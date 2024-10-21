@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "tapnchill Extension",
+  "description": "tapnchill.live - Discover chilling music, long listening music, and relaxing playlists with tapnchill's 24/7 live streaming station. Tune in and chill out!",
+  "version": "1.0.0",
+  "action": {
+    "default_popup": "index.html",
+    "default_icon": "icon.png"
+  }
+}
