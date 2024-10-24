@@ -18,11 +18,18 @@ const App = () => {
   return (
     <ThemeProvider defaultTheme='dark' storageKey='vite-ui-theme'>
       <Toaster />
-      <div className='flex flex-col w-[400px] h-[600px] p-4'>
-        <div id='header' className='flex w-full justify-end'>
+      <div className='flex flex-col w-[400px] h-[600px]'>
+        <div
+          id='header'
+          className='flex w-full flex-row justify-between p-4 border-b-[1px]'
+        >
+          <h2 className='text-xl font-bold tracking-wide'>Tap & Chill</h2>
           <ModeToggle />
         </div>
-        <div id='content' className='flex flex-col mt-8 gap-4 scrollbar-hide'>
+        <div
+          id='content'
+          className='flex flex-col p-4 mt-4 gap-4 scrollbar-hide'
+        >
           <StationPreview />
           <EffectPreview />
           <TimerPreview />
