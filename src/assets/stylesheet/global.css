@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
-
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -96,6 +94,10 @@
   .backdrop-hack {
     @apply absolute inset-0 -z-10;
   }
+
+  .badge-hover {
+    @apply hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors duration-300;
+  }
 }
 
 /*@font-face {*/
@@ -145,7 +147,7 @@ body {
 }
 
 /* Hide scrollbar for WebKit-based browsers (Chrome, Safari, Edge) */
-.scrollbar-hide::-webkit-scrollbar {
+::-webkit-scrollbar {
   display: none;
 }
 
@@ -182,3 +184,5 @@ body {
   transform: translateX(-50%);
   width: 100%;
 }
+
+
