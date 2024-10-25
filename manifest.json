@@ -6,5 +6,9 @@
   "action": {
     "default_popup": "index.html",
     "default_icon": "icon.png"
+  },
+  "background": {
+    "service_worker": "dist/background.js",
+    "type": "module"
   }
 }

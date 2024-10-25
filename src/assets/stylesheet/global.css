@@ -95,8 +95,13 @@
     @apply absolute inset-0 -z-10;
   }
 
-  .badge-hover {
-    @apply hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors duration-300;
+  .container-hover {
+    /*@apply hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors duration-300;*/
+    @apply hover:bg-primary/20 transition-colors duration-300;
+  }
+
+  .container-selected {
+    @apply bg-primary/20;
   }
 }
 

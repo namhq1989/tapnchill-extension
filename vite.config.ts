@@ -2,13 +2,39 @@ import path from 'path'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { crx } from '@crxjs/vite-plugin'
+import { viteStaticCopy } from 'vite-plugin-static-copy'
 import manifest from './manifest.json'
 
 export default defineConfig({
-  plugins: [react(), crx({ manifest })],
+  plugins: [
+    react(),
+    crx({ manifest }),
+    viteStaticCopy({
+      targets: [
+        {
+          src: 'node_modules/howler/dist/howler.min.js',
+          dest: '',
+        },
+      ],
+    }),
+  ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+    },
+  },
+  build: {
+    outDir: 'dist',
+    rollupOptions: {
+      input: {
+        background: path.resolve(__dirname, 'scripts/background.js'),
+        playAmbience: path.resolve(__dirname, 'scripts/play-ambiences.js'),
+      },
+      output: {
+        entryFileNames: '[name].js',
+        format: 'es',
+        dir: 'dist',
+      },
     },
   },
   server: {
