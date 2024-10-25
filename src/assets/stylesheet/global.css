@@ -94,6 +94,10 @@
   .backdrop-hack {
     @apply absolute inset-0 -z-10;
   }
+
+  .badge-hover {
+    @apply hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors duration-300;
+  }
 }
 
 /*@font-face {*/
@@ -180,3 +184,5 @@ body {
   transform: translateX(-50%);
   width: 100%;
 }
+
+
