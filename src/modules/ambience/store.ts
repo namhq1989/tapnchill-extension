@@ -64,7 +64,7 @@ const useAmbiencesStore = create<IAmbiencesStore>((set, get) => ({
   toggleAmbience: async (id: string) => {
     const { ambiences } = get()
 
-    const ambience = ambiences.find((e) => e.id === id)
+    let ambience = ambiences.find((e) => e.id === id)
     if (!ambience) return
 
     const totalAdded = ambiences.filter((e) => e.isAdded).length
@@ -80,17 +80,18 @@ const useAmbiencesStore = create<IAmbiencesStore>((set, get) => ({
       chrome.runtime.sendMessage(
         {
           type: 'play-ambience',
-          id: ambience.id,
-          audioUrl: `${import.meta.env.VITE_BASE_URL}/ambiences/${ambience.file}`,
-          volume: ambience.volume,
+          // id: ambience.id,
+          // audioUrl: `${import.meta.env.VITE_BASE_URL}/ambiences/${ambience.file}`,
+          // volume: ambience.volume,
         },
         (response) => {
-          if (!response?.success) {
-            showErrorNotification({
-              description: response?.message || 'Cannot play ambience',
-            })
-            return
-          }
+          console.log('play response', response)
+          // if (!response?.success) {
+          //   showErrorNotification({
+          //     description: response?.message || 'Cannot play ambience',
+          //   })
+          //   return
+          // }
 
           ambience.isAdded = true
           set({
@@ -105,12 +106,14 @@ const useAmbiencesStore = create<IAmbiencesStore>((set, get) => ({
           id: ambience.id,
         },
         (response) => {
-          if (!response?.success) {
-            showErrorNotification({
-              description: response?.message || 'Cannot pause ambience',
-            })
-            return
-          }
+          console.log('pause response', response)
+
+          // if (!response?.success) {
+          //   showErrorNotification({
+          //     description: response?.message || 'Cannot pause ambience',
+          //   })
+          //   return
+          // }
 
           ambience.isAdded = false
           set({

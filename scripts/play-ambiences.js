@@ -1,10 +1,11 @@
-const loadHowler = () => {
-  return new Promise((resolve, reject) => {
-    const script = document.createElement('script')
-    script.src = chrome.runtime.getURL('howler.min.js')
-    script.onload = () => resolve(window.Howl)
-    script.onerror = reject
-    document.head.appendChild(script)
+const createOffscreen = async () => {
+  console.log('1111')
+  if (await chrome.offscreen.hasDocument()) return
+  console.log('2222')
+  await chrome.offscreen.createDocument({
+    url: 'offscreen.html',
+    reasons: ['AUDIO_PLAYBACK'],
+    justification: 'testing', // details for using the API
   })
 }
 
@@ -15,6 +16,8 @@ const playAmbience = async (id, audioUrl, volume) => {
     // return if already playing
     return
   }
+
+  await createOffscreen()
 
   let ambience = ambienceInstances.get(id)
   if (ambience) {
@@ -30,7 +33,6 @@ const playAmbience = async (id, audioUrl, volume) => {
     loopTimeoutId: null,
   }
 
-  const Howl = await loadHowler()
   ambience.audio = new Howl({
     src: [audioUrl],
     loop: false,

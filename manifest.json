@@ -7,8 +7,13 @@
     "default_popup": "index.html",
     "default_icon": "icon.png"
   },
-  "background": {
-    "service_worker": "dist/background.js",
-    "type": "module"
-  }
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["offscreen.js", "scripts/play-ambiences.js"]
+    }
+  ],
+  "permissions": [
+    "offscreen"
+  ]
 }
