@@ -24,8 +24,6 @@ const createItem = (id: string, name: string, icon: ElementType): IAmbience => {
     file: `${id}.mp3`,
     volume: DEFAULT_VOLUME_VALUE,
     isAdded: false,
-    isAudioLoaded: false,
-    loopTimeoutId: null,
   }
 }
 

@@ -4,7 +4,6 @@ import listAmbiences, {
   DEFAULT_VOLUME_VALUE,
 } from '@/modules/ambience/list-ambiences.ts'
 import useNotificationStore from '@/modules/notification/store.ts'
-import { Howl } from 'howler'
 
 const MAX_ADDED_AMBIENCES = 3
 const { showErrorNotification } = useNotificationStore.getState()
@@ -49,22 +48,10 @@ const useAmbiencesStore = create<IAmbiencesStore>((set, get) => ({
     })
   },
 
-  removeAllAddedAmbiences: () => {
-    const { addedAmbiences, deleteAmbienceAudio } = get()
-
-    for (const ambience of addedAmbiences) {
-      deleteAmbienceAudio(ambience)
-    }
-
-    set({
-      addedAmbiences: [],
-    })
-  },
-
   toggleAmbience: async (id: string) => {
     const { ambiences } = get()
 
-    let ambience = ambiences.find((e) => e.id === id)
+    const ambience = ambiences.find((e) => e.id === id)
     if (!ambience) return
 
     const totalAdded = ambiences.filter((e) => e.isAdded).length
@@ -80,19 +67,11 @@ const useAmbiencesStore = create<IAmbiencesStore>((set, get) => ({
       chrome.runtime.sendMessage(
         {
           type: 'play-ambience',
-          // id: ambience.id,
-          // audioUrl: `${import.meta.env.VITE_BASE_URL}/ambiences/${ambience.file}`,
-          // volume: ambience.volume,
+          id: ambience.id,
+          audioUrl: `${import.meta.env.VITE_BASE_URL}/ambiences/${ambience.file}`,
+          volume: ambience.volume,
         },
-        (response) => {
-          console.log('play response', response)
-          // if (!response?.success) {
-          //   showErrorNotification({
-          //     description: response?.message || 'Cannot play ambience',
-          //   })
-          //   return
-          // }
-
+        () => {
           ambience.isAdded = true
           set({
             ambiences: ambiences.map((e) => (e.id === id ? ambience : e)),
@@ -105,16 +84,7 @@ const useAmbiencesStore = create<IAmbiencesStore>((set, get) => ({
           type: 'pause-ambience',
           id: ambience.id,
         },
-        (response) => {
-          console.log('pause response', response)
-
-          // if (!response?.success) {
-          //   showErrorNotification({
-          //     description: response?.message || 'Cannot pause ambience',
-          //   })
-          //   return
-          // }
-
+        () => {
           ambience.isAdded = false
           set({
             ambiences: ambiences.map((e) => (e.id === id ? ambience : e)),
@@ -127,73 +97,21 @@ const useAmbiencesStore = create<IAmbiencesStore>((set, get) => ({
   changeVolumeValue: (id: string, value: number) => {
     const { ambiences } = get()
     const ambience = ambiences.find((e) => e.id === id)
-    if (!ambience || !ambience.audio) return
+    if (!ambience) return
 
-    ambience.audio!.volume(value / 100)
-    ambience.volume = value
-
-    set({
-      ambiences: ambiences.map((e) => (e.id === id ? ambience : e)),
-    })
-  },
-
-  addAmbienceAudio: async (ambience: IAmbience): Promise<IAmbience> => {
-    if (ambience.audio) {
-      ambience.audio.play()
-      return ambience
-    }
-
-    const soundSrc = `${import.meta.env.VITE_BASE_URL}/ambiences/${ambience.file}`
-    ambience.audio = new Howl({
-      src: [soundSrc],
-      loop: false,
-      html5: true,
-      preload: true,
-      volume: ambience.volume / 100,
-      onload: () => {
-        if (!ambience.isAudioLoaded) {
-          ambience.isAudioLoaded = true
-          const duration = ambience.audio!.duration() * 1000 // duration in milliseconds
-          get().playLoop(ambience, duration)
-        }
+    chrome.runtime.sendMessage(
+      {
+        type: 'change-ambience-volume',
+        id: ambience.id,
+        volume: value,
       },
-      onloaderror: (_, error) => {
-        throw new Error(`Failed to load ambience: ${soundSrc}, Error: ${error}`)
+      () => {
+        ambience.volume = value
+        set({
+          ambiences: ambiences.map((e) => (e.id === id ? ambience : e)),
+        })
       },
-    })
-
-    return ambience
-  },
-
-  deleteAmbienceAudio: (ambience: IAmbience) => {
-    if (ambience.audio) {
-      ambience.audio!.stop()
-    }
-
-    return ambience
-  },
-
-  playLoop: (ambience: IAmbience, ms: number) => {
-    if (!ambience || !ambience.audio) return
-
-    // play the audio
-    ambience.audio!.play()
-
-    // ensure there's no running timeout for this ambience
-    if (ambience.loopTimeoutId) {
-      clearTimeout(ambience.loopTimeoutId)
-      ambience.loopTimeoutId = null
-    }
-
-    ambience.loopTimeoutId = setTimeout(() => {
-      get().playLoop(ambience, ms)
-    }, ms - 200)
-
-    set({
-      ambiences: get().ambiences.map((e) =>
-        e.id === ambience.id ? ambience : e,
-      ),
-    })
+    )
   },
 }))
 

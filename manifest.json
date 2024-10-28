@@ -10,10 +10,14 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["offscreen.js", "scripts/play-ambiences.js"]
+      "js": ["scripts/offscreen.js"]
     }
   ],
+  "background": {
+    "service_worker": "scripts/background.js"
+  },
   "permissions": [
-    "offscreen"
+    "offscreen",
+    "background"
   ]
 }

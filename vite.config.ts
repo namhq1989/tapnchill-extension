@@ -19,7 +19,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         background: path.resolve(__dirname, 'scripts/background.js'),
-        playAmbience: path.resolve(__dirname, 'scripts/play-ambiences.js'),
+        offscreen: path.resolve(__dirname, 'scripts/offscreen.js'),
       },
       output: {
         entryFileNames: '[name].js',
@@ -27,6 +27,9 @@ export default defineConfig({
         dir: 'dist',
       },
     },
+  },
+  optimizeDeps: {
+    include: ['howler'],
   },
   server: {
     port: 3050,
