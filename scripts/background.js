@@ -1,3 +1,7 @@
+chrome.runtime.onStartup.addListener(function () {
+  chrome.storage.session.clear().then()
+})
+
 chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
   // console.log('request', request)
   if (request.type === 'play-ambience') {

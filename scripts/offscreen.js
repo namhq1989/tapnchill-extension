@@ -65,6 +65,8 @@ const pauseAmbience = (id) => {
 
   ambienceInstances.get(id).audio.stop()
   ambienceInstances.get(id).isPlaying = false
+  clearTimeout(ambienceInstances.get(id).currentLoopTimeoutId)
+  clearTimeout(ambienceInstances.get(id).oldLoopTimeoutId)
 }
 
 const setAmbienceVolume = (id, volume) => {

@@ -16,7 +16,7 @@ const App = () => {
   return (
     <ThemeProvider defaultTheme='dark' storageKey='vite-ui-theme'>
       <Toaster />
-      <div className='flex flex-col w-[400px] h-[400px] scrollbar-hide'>
+      <div className='flex flex-col w-[400px] h-[600px] scrollbar-hide'>
         <div
           id='header'
           className='flex w-full flex-row justify-between p-4 border-b-[1px]'

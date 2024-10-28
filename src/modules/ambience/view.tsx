@@ -15,6 +15,7 @@ const side = 'right'
 
 const AmbienceView = () => {
   const { ambiences, changeVolumeValue, toggleAmbience } = useAmbiencesStore()
+  const totalAddedAmbiences = ambiences.filter((a) => a.isAdded).length
 
   const handleVolumeChange = useCallback(
     (id: string) => (value: number) => {
@@ -31,13 +32,23 @@ const AmbienceView = () => {
     <div className='flex cursor-pointer'>
       <Sheet key={side}>
         <SheetTrigger asChild>
-          <Sparkles strokeWidth={1} size={32} className='cursor-pointer' />
+          <Sparkles
+            strokeWidth={1}
+            size={32}
+            className='cursor-pointer'
+            fill={totalAddedAmbiences > 0 ? 'hsl(var(--primary))' : 'none'}
+            stroke={
+              totalAddedAmbiences > 0
+                ? 'hsl(var(--primary))'
+                : 'hsl(var(--foreground))'
+            }
+          />
         </SheetTrigger>
         <SheetContent side={side} className='w-full overflow-auto p-0'>
           <SheetHeader className='p-4'>
             <SheetTitle>Ambiences</SheetTitle>
           </SheetHeader>
-          <div className='grid grid-cols-2 gap-4 p-4'>
+          <div className='grid grid-cols-3 gap-4 p-4'>
             {ambiences.map((a) => {
               return (
                 <AmbienceItem
@@ -69,14 +80,15 @@ const AmbienceItem = (props: IAmbienceItemProps) => {
 
   return (
     <div
-      className={`flex flex-col gap-8 px-4 py-8 rounded-xl hover:rounded-xl container-hover justify-center items-center ${isAdded ? 'container-selected' : ''}`}
+      key={ambience.id}
+      className={`flex flex-col gap-8 px-4 py-4 rounded-xl hover:rounded-xl container-hover justify-center items-center ${isAdded ? 'container-selected' : ''}`}
     >
-      <IconComponent
-        size={40}
-        strokeWidth={1}
-        className='mr-1 cursor-pointer'
+      <div
+        className='flex w-full justify-center items-center cursor-pointer'
         onClick={props.onToggleAmbience}
-      />
+      >
+        <IconComponent size={44} strokeWidth={1} />
+      </div>
       {isAdded ? (
         <Slider
           defaultValue={[ambience.volume]}

@@ -11,11 +11,12 @@ export interface IAmbience {
 
 export interface IAmbiencesStore {
   ambiences: IAmbience[]
-  addedAmbiences: IAmbience[]
   initAmbiences: () => void
-  uniqueAmbiences: (ambiences: IAmbience[]) => IAmbience[]
-  getAmbienceById: (id: string) => IAmbience | undefined
-  addAmbienceById: (id: string) => Promise<void>
   toggleAmbience: (id: string) => Promise<void>
   changeVolumeValue: (id: string, value: number) => void
+}
+
+export interface ISelectedAmbience {
+  id: string
+  volume: number
 }

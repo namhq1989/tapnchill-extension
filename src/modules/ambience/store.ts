@@ -1,8 +1,6 @@
 import { create } from 'zustand'
-import { IAmbience, IAmbiencesStore } from '@/modules/ambience/types.ts'
-import listAmbiences, {
-  DEFAULT_VOLUME_VALUE,
-} from '@/modules/ambience/list-ambiences.ts'
+import { IAmbiencesStore, ISelectedAmbience } from '@/modules/ambience/types.ts'
+import listAmbiences from '@/modules/ambience/list-ambiences.ts'
 import useNotificationStore from '@/modules/notification/store.ts'
 
 const MAX_ADDED_AMBIENCES = 3
@@ -10,41 +8,24 @@ const { showErrorNotification } = useNotificationStore.getState()
 
 const useAmbiencesStore = create<IAmbiencesStore>((set, get) => ({
   ambiences: [],
-  addedAmbiences: [],
   initAmbiences: () => {
-    const ambiences = listAmbiences()
-    set({ ambiences })
-  },
-
-  uniqueAmbiences: (ambiences: IAmbience[]) => {
-    const ambienceMap = new Map<string, IAmbience>()
-
-    ambiences.forEach((ambience) => {
-      ambienceMap.set(ambience.id, ambience)
-    })
-
-    return Array.from(ambienceMap.values())
-  },
-
-  getAmbienceById: (id: string) => {
-    return get().ambiences.find((e) => e.id === id)
-  },
-
-  addAmbienceById: async (id: string) => {
-    const { ambiences, addedAmbiences } = get()
-
-    const ambience = ambiences.find((e) => e.id === id)
-    if (!ambience) return
-
-    const isAdded = addedAmbiences.findIndex((e) => e.id === id) > -1
-    if (isAdded) return
-
-    const modificationAmbience = { ...ambience }
-    modificationAmbience.volume = DEFAULT_VOLUME_VALUE
-    addedAmbiences.push(modificationAmbience)
-
-    set({
-      addedAmbiences,
+    chrome.storage.session.get((result) => {
+      const selectedAmbiances: ISelectedAmbience[] =
+        result.selectedAmbiances || []
+      let ambiences = listAmbiences()
+      if (!selectedAmbiances.length) {
+        set({ ambiences })
+      } else {
+        ambiences = ambiences.map((a) => {
+          const item = selectedAmbiances.find((sa) => sa.id === a.id)
+          if (item) {
+            a.isAdded = true
+            a.volume = item.volume
+          }
+          return a
+        })
+        set({ ambiences })
+      }
     })
   },
 
@@ -76,6 +57,16 @@ const useAmbiencesStore = create<IAmbiencesStore>((set, get) => ({
           set({
             ambiences: ambiences.map((e) => (e.id === id ? ambience : e)),
           })
+
+          chrome.storage.session.get((result) => {
+            const selectedAmbiances: ISelectedAmbience[] =
+              result.selectedAmbiances || []
+            selectedAmbiances.push({
+              id: ambience.id,
+              volume: ambience.volume,
+            })
+            chrome.storage.session.set({ selectedAmbiances })
+          })
         },
       )
     } else {
@@ -88,6 +79,16 @@ const useAmbiencesStore = create<IAmbiencesStore>((set, get) => ({
           ambience.isAdded = false
           set({
             ambiences: ambiences.map((e) => (e.id === id ? ambience : e)),
+          })
+
+          chrome.storage.session.get((result) => {
+            const selectedAmbiances: ISelectedAmbience[] =
+              result.selectedAmbiances || []
+            const index = selectedAmbiances.findIndex(
+              (sa) => sa.id === ambience.id,
+            )
+            selectedAmbiances.splice(index, 1)
+            chrome.storage.session.set({ selectedAmbiances })
           })
         },
       )
@@ -109,6 +110,16 @@ const useAmbiencesStore = create<IAmbiencesStore>((set, get) => ({
         ambience.volume = value
         set({
           ambiences: ambiences.map((e) => (e.id === id ? ambience : e)),
+        })
+
+        chrome.storage.session.get((result) => {
+          const selectedAmbiances: ISelectedAmbience[] =
+            result.selectedAmbiances || []
+          const index = selectedAmbiances.findIndex(
+            (sa) => sa.id === ambience.id,
+          )
+          selectedAmbiances[index].volume = value
+          chrome.storage.session.set({ selectedAmbiances })
         })
       },
     )

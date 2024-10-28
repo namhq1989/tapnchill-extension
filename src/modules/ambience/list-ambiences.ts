@@ -35,7 +35,7 @@ const listAmbiences = (): IAmbience[] => {
     createItem('water', 'Water', Droplet),
     createItem('sea', 'Sea', Waves),
     createItem('bird', 'Bird', Bird),
-    createItem('train-track', 'Train track', TrainTrack),
+    createItem('train', 'Train', TrainTrack),
     createItem('coffee-shop', 'Coffee Shop', Coffee),
     createItem('cricket', 'Cricket', Bug),
     createItem('driving', 'Driving', Gauge),
