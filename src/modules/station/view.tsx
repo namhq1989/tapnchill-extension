@@ -5,7 +5,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
-import { Badge } from '@/components/ui/badge'
 import { ArrowRight, Heart, Pause } from 'lucide-react'
 
 const side = 'right'
@@ -40,9 +39,15 @@ const StationView = () => {
 
 const StationItem = () => {
   return (
-    <div className='flex flex-row gap-4 px-4 py-4 badge-hover'>
+    <div className='flex flex-row gap-4 px-4 py-4 container-hover'>
       <div className='flex flex-col gap-2'>
-        <div className='bg-gray-500 rounded-xl h-[80px] aspect-square'></div>
+        <div className='rounded-xl w-[80px] aspect-square'>
+          <img
+            className='object-scale-fit'
+            src='https://cdn-profiles.tunein.com/s190122/images/logod.jpg?t=636656470344730000'
+            alt='logo'
+          />
+        </div>
         <div className='flex flex-row items-center justify-evenly gap-4'>
           <Pause strokeWidth={1} className='cursor-pointer' />
           <Heart
@@ -55,15 +60,16 @@ const StationItem = () => {
       </div>
       <div className='flex flex-col'>
         <div className='text-base font-bold'>Station Name</div>
+        <a
+          href='https://somafm.com/folkfwd/'
+          target='_blank'
+          className='text-xs mb-1'
+        >
+          somafm.com
+        </a>
         <small className='text-sm text-muted-foreground'>
           Thoughtful, gentle songs, perfect as background music at home or work.
         </small>
-        <div className='flex flex-row flex-wrap gap-2 mt-2'>
-          <Badge variant='outline'>Instrumental</Badge>
-          <Badge variant='outline'>English</Badge>
-          <Badge variant='outline'>Radio</Badge>
-          <Badge variant='outline'>Gaming</Badge>
-        </div>
       </div>
     </div>
   )

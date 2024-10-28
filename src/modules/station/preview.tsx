@@ -1,6 +1,6 @@
 import { Heart, Pause, VolumeOff } from 'lucide-react'
 import StationView from '@/modules/station/view.tsx'
-import EffectPreview from '@/modules/effect/preview.tsx'
+import AmbienceView from '@/modules/ambience/view.tsx'
 
 const StationPreview = () => {
   return (
@@ -12,9 +12,10 @@ const StationPreview = () => {
             Thoughtful, gentle songs, perfect as background music at home or
             work.
           </small>
-          <div className='flex flex-row items-center justify-between my-6 px-8'>
-            <VolumeOff strokeWidth={1} size={32} className='cursor-pointer' />
+          <div className='flex flex-row items-center justify-between my-8 px-4'>
             <Pause strokeWidth={1} size={32} className='cursor-pointer' />
+            <VolumeOff strokeWidth={1} size={32} className='cursor-pointer' />
+            <AmbienceView />
             <Heart
               strokeWidth={1}
               size={32}
@@ -23,7 +24,6 @@ const StationPreview = () => {
               stroke='hsl(var(--primary))'
             />
           </div>
-          <EffectPreview />
         </div>
       </div>
     </div>
