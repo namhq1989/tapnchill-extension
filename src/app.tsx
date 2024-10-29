@@ -5,13 +5,16 @@ import { ThemeProvider } from '@/components/theme/theme-provider.tsx'
 import { ModeToggle } from '@/components/theme/mode-toggle.tsx'
 import StationPreview from '@/modules/station/preview.tsx'
 import { Info } from 'lucide-react'
+import useStationsStore from '@/modules/station/store.ts'
 
 const App = () => {
+  const { initStations } = useStationsStore()
   const { initAmbiences } = useAmbiencesStore()
 
   useEffect(() => {
+    initStations()
     initAmbiences()
-  }, [initAmbiences])
+  }, [initStations, initAmbiences])
 
   return (
     <ThemeProvider defaultTheme='dark' storageKey='vite-ui-theme'>

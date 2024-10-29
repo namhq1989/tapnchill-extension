@@ -9,8 +9,20 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
     pauseAmbience(request.id)
   } else if (request.type === 'offscreen-change-ambience-volume') {
     setAmbienceVolume(request.id, request.volume)
+  } else if (request.type === 'offscreen-play-station') {
+    playStation(request.stationUrl, request.format, request.volume)
+  } else if (request.type === 'offscreen-stop-station') {
+    stopStation()
+  } else if (request.type === 'offscreen-pause-station') {
+    pauseStation()
+  } else if (request.type === 'offscreen-change-station-volume') {
+    setStationVolume(request.volume)
   }
 })
+
+//
+// AMBIENCES
+//
 
 const ambienceInstances = new Map()
 
@@ -48,14 +60,12 @@ const playAmbience = async (id, audioUrl, volume) => {
         clearTimeout(ambience.oldLoopTimeoutId)
         ambience.oldLoopTimeoutId = null
         ambience.audio.play()
-      }, durationMs - 50)
+      }, durationMs - 200)
     },
     onstop: () => {
       clearTimeout(ambience.oldLoopTimeoutId)
     },
   })
-
-  chrome.runtime.sendMessage({ type: 'offscreen-logs', data: 4 }).then()
 
   ambienceInstances.set(id, ambience)
 }
@@ -76,22 +86,51 @@ const setAmbienceVolume = (id, volume) => {
 }
 
 //
-// const playLoop = (ambience) => {
-//   const durationMs = ambience.audio.duration() * 1000
+// STATION
 //
-//   // play the audio
-//   ambience.audio.play()
-//
-//   // ensure there's no running timeout for this ambience
-//   if (ambience.loopTimeoutId) {
-//     clearTimeout(ambience.loopTimeoutId)
-//     ambience.loopTimeoutId = null
-//   }
-//
-//   // new play session
-//   ambience.loopTimeoutId = setTimeout(() => {
-//     playLoop(ambience)
-//   }, durationMs - 200)
-//
-//   ambienceInstances.set(ambience.id, ambience)
-// }
+
+const stationInstance = {}
+
+const playStation = (stationUrl, format, volume) => {
+  if (stationInstance.audio) {
+    stationInstance.audio.play()
+    return
+  }
+
+  stationInstance.audio = new Howl({
+    src: [stationUrl],
+    format: [format],
+    autoplay: true,
+    html5: true,
+    preload: true,
+    volume: volume / 100,
+    onplay: () => {
+      chrome.runtime
+        .sendMessage({ type: 'offscreen-station-is-playing' })
+        .then()
+    },
+    // onloaderror: (id, error) => {
+    //   console.log('3333', error)
+    // },
+  })
+}
+
+const pauseStation = (id) => {
+  if (!stationInstance.audio) return
+
+  stationInstance.audio.stop()
+}
+
+const stopStation = (id) => {
+  if (!stationInstance.audio) return
+
+  stationInstance.audio.stop()
+  stationInstance.audio = undefined
+  delete stationInstance.audio
+}
+
+const setStationVolume = (volume) => {
+  if (!stationInstance.audio) return
+
+  stationInstance.audio.volume(volume / 100)
+}
