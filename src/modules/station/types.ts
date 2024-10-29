@@ -6,6 +6,7 @@ export interface IStation {
   description: string
   website: string
   image: string
+  isFavorite: boolean
 }
 
 export interface IStationsStore {
@@ -18,4 +19,7 @@ export interface IStationsStore {
   play: (id: string) => Promise<void>
   pause: () => void
   changeVolumeValue: (value: number) => void
+  onPlaying: () => void
+  onStopping: () => void
+  toggleFavorite: (id: string) => void
 }

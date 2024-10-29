@@ -5,7 +5,26 @@ import { ThemeProvider } from '@/components/theme/theme-provider.tsx'
 import { ModeToggle } from '@/components/theme/mode-toggle.tsx'
 import StationPreview from '@/modules/station/preview.tsx'
 import { Info } from 'lucide-react'
-import useStationsStore from '@/modules/station/store.ts'
+import useStationsStore, { setState } from '@/modules/station/store.ts'
+
+chrome.runtime.onMessage.addListener((request) => {
+  if (request.type === 'offscreen-station-is-playing') {
+    setState({
+      isPlaying: true,
+      isSwitchingStation: false,
+    })
+    chrome.storage.session.set({
+      isStationPlaying: true,
+    })
+  } else if (request.type === 'offscreen-station-is-stopped') {
+    setState({
+      isPlaying: false,
+    })
+    chrome.storage.session.set({
+      isStationPlaying: false,
+    })
+  }
+})
 
 const App = () => {
   const { initStations } = useStationsStore()

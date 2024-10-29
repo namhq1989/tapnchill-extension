@@ -2,10 +2,22 @@ import { Heart, Pause, Play, VolumeOff } from 'lucide-react'
 import StationView from '@/modules/station/view.tsx'
 import AmbienceView from '@/modules/ambience/view.tsx'
 import useStationsStore from '@/modules/station/store.ts'
+import LoadingIndicator from '@/loading-indicator.tsx'
 
 const StationPreview = () => {
-  const { selectedStation, isPlaying, pause, play } = useStationsStore()
-  const PlayIcon = isPlaying ? Pause : Play
+  const {
+    selectedStation,
+    isSwitchingStation,
+    isPlaying,
+    pause,
+    play,
+    toggleFavorite,
+  } = useStationsStore()
+  const PlayIcon = isSwitchingStation
+    ? LoadingIndicator
+    : isPlaying
+      ? Pause
+      : Play
 
   return (
     <div className='flex flex-col w-full min-h-[120px]'>
@@ -21,7 +33,7 @@ const StationPreview = () => {
                 <PlayIcon
                   strokeWidth={1}
                   size={32}
-                  className='cursor-pointer'
+                  className={`cursor-pointer ${isSwitchingStation ? 'w-8 h-8' : ''}`}
                   onClick={() =>
                     isPlaying ? pause() : play(selectedStation.id)
                   }
@@ -36,8 +48,15 @@ const StationPreview = () => {
                   strokeWidth={1}
                   size={32}
                   className='cursor-pointer'
-                  fill='hsl(var(--primary))'
-                  stroke='hsl(var(--primary))'
+                  fill={
+                    selectedStation.isFavorite ? 'hsl(var(--primary))' : 'none'
+                  }
+                  stroke={
+                    selectedStation.isFavorite
+                      ? 'hsl(var(--primary))'
+                      : 'hsl(var(--foreground))'
+                  }
+                  onClick={() => toggleFavorite(selectedStation.id)}
                 />
               </div>
             </>

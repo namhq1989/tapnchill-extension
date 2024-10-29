@@ -17,6 +17,7 @@ const createItem = (
     description,
     website,
     image,
+    isFavorite: false,
   }
 }
 

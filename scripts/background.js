@@ -72,6 +72,21 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
         console.error('Failed to create offscreen document:', error)
         sendResponse({ success: false })
       })
+  } else if (request.type === 'resume-station') {
+    createOffscreen()
+      .then(() => {
+        chrome.runtime
+          .sendMessage({ ...request, type: 'offscreen-resume-station' })
+          .then(() => {
+            sendResponse({
+              success: true,
+            })
+          })
+      })
+      .catch((error) => {
+        console.error('Failed to create offscreen document:', error)
+        sendResponse({ success: false })
+      })
   } else if (request.type === 'stop-station') {
     createOffscreen()
       .then(() => {

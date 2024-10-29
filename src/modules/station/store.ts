@@ -10,14 +10,22 @@ const useStationsStore = create<IStationsStore>((set, get) => ({
   selectedStation: null,
   initStations: () => {
     chrome.storage.session.get((result) => {
-      const stations = listStations()
+      let stations = listStations()
       const selectedStationId: string = result.selectedStationId || ''
+      const favoriteStationIds: string[] = result.favoriteStationIds || []
       const volume: number = result.stationVolume || 50
       const isPlaying: boolean = result.isStationPlaying || false
 
       let selectedStation = null
       if (selectedStationId) {
         selectedStation = stations.find((s) => s.id === selectedStationId)
+      }
+
+      if (favoriteStationIds.length) {
+        stations = stations.map((s) => {
+          s.isFavorite = favoriteStationIds.includes(s.id)
+          return s
+        })
       }
 
       set({ stations, selectedStation, volume, isPlaying })
@@ -28,39 +36,22 @@ const useStationsStore = create<IStationsStore>((set, get) => ({
     const { isSwitchingStation, selectedStation, stations, volume, isPlaying } =
       get()
 
-    console.log('isSwitchingStation', isSwitchingStation)
-    console.log('selectedStation', selectedStation)
-    console.log('isPlaying', isPlaying)
-
     if (isSwitchingStation) return
 
-    if (selectedStation && !isPlaying) {
-      console.log('here')
-      chrome.runtime.sendMessage(
-        {
-          type: 'play-station',
-          stationUrl: selectedStation.url,
-          format: selectedStation.format,
-          volume,
-        },
-        () => {
-          set({
-            isPlaying: true,
-          })
-          chrome.storage.session.set({
-            isStationPlaying: true,
-          })
-        },
-      )
+    if (selectedStation && selectedStation.id === id) {
+      if (!isPlaying) {
+        set({ isSwitchingStation: true })
+      }
+      chrome.runtime.sendMessage({
+        type: isPlaying ? 'pause-station' : 'resume-station',
+      })
       return
     }
 
-    if (selectedStation && selectedStation.id === id) return
-
-    set({ isSwitchingStation: true })
-
     const newStation = stations.find((e) => e.id === id)
     if (!newStation) return
+
+    set({ isSwitchingStation: true })
 
     chrome.runtime.sendMessage(
       {
@@ -77,12 +68,9 @@ const useStationsStore = create<IStationsStore>((set, get) => ({
           () => {
             set({
               selectedStation: newStation,
-              isSwitchingStation: false,
-              isPlaying: true,
             })
             chrome.storage.session.set({
               selectedStationId: id,
-              isStationPlaying: true,
             })
           },
         )
@@ -91,17 +79,9 @@ const useStationsStore = create<IStationsStore>((set, get) => ({
   },
 
   pause: () => {
-    chrome.runtime.sendMessage(
-      {
-        type: 'stop-station',
-      },
-      () => {
-        set({ isPlaying: false })
-        chrome.storage.session.set({
-          isStationPlaying: false,
-        })
-      },
-    )
+    chrome.runtime.sendMessage({
+      type: 'pause-station',
+    })
   },
 
   changeVolumeValue: (value: number) => {
@@ -120,6 +100,57 @@ const useStationsStore = create<IStationsStore>((set, get) => ({
       },
     )
   },
+
+  onPlaying: () => {
+    set({
+      isPlaying: true,
+      isSwitchingStation: false,
+    })
+    chrome.storage.session.set({
+      isStationPlaying: true,
+    })
+  },
+
+  onStopping: () => {
+    set({
+      isPlaying: false,
+      isSwitchingStation: false,
+    })
+    chrome.storage.session.set({
+      isStationPlaying: false,
+    })
+  },
+  toggleFavorite: (id: string) => {
+    chrome.storage.session.get((result) => {
+      const favoriteStationIds: string[] = result.favoriteStationIds || []
+      let isFavorite = false
+      if (favoriteStationIds.includes(id)) {
+        favoriteStationIds.splice(favoriteStationIds.indexOf(id), 1)
+      } else {
+        favoriteStationIds.push(id)
+        isFavorite = true
+      }
+
+      chrome.storage.session.set({
+        favoriteStationIds,
+      })
+
+      const { stations, selectedStation } = get()
+      const newStations = stations.map((s) => {
+        if (s.id === id) {
+          s.isFavorite = isFavorite
+        }
+        return s
+      })
+      if (selectedStation && selectedStation.id === id) {
+        selectedStation.isFavorite = isFavorite
+      }
+
+      set({ stations: newStations, selectedStation })
+    })
+  },
 }))
+
+export const { setState } = useStationsStore
 
 export default useStationsStore

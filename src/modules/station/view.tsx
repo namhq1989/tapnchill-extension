@@ -8,12 +8,20 @@ import {
 import { ArrowRight, Heart, Pause, Play } from 'lucide-react'
 import useStationsStore from '@/modules/station/store.ts'
 import { IStation } from '@/modules/station/types.ts'
+import LoadingIndicator from '@/loading-indicator.tsx'
 
 const side = 'right'
 
 const StationView = () => {
-  const { stations, selectedStation, isPlaying, play, pause } =
-    useStationsStore()
+  const {
+    stations,
+    selectedStation,
+    isSwitchingStation,
+    isPlaying,
+    play,
+    pause,
+    toggleFavorite,
+  } = useStationsStore()
 
   return (
     <div className='flex cursor-pointer'>
@@ -30,15 +38,17 @@ const StationView = () => {
           <SheetHeader className='p-4'>
             <SheetTitle>Stations</SheetTitle>
           </SheetHeader>
-          <div className='flex flex-col'>
+          <div className='flex flex-col mt-4'>
             {stations.map((station) => (
               <StationItem
                 key={station.id}
                 station={station}
                 isSelected={station.id === selectedStation?.id}
+                isSwitchingStation={isSwitchingStation}
                 isPlaying={isPlaying}
                 onPlay={() => play(station.id)}
                 onPause={() => pause()}
+                onToggleFavorite={(id) => toggleFavorite(id)}
               />
             ))}
           </div>
@@ -51,14 +61,30 @@ const StationView = () => {
 interface IStationItemProps {
   station: IStation
   isSelected: boolean
+  isSwitchingStation: boolean
   isPlaying: boolean
   onPlay: () => void
   onPause: () => void
+  onToggleFavorite: (id: string) => void
 }
 
 const StationItem = (props: IStationItemProps) => {
-  const { station, isSelected, isPlaying, onPlay, onPause } = props
-  const PlayIcon = isSelected && isPlaying ? Pause : Play
+  const {
+    station,
+    isSelected,
+    isSwitchingStation,
+    isPlaying,
+    onPlay,
+    onPause,
+    onToggleFavorite,
+  } = props
+  const PlayIcon = !isSelected
+    ? Play
+    : isSwitchingStation
+      ? LoadingIndicator
+      : isSelected && isPlaying
+        ? Pause
+        : Play
 
   return (
     <div
@@ -77,8 +103,13 @@ const StationItem = (props: IStationItemProps) => {
           <Heart
             strokeWidth={1}
             className='cursor-pointer'
-            fill='hsl(var(--primary))'
-            stroke='hsl(var(--primary))'
+            fill={station.isFavorite ? 'hsl(var(--primary))' : 'none'}
+            stroke={
+              station.isFavorite
+                ? 'hsl(var(--primary))'
+                : 'hsl(var(--foreground))'
+            }
+            onClick={() => onToggleFavorite(station.id)}
           />
         </div>
       </div>
@@ -87,7 +118,10 @@ const StationItem = (props: IStationItemProps) => {
         <a href={station.website} target='_blank' className='text-xs mb-1'>
           {station.website}
         </a>
-        <small className='text-sm text-muted-foreground line-clamp-3'>
+        <small
+          className='text-xs text-muted-foreground line-clamp-3'
+          title={station.description}
+        >
           {station.description}
         </small>
       </div>

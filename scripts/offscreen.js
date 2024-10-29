@@ -15,6 +15,8 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
     stopStation()
   } else if (request.type === 'offscreen-pause-station') {
     pauseStation()
+  } else if (request.type === 'offscreen-resume-station') {
+    resumeStation()
   } else if (request.type === 'offscreen-change-station-volume') {
     setStationVolume(request.volume)
   }
@@ -105,9 +107,21 @@ const playStation = (stationUrl, format, volume) => {
     preload: true,
     volume: volume / 100,
     onplay: () => {
+      console.log('on play')
+
       chrome.runtime
         .sendMessage({ type: 'offscreen-station-is-playing' })
         .then()
+    },
+    onstop: () => {
+      console.log('on stop')
+
+      chrome.runtime
+        .sendMessage({ type: 'offscreen-station-is-stopped' })
+        .then()
+    },
+    onpause: () => {
+      console.log('on pause')
     },
     // onloaderror: (id, error) => {
     //   console.log('3333', error)
@@ -115,7 +129,13 @@ const playStation = (stationUrl, format, volume) => {
   })
 }
 
-const pauseStation = (id) => {
+const resumeStation = () => {
+  if (!stationInstance.audio) return
+
+  stationInstance.audio.play()
+}
+
+const pauseStation = () => {
   if (!stationInstance.audio) return
 
   stationInstance.audio.stop()
