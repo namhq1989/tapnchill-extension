@@ -24,14 +24,14 @@ const StationView = () => {
   } = useStationsStore()
 
   return (
-    <div className='flex cursor-pointer'>
+    <div className='flex cursor-pointe'>
       <Sheet key={side}>
         <SheetTrigger asChild>
           <div className='flex flex-row w-full justify-between items-center cursor-pointer'>
-            <h2 className='text-2xl font-bold'>
-              {selectedStation?.name || 'N/A'}
-            </h2>
-            <ArrowRight />
+            <p className='text-2xl font-bold text-white'>
+              {selectedStation?.name || 'Station Unselected'}
+            </p>
+            <ArrowRight className='text-white' />
           </div>
         </SheetTrigger>
         <SheetContent side={side} className='w-full overflow-auto p-0'>

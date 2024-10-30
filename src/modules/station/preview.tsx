@@ -20,42 +20,41 @@ const StationPreview = () => {
       : Play
 
   return (
-    <div className='flex flex-col w-full min-h-[120px]'>
+    <div className='flex flex-col w-full min-h-[120px] bg-primary rounded-xl p-4'>
       <div className='flex flex-grow py-4 px-0'>
-        <div className='flex flex-col gap-2'>
+        <div className='flex flex-col gap-2 w-full'>
           <StationView />
-          {selectedStation && (
+          {!selectedStation ? (
+            <small className='text-sm text-gray-300'>
+              Pick a station and let the music play!
+            </small>
+          ) : (
             <>
-              <small className='text-sm text-muted-foreground'>
+              <small className='text-sm text-gray-300'>
                 {selectedStation.description}
               </small>
-              <div className='flex flex-row items-center justify-between my-8 px-4'>
+              <div className='flex flex-row items-center justify-between mt-4 px-4'>
                 <PlayIcon
                   strokeWidth={1}
                   size={32}
-                  className={`cursor-pointer ${isSwitchingStation ? 'w-8 h-8' : ''}`}
+                  className={`text-white dark:text-white cursor-pointer ${isSwitchingStation ? 'w-8 h-8' : ''}`}
                   onClick={() =>
                     isPlaying ? pause() : play(selectedStation.id)
                   }
+                  fill={isPlaying ? 'white' : 'none'}
                 />
                 <VolumeOff
                   strokeWidth={1}
                   size={32}
-                  className='cursor-pointer'
+                  className='text-white cursor-pointer'
                 />
                 <AmbienceView />
                 <Heart
                   strokeWidth={1}
                   size={32}
-                  className='cursor-pointer'
-                  fill={
-                    selectedStation.isFavorite ? 'hsl(var(--primary))' : 'none'
-                  }
-                  stroke={
-                    selectedStation.isFavorite
-                      ? 'hsl(var(--primary))'
-                      : 'hsl(var(--foreground))'
-                  }
+                  className='text-white cursor-pointer'
+                  fill={selectedStation.isFavorite ? 'white' : 'none'}
+                  stroke='white'
                   onClick={() => toggleFavorite(selectedStation.id)}
                 />
               </div>

@@ -35,13 +35,9 @@ const AmbienceView = () => {
           <Sparkles
             strokeWidth={1}
             size={32}
-            className='cursor-pointer'
-            fill={totalAddedAmbiences > 0 ? 'hsl(var(--primary))' : 'none'}
-            stroke={
-              totalAddedAmbiences > 0
-                ? 'hsl(var(--primary))'
-                : 'hsl(var(--foreground))'
-            }
+            className='text-white cursor-pointer'
+            fill={totalAddedAmbiences > 0 ? 'white' : 'none'}
+            stroke='white'
           />
         </SheetTrigger>
         <SheetContent side={side} className='w-full overflow-auto p-0'>
