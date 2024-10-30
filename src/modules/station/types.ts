@@ -22,4 +22,6 @@ export interface IStationsStore {
   onPlaying: () => void
   onStopping: () => void
   toggleFavorite: (id: string) => void
+  isMuted: boolean
+  toggleMute: () => void
 }

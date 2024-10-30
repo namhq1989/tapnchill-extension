@@ -1,0 +1,30 @@
+#bars {
+    position: relative;
+    width: 50px;
+}
+
+.bar {
+    background: hsl(var(--primary));
+    bottom: 7px;
+    height: 3px;
+    position: absolute;
+    width: 4px;
+    animation: sound 0ms -800ms linear infinite alternate;
+}
+
+@keyframes sound {
+    0% {
+        opacity: .35;
+        height: 2px;
+    }
+    100% {
+        opacity: 1;
+        height: 14px;
+    }
+}
+
+.bar:nth-child(1)  { left: 1px; animation-duration: 474ms; }
+.bar:nth-child(2)  { left: 10px; animation-duration: 433ms; }
+.bar:nth-child(3)  { left: 19px; animation-duration: 407ms; }
+.bar:nth-child(4)  { left: 28px; animation-duration: 458ms; }
+.bar:nth-child(5)  { left: 37px; animation-duration: 400ms; }

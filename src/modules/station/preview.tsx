@@ -1,8 +1,23 @@
-import { Heart, Pause, Play, VolumeOff } from 'lucide-react'
+import {
+  Clock,
+  Heart,
+  Info,
+  Pause,
+  Play,
+  Volume2,
+  VolumeOff,
+} from 'lucide-react'
 import StationView from '@/modules/station/view.tsx'
 import AmbienceView from '@/modules/ambience/view.tsx'
 import useStationsStore from '@/modules/station/store.ts'
 import LoadingIndicator from '@/loading-indicator.tsx'
+import { Slider } from '@/components/ui/slider.tsx'
+import { IStation } from '@/modules/station/types.ts'
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from '@/components/ui/hover-card.tsx'
 
 const StationPreview = () => {
   const {
@@ -12,12 +27,18 @@ const StationPreview = () => {
     pause,
     play,
     toggleFavorite,
+    volume,
+    changeVolumeValue,
+    isMuted,
+    toggleMute,
   } = useStationsStore()
   const PlayIcon = isSwitchingStation
     ? LoadingIndicator
     : isPlaying
       ? Pause
       : Play
+
+  const VolumeIcon = isMuted ? VolumeOff : Volume2
 
   return (
     <div className='flex flex-col w-full min-h-[120px] bg-primary rounded-xl p-4'>
@@ -29,11 +50,25 @@ const StationPreview = () => {
               Pick a station and let the music play!
             </small>
           ) : (
-            <>
-              <small className='text-sm text-gray-300'>
-                {selectedStation.description}
-              </small>
-              <div className='flex flex-row items-center justify-between mt-4 px-4'>
+            <div className='flex flex-col'>
+              <div className='flex flex-row gap-4'>
+                <div className='flex flex-row gap-1 items-center'>
+                  <Clock className='text-white' size={16} />
+                  <small className='text-sm text-white'>05:00</small>
+                </div>
+                <StationInformation station={selectedStation} />
+              </div>
+              <Slider
+                className='w-full mt-8 force-white'
+                defaultValue={[volume]}
+                max={100}
+                step={1}
+                onValueChange={(value: number[]) => {
+                  changeVolumeValue(value[0])
+                }}
+                disabled={!isPlaying}
+              />
+              <div className='flex flex-row items-center justify-between mt-8 px-4'>
                 <PlayIcon
                   strokeWidth={1}
                   size={32}
@@ -43,10 +78,12 @@ const StationPreview = () => {
                   }
                   fill={isPlaying ? 'white' : 'none'}
                 />
-                <VolumeOff
+                <VolumeIcon
                   strokeWidth={1}
                   size={32}
                   className='text-white cursor-pointer'
+                  onClick={() => toggleMute()}
+                  fill={!isMuted ? 'white' : 'none'}
                 />
                 <AmbienceView />
                 <Heart
@@ -58,11 +95,32 @@ const StationPreview = () => {
                   onClick={() => toggleFavorite(selectedStation.id)}
                 />
               </div>
-            </>
+            </div>
           )}
         </div>
       </div>
     </div>
+  )
+}
+
+interface IStationInformationProps {
+  station: IStation
+}
+
+const StationInformation = (props: IStationInformationProps) => {
+  const { station } = props
+  return (
+    <HoverCard>
+      <HoverCardTrigger>
+        <div className='flex flex-row gap-1 items-center cursor-pointer'>
+          <Info className='text-white' size={16} />
+          <small className='text-sm text-white'>Information</small>
+        </div>
+      </HoverCardTrigger>
+      <HoverCardContent>
+        The React Framework – created and maintained by @vercel. {station.name}
+      </HoverCardContent>
+    </HoverCard>
   )
 }
 

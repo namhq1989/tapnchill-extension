@@ -6,6 +6,7 @@ import { ModeToggle } from '@/components/theme/mode-toggle.tsx'
 import StationPreview from '@/modules/station/preview.tsx'
 import { Info } from 'lucide-react'
 import useStationsStore, { setState } from '@/modules/station/store.ts'
+import WaveForm from '@/wave-form.tsx'
 
 chrome.runtime.onMessage.addListener((request) => {
   if (request.type === 'offscreen-station-is-playing') {
@@ -27,7 +28,7 @@ chrome.runtime.onMessage.addListener((request) => {
 })
 
 const App = () => {
-  const { initStations } = useStationsStore()
+  const { initStations, isPlaying } = useStationsStore()
   const { initAmbiences } = useAmbiencesStore()
 
   useEffect(() => {
@@ -43,7 +44,12 @@ const App = () => {
           id='header'
           className='flex w-full flex-row justify-between p-4 border-b-[1px]'
         >
-          <h2 className='text-base tracking-wide'>Tap & Chill</h2>
+          <div className='flex flex-row gap-4 justify-center'>
+            <h2 className='text-base text-primary font-bold tracking-wide'>
+              Tap & Chill
+            </h2>
+            {isPlaying && <WaveForm />}
+          </div>
           <div className='flex flex-row gap-4 items-center'>
             <Info size={20} className='cursor-pointer' />
             <ModeToggle />
