@@ -23,7 +23,7 @@ const createItem = (
   }
 }
 
-enum Genres {
+export enum Genres {
   ROCK = 'rock',
   POP = 'pop',
   BLUES = 'blues',
@@ -31,7 +31,7 @@ enum Genres {
   JAZZ = 'jazz',
   COUNTRY = 'country',
   FOLK = 'folk',
-  ALTERNATIVE_ROCK = 'alternative rock',
+  ALTERNATIVE_ROCK = 'alt rock',
   FUNK = 'funk',
   SOUL = 'soul',
   RNB = 'r&b',

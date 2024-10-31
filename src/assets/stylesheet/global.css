@@ -103,6 +103,10 @@
   .container-selected {
     @apply bg-muted;
   }
+
+  .overlay {
+    @apply absolute inset-0 bg-black/60;
+  }
 }
 
 /*@font-face {*/
@@ -161,33 +165,3 @@ body {
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }
-
-.glassmorphism {
-  @apply rounded-3xl backdrop-blur-[5px] bg-white/65 shadow-lg ring-1 ring-black/5;
-}
-
-.glassmorphism-mood {
-  @apply rounded-3xl backdrop-blur-[5px] bg-black/65 shadow-lg ring-1 ring-black/5;
-}
-
-.glassmorphism-select {
-  @apply rounded-3xl backdrop-blur-[5px] bg-white/20 shadow-lg ring-1 ring-black/5;
-}
-
-.glassmorphism-parent {
-  @apply rounded-3xl before:backdrop-blur-md before:backdrop-hack bg-white/65 shadow-lg ring-1 ring-black/5;
-}
-
-.overlay {
-  z-index: 0;
-  position: fixed;
-  background: rgba(0, 0, 0, 0.8);
-  will-change: opacity;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-}
-
-

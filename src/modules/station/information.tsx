@@ -16,10 +16,10 @@ const StationInformation = (props: IStationInformationProps) => {
   return (
     <HoverCard>
       <HoverCardTrigger>
-        <Info className='text-white cursor-pointer' size={20} />
+        <Info className='text-white cursor-pointer' size={16} />
       </HoverCardTrigger>
-      <HoverCardContent className='rounded-xl ml-4 w-[300px]'>
-        <div className='flex flex-col p-4 gap-4'>
+      <HoverCardContent className='rounded-xl w-[300px]'>
+        <div className='flex flex-col gap-4'>
           <a
             className='text-sm underline underline-offset-2'
             href={station.website}

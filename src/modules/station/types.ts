@@ -32,6 +32,9 @@ export interface IStationsStore {
   isMuted: boolean
   toggleMute: () => void
   filters: IStationFilter[]
+  genres: IStationFilter[]
   selectedFilterId: string
+  selectedGenreId: string
   selectFilter: (id: string) => void
+  selectGenre: (id: string) => void
 }

@@ -6,7 +6,7 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
   // console.log('request', request)
   if (request.type === 'offscreen-station-is-playing') {
     chrome.action.setBadgeBackgroundColor({ color: '#6d28d9' }).then()
-    chrome.action.setBadgeText({ text: '♫' }).then()
+    chrome.action.setBadgeText({ text: '♬' }).then()
     chrome.action.setBadgeTextColor({ color: '#fff' }).then()
   } else if (request.type === 'offscreen-station-is-stopped') {
     chrome.action.setBadgeText({ text: '' }).then()
