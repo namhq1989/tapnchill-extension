@@ -5,13 +5,38 @@ import { ThemeProvider } from '@/components/theme/theme-provider.tsx'
 import { ModeToggle } from '@/components/theme/mode-toggle.tsx'
 import StationPreview from '@/modules/station/preview.tsx'
 import { Info } from 'lucide-react'
+import useStationsStore, { setState } from '@/modules/station/store.ts'
+import WaveForm from '@/wave-form.tsx'
+
+chrome.runtime.onMessage.addListener((request) => {
+  if (request.type === 'offscreen-station-is-playing') {
+    setState({
+      isPlaying: true,
+      isSwitchingStation: false,
+      startTime: new Date(),
+    })
+    chrome.storage.local.set({
+      isStationPlaying: true,
+      stationStartTime: new Date(),
+    })
+  } else if (request.type === 'offscreen-station-is-stopped') {
+    setState({
+      isPlaying: false,
+    })
+    chrome.storage.local.set({
+      isStationPlaying: false,
+    })
+  }
+})
 
 const App = () => {
+  const { initStations, isPlaying } = useStationsStore()
   const { initAmbiences } = useAmbiencesStore()
 
   useEffect(() => {
+    initStations()
     initAmbiences()
-  }, [initAmbiences])
+  }, [initStations, initAmbiences])
 
   return (
     <ThemeProvider defaultTheme='dark' storageKey='vite-ui-theme'>
@@ -21,7 +46,12 @@ const App = () => {
           id='header'
           className='flex w-full flex-row justify-between p-4 border-b-[1px]'
         >
-          <h2 className='text-base tracking-wide'>Tap & Chill</h2>
+          <div className='flex flex-row gap-4 justify-center'>
+            <h2 className='text-base text-primary font-bold tracking-wide'>
+              Tap & Chill
+            </h2>
+            {isPlaying && <WaveForm />}
+          </div>
           <div className='flex flex-row gap-4 items-center'>
             <Info size={20} className='cursor-pointer' />
             <ModeToggle />

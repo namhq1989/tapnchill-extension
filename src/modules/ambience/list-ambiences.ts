@@ -14,7 +14,7 @@ import {
 import { IAmbience } from '@/modules/ambience/types.ts'
 import { ElementType } from 'react'
 
-export const DEFAULT_VOLUME_VALUE = 40
+export const DEFAULT_VOLUME_VALUE = 70
 
 const createItem = (id: string, name: string, icon: ElementType): IAmbience => {
   return {

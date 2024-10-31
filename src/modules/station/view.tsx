@@ -5,31 +5,64 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
-import { ArrowRight, Heart, Pause } from 'lucide-react'
+
+import { ArrowRight, Heart, Pause, Play } from 'lucide-react'
+import useStationsStore from '@/modules/station/store.ts'
+import { IStation } from '@/modules/station/types.ts'
+import LoadingIndicator from '@/loading-indicator.tsx'
+import { Badge } from '@/components/ui/badge.tsx'
 
 const side = 'right'
 
 const StationView = () => {
+  const {
+    stations,
+    selectedStation,
+    isSwitchingStation,
+    isPlaying,
+    play,
+    pause,
+    toggleFavorite,
+    filters,
+    selectedFilter,
+    selectFilter,
+  } = useStationsStore()
+
   return (
-    <div className='flex cursor-pointer'>
+    <div className='flex cursor-pointe'>
       <Sheet key={side}>
         <SheetTrigger asChild>
-          <div className='flex flex-row w-full justify-between items-center cursor-pointer'>
-            <h2 className='text-2xl font-bold'>Station Name</h2>
-            <ArrowRight />
-          </div>
+          <ArrowRight className='text-white w-8 h-8 cursor-pointer' />
         </SheetTrigger>
         <SheetContent side={side} className='w-full overflow-auto p-0'>
           <SheetHeader className='p-4'>
             <SheetTitle>Stations</SheetTitle>
           </SheetHeader>
-          <div className='flex flex-col'>
-            <StationItem />
-            <StationItem />
-            <StationItem />
-            <StationItem />
-            <StationItem />
-            <StationItem />
+          <div className='p-4'>
+            {filters.map((filter) => (
+              <Badge
+                variant={selectedFilter === filter.id ? 'secondary' : 'outline'}
+                key={filter.id}
+                className='cursor-pointer py-2 px-4 mx-1'
+                onClick={() => selectFilter(filter.id)}
+              >
+                {filter.name}
+              </Badge>
+            ))}
+          </div>
+          <div className='flex flex-col mt-4'>
+            {stations.map((station) => (
+              <StationItem
+                key={station.id}
+                station={station}
+                isSelected={station.id === selectedStation?.id}
+                isSwitchingStation={isSwitchingStation}
+                isPlaying={isPlaying}
+                onPlay={() => play(station.id)}
+                onPause={() => pause()}
+                onToggleFavorite={(id) => toggleFavorite(id)}
+              />
+            ))}
           </div>
         </SheetContent>
       </Sheet>
@@ -37,38 +70,88 @@ const StationView = () => {
   )
 }
 
-const StationItem = () => {
+interface IStationItemProps {
+  station: IStation
+  isSelected: boolean
+  isSwitchingStation: boolean
+  isPlaying: boolean
+  onPlay: () => void
+  onPause: () => void
+  onToggleFavorite: (id: string) => void
+}
+
+const StationItem = (props: IStationItemProps) => {
+  const {
+    station,
+    isSelected,
+    isSwitchingStation,
+    isPlaying,
+    onPlay,
+    onPause,
+    onToggleFavorite,
+  } = props
+  const PlayIcon = !isSelected
+    ? Play
+    : isSwitchingStation
+      ? LoadingIndicator
+      : isSelected && isPlaying
+        ? Pause
+        : Play
+
   return (
-    <div className='flex flex-row gap-4 px-4 py-4 container-hover'>
+    <div
+      className={`flex flex-row gap-4 px-4 py-4 container-hover ${isSelected ? 'container-selected' : ''}`}
+    >
       <div className='flex flex-col gap-2'>
         <div className='rounded-xl w-[80px] aspect-square'>
           <img
-            className='object-scale-fit'
-            src='https://cdn-profiles.tunein.com/s190122/images/logod.jpg?t=636656470344730000'
+            className='object-scale-fit rounded-xl'
+            src={station.image}
             alt='logo'
           />
         </div>
         <div className='flex flex-row items-center justify-evenly gap-4'>
-          <Pause strokeWidth={1} className='cursor-pointer' />
+          <PlayIcon
+            strokeWidth={1}
+            className='cursor-pointer'
+            onClick={() => (isSelected && isPlaying ? onPause() : onPlay())}
+          />
           <Heart
             strokeWidth={1}
             className='cursor-pointer'
-            fill='hsl(var(--primary))'
-            stroke='hsl(var(--primary))'
+            fill={station.isFavorite ? 'hsl(var(--primary))' : 'none'}
+            stroke={
+              station.isFavorite
+                ? 'hsl(var(--primary))'
+                : 'hsl(var(--foreground))'
+            }
+            onClick={() => onToggleFavorite(station.id)}
           />
         </div>
       </div>
       <div className='flex flex-col'>
-        <div className='text-base font-bold'>Station Name</div>
+        <div className='text-base font-bold'>{station.name}</div>
         <a
-          href='https://somafm.com/folkfwd/'
+          href={station.website}
           target='_blank'
-          className='text-xs mb-1'
+          className='text-xs mb-2 underline underline-offset-2'
         >
-          somafm.com
+          {station.website}
         </a>
-        <small className='text-sm text-muted-foreground'>
-          Thoughtful, gentle songs, perfect as background music at home or work.
+        {station.genres.length > 0 && (
+          <div className='flex flex-row flex-wrap gap-2 mb-2'>
+            {station.genres.map((genre, index) => (
+              <Badge key={index} className='text-xs'>
+                {genre}
+              </Badge>
+            ))}
+          </div>
+        )}
+        <small
+          className='text-xs text-muted-foreground line-clamp-3'
+          title={station.description}
+        >
+          {station.description}
         </small>
       </div>
     </div>

@@ -1,5 +1,5 @@
 chrome.runtime.onStartup.addListener(function () {
-  chrome.storage.session.clear().then()
+  chrome.storage.local.set({ isStationPlaying: false }).then()
 })
 
 chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
@@ -37,6 +37,74 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
   } else if (request.type === 'change-ambience-volume') {
     chrome.runtime
       .sendMessage({ ...request, type: 'offscreen-change-ambience-volume' })
+      .then(() => {
+        sendResponse({
+          success: true,
+        })
+      })
+  } else if (request.type === 'play-station') {
+    createOffscreen()
+      .then(() => {
+        chrome.runtime
+          .sendMessage({ ...request, type: 'offscreen-play-station' })
+          .then(() => {
+            sendResponse({
+              success: true,
+            })
+          })
+      })
+      .catch((error) => {
+        console.error('Failed to create offscreen document:', error)
+        sendResponse({ success: false })
+      })
+  } else if (request.type === 'pause-station') {
+    createOffscreen()
+      .then(() => {
+        chrome.runtime
+          .sendMessage({ ...request, type: 'offscreen-pause-station' })
+          .then(() => {
+            sendResponse({
+              success: true,
+            })
+          })
+      })
+      .catch((error) => {
+        console.error('Failed to create offscreen document:', error)
+        sendResponse({ success: false })
+      })
+  } else if (request.type === 'resume-station') {
+    createOffscreen()
+      .then(() => {
+        chrome.runtime
+          .sendMessage({ ...request, type: 'offscreen-resume-station' })
+          .then(() => {
+            sendResponse({
+              success: true,
+            })
+          })
+      })
+      .catch((error) => {
+        console.error('Failed to create offscreen document:', error)
+        sendResponse({ success: false })
+      })
+  } else if (request.type === 'stop-station') {
+    createOffscreen()
+      .then(() => {
+        chrome.runtime
+          .sendMessage({ ...request, type: 'offscreen-stop-station' })
+          .then(() => {
+            sendResponse({
+              success: true,
+            })
+          })
+      })
+      .catch((error) => {
+        console.error('Failed to create offscreen document:', error)
+        sendResponse({ success: false })
+      })
+  } else if (request.type === 'change-station-volume') {
+    chrome.runtime
+      .sendMessage({ ...request, type: 'offscreen-change-station-volume' })
       .then(() => {
         sendResponse({
           success: true,
