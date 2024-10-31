@@ -7,15 +7,18 @@ const useStationsStore = create<IStationsStore>((set, get) => ({
   isPlaying: false,
   isSwitchingStation: false,
   volume: 50,
+  startTime: new Date(),
   selectedStation: null,
   initStations: () => {
-    chrome.storage.session.get((result) => {
+    chrome.storage.local.get((result) => {
+      console.log('result', result)
       let stations = listStations()
       const selectedStationId: string = result.selectedStationId || ''
       const favoriteStationIds: string[] = result.favoriteStationIds || []
       const volume: number = result.stationVolume || 50
       const isPlaying: boolean = result.isStationPlaying || false
       const isMuted: boolean = result.isStationMuted || false
+      const startTime: Date = result.stationStartTime || new Date()
 
       let selectedStation = null
       if (selectedStationId) {
@@ -29,13 +32,19 @@ const useStationsStore = create<IStationsStore>((set, get) => ({
         })
       }
 
-      set({ stations, selectedStation, volume, isPlaying, isMuted })
+      set({ stations, selectedStation, volume, isPlaying, isMuted, startTime })
     })
   },
 
   play: async (id: string) => {
-    const { isSwitchingStation, selectedStation, stations, volume, isPlaying } =
-      get()
+    const {
+      isSwitchingStation,
+      selectedStation,
+      stations,
+      volume,
+      isPlaying,
+      isMuted,
+    } = get()
 
     if (isSwitchingStation) return
 
@@ -45,7 +54,10 @@ const useStationsStore = create<IStationsStore>((set, get) => ({
       }
       chrome.runtime
         .sendMessage({
-          type: isPlaying ? 'pause-station' : 'resume-station',
+          type: 'play-station',
+          stationUrl: selectedStation.url,
+          format: selectedStation.format,
+          volume: isMuted ? 0 : volume,
         })
         .then()
       return
@@ -72,7 +84,7 @@ const useStationsStore = create<IStationsStore>((set, get) => ({
             set({
               selectedStation: newStation,
             })
-            chrome.storage.session.set({
+            chrome.storage.local.set({
               selectedStationId: id,
             })
           },
@@ -101,7 +113,7 @@ const useStationsStore = create<IStationsStore>((set, get) => ({
       },
       () => {
         set({ volume: value, isMuted: value === 0 })
-        chrome.storage.session
+        chrome.storage.local
           .set({ stationVolume: value, isStationMuted: value === 0 })
           .then()
       },
@@ -113,7 +125,7 @@ const useStationsStore = create<IStationsStore>((set, get) => ({
       isPlaying: true,
       isSwitchingStation: false,
     })
-    chrome.storage.session.set({
+    chrome.storage.local.set({
       isStationPlaying: true,
     })
   },
@@ -123,14 +135,14 @@ const useStationsStore = create<IStationsStore>((set, get) => ({
       isPlaying: false,
       isSwitchingStation: false,
     })
-    chrome.storage.session
+    chrome.storage.local
       .set({
         isStationPlaying: false,
       })
       .then()
   },
   toggleFavorite: (id: string) => {
-    chrome.storage.session.get((result) => {
+    chrome.storage.local.get((result) => {
       const favoriteStationIds: string[] = result.favoriteStationIds || []
       let isFavorite = false
       if (favoriteStationIds.includes(id)) {
@@ -140,7 +152,7 @@ const useStationsStore = create<IStationsStore>((set, get) => ({
         isFavorite = true
       }
 
-      chrome.storage.session
+      chrome.storage.local
         .set({
           favoriteStationIds,
         })
@@ -173,7 +185,7 @@ const useStationsStore = create<IStationsStore>((set, get) => ({
       },
       () => {
         set({ isMuted: !isMuted })
-        chrome.storage.session.set({
+        chrome.storage.local.set({
           isStationMuted: !isMuted,
         })
       },

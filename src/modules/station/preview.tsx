@@ -18,6 +18,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from '@/components/ui/hover-card.tsx'
+import Timer from '@/modules/station/timer.tsx'
 
 const StationPreview = () => {
   const {
@@ -31,6 +32,7 @@ const StationPreview = () => {
     changeVolumeValue,
     isMuted,
     toggleMute,
+    startTime,
   } = useStationsStore()
   const PlayIcon = isSwitchingStation
     ? LoadingIndicator
@@ -39,6 +41,8 @@ const StationPreview = () => {
       : Play
 
   const VolumeIcon = isMuted ? VolumeOff : Volume2
+
+  console.log('startTime', startTime)
 
   return (
     <div className='flex flex-col w-full min-h-[120px] bg-primary rounded-xl p-4'>
@@ -52,9 +56,9 @@ const StationPreview = () => {
           ) : (
             <div className='flex flex-col'>
               <div className='flex flex-row gap-4'>
-                <div className='flex flex-row gap-1 items-center'>
+                <div className='flex flex-row gap-1 items-center justify-center h-full'>
                   <Clock className='text-white' size={16} />
-                  <small className='text-sm text-white'>05:00</small>
+                  <Timer startTime={startTime} />
                 </div>
                 <StationInformation station={selectedStation} />
               </div>

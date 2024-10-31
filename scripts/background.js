@@ -1,5 +1,5 @@
 chrome.runtime.onStartup.addListener(function () {
-  chrome.storage.session.clear().then()
+  chrome.storage.local.set({ isStationPlaying: false }).then()
 })
 
 chrome.runtime.onMessage.addListener((request, _, sendResponse) => {

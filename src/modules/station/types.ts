@@ -15,6 +15,7 @@ export interface IStationsStore {
   isPlaying: boolean
   isSwitchingStation: boolean
   volume: number
+  startTime: Date
   initStations: () => void
   play: (id: string) => Promise<void>
   pause: () => void
