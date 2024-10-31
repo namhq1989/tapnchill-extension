@@ -3,7 +3,7 @@ import { IAmbiencesStore, ISelectedAmbience } from '@/modules/ambience/types.ts'
 import listAmbiences from '@/modules/ambience/list-ambiences.ts'
 import useNotificationStore from '@/modules/notification/store.ts'
 
-const MAX_ADDED_AMBIENCES = 3
+const MAX_ADDED_AMBIENCES = 2
 const { showErrorNotification } = useNotificationStore.getState()
 
 const useAmbiencesStore = create<IAmbiencesStore>((set, get) => ({

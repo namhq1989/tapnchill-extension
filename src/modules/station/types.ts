@@ -32,6 +32,6 @@ export interface IStationsStore {
   isMuted: boolean
   toggleMute: () => void
   filters: IStationFilter[]
-  selectedFilter: string
+  selectedFilterId: string
   selectFilter: (id: string) => void
 }

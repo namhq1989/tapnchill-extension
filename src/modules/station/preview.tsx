@@ -18,7 +18,6 @@ const StationPreview = () => {
     changeVolumeValue,
     isMuted,
     toggleMute,
-    startTime,
   } = useStationsStore()
   const PlayIcon = isSwitchingStation
     ? LoadingIndicator
@@ -28,11 +27,9 @@ const StationPreview = () => {
 
   const VolumeIcon = isMuted ? VolumeOff : Volume2
 
-  console.log('startTime', startTime)
-
   return (
     <div className='flex flex-col w-full min-h-[120px] bg-primary rounded-xl p-4'>
-      <div className='flex flex-grow py-4 px-0'>
+      <div className='flex flex-grow py-2 px-0'>
         <div className='flex flex-col gap-2 w-full'>
           <div className='flex flex-row w-full justify-between items-center gap-4'>
             <div className='flex flex-row gap-2 items-center'>

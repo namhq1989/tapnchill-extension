@@ -2,6 +2,9 @@ import { create } from 'zustand/index'
 import { IStationsStore } from '@/modules/station/types.ts'
 import listStations from '@/modules/station/list-stations.ts'
 
+export const FILTER_STATIONS_ALL = 'all'
+export const FILTER_STATIONS_FAVORITES = 'favorites'
+
 const useStationsStore = create<IStationsStore>((set, get) => ({
   stations: [],
   isPlaying: false,
@@ -18,6 +21,7 @@ const useStationsStore = create<IStationsStore>((set, get) => ({
       const isPlaying: boolean = result.isStationPlaying || false
       const isMuted: boolean = result.isStationMuted || false
       const startTime: Date = result.stationStartTime || new Date()
+      const selectedFilterId: string = result.stationSelectedFilterId || 'all'
 
       let selectedStation = null
       if (selectedStationId) {
@@ -31,7 +35,15 @@ const useStationsStore = create<IStationsStore>((set, get) => ({
         })
       }
 
-      set({ stations, selectedStation, volume, isPlaying, isMuted, startTime })
+      set({
+        stations,
+        selectedStation,
+        volume,
+        isPlaying,
+        isMuted,
+        startTime,
+        selectedFilterId,
+      })
     })
   },
 
@@ -193,20 +205,23 @@ const useStationsStore = create<IStationsStore>((set, get) => ({
 
   filters: [
     {
-      id: 'all',
+      id: FILTER_STATIONS_ALL,
       name: 'All',
     },
     {
-      id: 'favorites',
+      id: FILTER_STATIONS_FAVORITES,
       name: 'Favorites',
     },
   ],
-  selectedFilter: 'all',
+  selectedFilterId: 'all',
   selectFilter: (id: string) => {
-    const { selectedFilter } = get()
-    if (selectedFilter === id) return
+    const { selectedFilterId } = get()
+    if (selectedFilterId === id) return
 
-    set({ selectedFilter: id })
+    set({ selectedFilterId: id })
+    chrome.storage.local.set({
+      stationSelectedFilterId: id,
+    })
   },
 }))
 

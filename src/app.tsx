@@ -15,10 +15,12 @@ chrome.runtime.onMessage.addListener((request) => {
       isSwitchingStation: false,
       startTime: new Date(),
     })
-    chrome.storage.local.set({
-      isStationPlaying: true,
-      stationStartTime: new Date(),
-    })
+    chrome.storage.local
+      .set({
+        isStationPlaying: true,
+        stationStartTime: new Date(),
+      })
+      .then()
   } else if (request.type === 'offscreen-station-is-stopped') {
     setState({
       isPlaying: false,
