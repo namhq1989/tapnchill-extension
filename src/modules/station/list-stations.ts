@@ -23,6 +23,21 @@ const createItem = (
   }
 }
 
+enum Genres {
+  ROCK = 'rock',
+  POP = 'pop',
+  BLUES = 'blues',
+  CLASSICAL = 'classical',
+  JAZZ = 'jazz',
+  COUNTRY = 'country',
+  FOLK = 'folk',
+  ALTERNATIVE_ROCK = 'alternative rock',
+  FUNK = 'funk',
+  SOUL = 'soul',
+  RNB = 'r&b',
+  DISCO = 'disco',
+}
+
 const listStations = (): IStation[] => {
   return [
     createItem(
@@ -33,7 +48,7 @@ const listStations = (): IStation[] => {
       'Contemporary indie folk music. Sometimes softer, sometimes a little harder, but always authentic. A modern take on classic folk music, with occasional appearances by the classic masters.',
       'https://somafm.com/folkfwd',
       'https://cdn-profiles.tunein.com/s190122/images/logod.jpg?t=636656470344730000',
-      ['folk', 'alternative rock'],
+      [Genres.FOLK, Genres.ALTERNATIVE_ROCK],
     ),
     createItem(
       'jazz24',
@@ -43,7 +58,27 @@ const listStations = (): IStation[] => {
       'Welcome to Jazz24 from Seattle and Tacoma, Washington. Our free jazz stream features some of the all-time greatest artists, like Miles Davis, Billie Holiday and Dave Brubeck; as well as today’s top talents, like Wynton Marsalis, Diana Krall and Pat Metheny.',
       'https://www.jazz24.org',
       'https://cdn-profiles.tunein.com/s34682/images/logod.jpg',
-      ['jazz'],
+      [Genres.JAZZ],
+    ),
+    createItem(
+      'funky-corner-radio',
+      'https://ais-sa2.cdnstream1.com/2447_192.mp3',
+      'mp3',
+      'Funky Corner Radio',
+      'We play the best in Funky, Soul, Rhythm and Blues, Disco from the 70s and 80s.',
+      'https://www.funkycorner.it',
+      'https://cdn-profiles.tunein.com/s231747/images/logoq.png?t=637232660090000000',
+      [Genres.FUNK, Genres.SOUL, Genres.RNB, Genres.BLUES, Genres.DISCO],
+    ),
+    createItem(
+      'highway-65-radio',
+      'https://hydra.cdnstream.com/1924_64',
+      'mp3',
+      'Highway 65 Radio',
+      'Highway 65 Radio is a 365/24/7 destination for all things Music City! MCR features all genres of music found in our great city!',
+      'https://www.highway65radio.com',
+      'https://cdn-radiotime-logos.tunein.com/s174864q.png',
+      [Genres.COUNTRY, Genres.ROCK, Genres.BLUES],
     ),
   ]
 }

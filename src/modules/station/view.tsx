@@ -7,7 +7,9 @@ import {
 } from '@/components/ui/sheet'
 
 import { ArrowRight, Heart, Pause, Play } from 'lucide-react'
-import useStationsStore from '@/modules/station/store.ts'
+import useStationsStore, {
+  FILTER_STATIONS_FAVORITES,
+} from '@/modules/station/store.ts'
 import { IStation } from '@/modules/station/types.ts'
 import LoadingIndicator from '@/loading-indicator.tsx'
 import { Badge } from '@/components/ui/badge.tsx'
@@ -24,9 +26,14 @@ const StationView = () => {
     pause,
     toggleFavorite,
     filters,
-    selectedFilter,
+    selectedFilterId,
     selectFilter,
   } = useStationsStore()
+
+  let filteredStations = [...stations]
+  if (selectedFilterId === FILTER_STATIONS_FAVORITES) {
+    filteredStations = stations.filter((s) => s.isFavorite)
+  }
 
   return (
     <div className='flex cursor-pointe'>
@@ -41,7 +48,7 @@ const StationView = () => {
           <div className='p-4'>
             {filters.map((filter) => (
               <Badge
-                variant={selectedFilter === filter.id ? 'secondary' : 'outline'}
+                variant={selectedFilterId === filter.id ? 'default' : 'outline'}
                 key={filter.id}
                 className='cursor-pointer py-2 px-4 mx-1'
                 onClick={() => selectFilter(filter.id)}
@@ -51,7 +58,7 @@ const StationView = () => {
             ))}
           </div>
           <div className='flex flex-col mt-4'>
-            {stations.map((station) => (
+            {filteredStations.map((station) => (
               <StationItem
                 key={station.id}
                 station={station}
