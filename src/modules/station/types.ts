@@ -7,6 +7,12 @@ export interface IStation {
   website: string
   image: string
   isFavorite: boolean
+  genres: string[]
+}
+
+export interface IStationFilter {
+  id: string
+  name: string
 }
 
 export interface IStationsStore {
@@ -25,4 +31,7 @@ export interface IStationsStore {
   toggleFavorite: (id: string) => void
   isMuted: boolean
   toggleMute: () => void
+  filters: IStationFilter[]
+  selectedFilter: string
+  selectFilter: (id: string) => void
 }

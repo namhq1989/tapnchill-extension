@@ -1,24 +1,10 @@
-import {
-  Clock,
-  Heart,
-  Info,
-  Pause,
-  Play,
-  Volume2,
-  VolumeOff,
-} from 'lucide-react'
+import { Heart, Pause, Play, Volume2, VolumeOff } from 'lucide-react'
 import StationView from '@/modules/station/view.tsx'
 import AmbienceView from '@/modules/ambience/view.tsx'
 import useStationsStore from '@/modules/station/store.ts'
 import LoadingIndicator from '@/loading-indicator.tsx'
 import { Slider } from '@/components/ui/slider.tsx'
-import { IStation } from '@/modules/station/types.ts'
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from '@/components/ui/hover-card.tsx'
-import Timer from '@/modules/station/timer.tsx'
+import StationInformation from '@/modules/station/information.tsx'
 
 const StationPreview = () => {
   const {
@@ -48,20 +34,25 @@ const StationPreview = () => {
     <div className='flex flex-col w-full min-h-[120px] bg-primary rounded-xl p-4'>
       <div className='flex flex-grow py-4 px-0'>
         <div className='flex flex-col gap-2 w-full'>
-          <StationView />
+          <div className='flex flex-row w-full justify-between items-center gap-4'>
+            <div className='flex flex-row gap-2 items-center'>
+              {selectedStation && (
+                <StationInformation station={selectedStation} />
+              )}
+              <p
+                className={`${selectedStation ? 'text-2xl' : 'text-xl'} font-bold text-white`}
+              >
+                {selectedStation?.name || 'Station Unselected'}
+              </p>
+            </div>
+            <StationView />
+          </div>
           {!selectedStation ? (
             <small className='text-sm text-gray-300'>
               Pick a station and let the music play!
             </small>
           ) : (
             <div className='flex flex-col'>
-              <div className='flex flex-row gap-4'>
-                <div className='flex flex-row gap-1 items-center justify-center h-full'>
-                  <Clock className='text-white' size={16} />
-                  <Timer startTime={startTime} />
-                </div>
-                <StationInformation station={selectedStation} />
-              </div>
               <Slider
                 className='w-full mt-8 force-white'
                 defaultValue={[volume]}
@@ -104,27 +95,6 @@ const StationPreview = () => {
         </div>
       </div>
     </div>
-  )
-}
-
-interface IStationInformationProps {
-  station: IStation
-}
-
-const StationInformation = (props: IStationInformationProps) => {
-  const { station } = props
-  return (
-    <HoverCard>
-      <HoverCardTrigger>
-        <div className='flex flex-row gap-1 items-center cursor-pointer'>
-          <Info className='text-white' size={16} />
-          <small className='text-sm text-white'>Information</small>
-        </div>
-      </HoverCardTrigger>
-      <HoverCardContent>
-        The React Framework – created and maintained by @vercel. {station.name}
-      </HoverCardContent>
-    </HoverCard>
   )
 }
 

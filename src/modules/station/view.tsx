@@ -5,18 +5,12 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 
 import { ArrowRight, Heart, Pause, Play } from 'lucide-react'
 import useStationsStore from '@/modules/station/store.ts'
 import { IStation } from '@/modules/station/types.ts'
 import LoadingIndicator from '@/loading-indicator.tsx'
+import { Badge } from '@/components/ui/badge.tsx'
 
 const side = 'right'
 
@@ -29,35 +23,32 @@ const StationView = () => {
     play,
     pause,
     toggleFavorite,
+    filters,
+    selectedFilter,
+    selectFilter,
   } = useStationsStore()
 
   return (
     <div className='flex cursor-pointe'>
       <Sheet key={side}>
         <SheetTrigger asChild>
-          <div className='flex flex-row w-full justify-between items-center cursor-pointer gap-4'>
-            <p
-              className={`${selectedStation ? 'text-3xl' : 'text-xl'} font-bold text-white`}
-            >
-              {selectedStation?.name || 'Station Unselected'}
-            </p>
-            <ArrowRight className='text-white w-12' />
-          </div>
+          <ArrowRight className='text-white w-8 h-8 cursor-pointer' />
         </SheetTrigger>
         <SheetContent side={side} className='w-full overflow-auto p-0'>
           <SheetHeader className='p-4'>
             <SheetTitle>Stations</SheetTitle>
           </SheetHeader>
           <div className='p-4'>
-            <Select>
-              <SelectTrigger className='w-[180px]'>
-                <SelectValue placeholder='All' />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value='all'>All</SelectItem>
-                <SelectItem value='favorite'>Favorite</SelectItem>
-              </SelectContent>
-            </Select>
+            {filters.map((filter) => (
+              <Badge
+                variant={selectedFilter === filter.id ? 'secondary' : 'outline'}
+                key={filter.id}
+                className='cursor-pointer py-2 px-4 mx-1'
+                onClick={() => selectFilter(filter.id)}
+              >
+                {filter.name}
+              </Badge>
+            ))}
           </div>
           <div className='flex flex-col mt-4'>
             {stations.map((station) => (
@@ -140,9 +131,22 @@ const StationItem = (props: IStationItemProps) => {
       </div>
       <div className='flex flex-col'>
         <div className='text-base font-bold'>{station.name}</div>
-        <a href={station.website} target='_blank' className='text-xs mb-1'>
+        <a
+          href={station.website}
+          target='_blank'
+          className='text-xs mb-2 underline underline-offset-2'
+        >
           {station.website}
         </a>
+        {station.genres.length > 0 && (
+          <div className='flex flex-row flex-wrap gap-2 mb-2'>
+            {station.genres.map((genre, index) => (
+              <Badge key={index} className='text-xs'>
+                {genre}
+              </Badge>
+            ))}
+          </div>
+        )}
         <small
           className='text-xs text-muted-foreground line-clamp-3'
           title={station.description}

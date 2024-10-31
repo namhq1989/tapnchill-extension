@@ -11,7 +11,6 @@ const useStationsStore = create<IStationsStore>((set, get) => ({
   selectedStation: null,
   initStations: () => {
     chrome.storage.local.get((result) => {
-      console.log('result', result)
       let stations = listStations()
       const selectedStationId: string = result.selectedStationId || ''
       const favoriteStationIds: string[] = result.favoriteStationIds || []
@@ -190,6 +189,24 @@ const useStationsStore = create<IStationsStore>((set, get) => ({
         })
       },
     )
+  },
+
+  filters: [
+    {
+      id: 'all',
+      name: 'All',
+    },
+    {
+      id: 'favorites',
+      name: 'Favorites',
+    },
+  ],
+  selectedFilter: 'all',
+  selectFilter: (id: string) => {
+    const { selectedFilter } = get()
+    if (selectedFilter === id) return
+
+    set({ selectedFilter: id })
   },
 }))
 

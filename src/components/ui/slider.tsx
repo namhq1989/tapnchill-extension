@@ -7,6 +7,7 @@ const Slider = React.forwardRef<
   React.ElementRef<typeof SliderPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root>
 >(({ className, ...props }, ref) => {
+  console.log('force-white', className?.includes('force-white'))
   return (
     <SliderPrimitive.Root
       ref={ref}
@@ -17,7 +18,7 @@ const Slider = React.forwardRef<
       {...props}
     >
       <SliderPrimitive.Track
-        className={`relative h-1 w-full grow overflow-hidden rounded-full bg-secondary ${className?.includes('force-white') ? 'bg-black' : 'bg-secondary'}`}
+        className={`relative h-1 w-full grow overflow-hidden rounded-full ${className?.includes('force-white') ? 'bg-black' : 'bg-background'}`}
       >
         <SliderPrimitive.Range
           className={`absolute h-full ${className?.includes('force-white') ? 'bg-white' : 'bg-foreground'}`}
