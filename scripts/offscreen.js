@@ -107,25 +107,14 @@ const playStation = (stationUrl, format, volume) => {
     preload: true,
     volume: volume / 100,
     onplay: () => {
-      console.log('on play')
-
-      chrome.runtime
-        .sendMessage({ type: 'offscreen-station-is-playing' })
-        .then()
+      chrome.runtime.sendMessage({ type: 'station-is-playing' }).then()
     },
     onstop: () => {
-      console.log('on stop')
-
-      chrome.runtime
-        .sendMessage({ type: 'offscreen-station-is-stopped' })
-        .then()
+      chrome.runtime.sendMessage({ type: 'station-is-stopped' }).then()
     },
     onpause: () => {
       console.log('on pause')
     },
-    // onloaderror: (id, error) => {
-    //   console.log('3333', error)
-    // },
   })
 }
 

@@ -12,24 +12,15 @@ import WeatherPreview from '@/modules/weather/preview.tsx'
 import TaskPreview from '@/modules/task/preview.tsx'
 
 chrome.runtime.onMessage.addListener((request) => {
-  if (request.type === 'offscreen-station-is-playing') {
+  if (request.type === 'station-is-playing') {
     setState({
       isPlaying: true,
       isSwitchingStation: false,
       startTime: new Date(),
     })
-    chrome.storage.local
-      .set({
-        isStationPlaying: true,
-        stationStartTime: new Date(),
-      })
-      .then()
-  } else if (request.type === 'offscreen-station-is-stopped') {
+  } else if (request.type === 'station-is-stopped') {
     setState({
       isPlaying: false,
-    })
-    chrome.storage.local.set({
-      isStationPlaying: false,
     })
   }
 })
