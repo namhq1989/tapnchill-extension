@@ -10,6 +10,7 @@ import WaveForm from '@/wave-form.tsx'
 import TimerPreview from '@/modules/timer/preview.tsx'
 import WeatherPreview from '@/modules/weather/preview.tsx'
 import TaskPreview from '@/modules/task/preview.tsx'
+import StatisticPreview from '@/modules/statistic/preview.tsx'
 
 chrome.runtime.onMessage.addListener((request) => {
   if (request.type === 'station-is-playing') {
@@ -53,12 +54,16 @@ const App = () => {
             <ModeToggle />
           </div>
         </div>
-        <div id='content' className='flex flex-col p-4 gap-4 scrollbar-hide'>
+        <div
+          id='content'
+          className='flex flex-col p-4 gap-x-4 gap-y-8 scrollbar-hide'
+        >
           <StationPreview />
           <div className='grid grid-cols-3 gap-4'>
             <WeatherPreview />
             <TimerPreview />
           </div>
+          <StatisticPreview />
           <TaskPreview />
         </div>
       </div>

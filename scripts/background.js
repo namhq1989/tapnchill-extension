@@ -25,7 +25,7 @@ chrome.runtime.onStartup.addListener(function () {
       }
 
       const listeningTime = Math.round(
-        (now.getTime() - lastTrackingTime.getTime()) / 1000,
+        (now.getTime() - lastTrackingTime.getTime()) / 1000, // in seconds
       )
 
       let { listeningTrackingTimeData } = result
@@ -38,14 +38,14 @@ chrome.runtime.onStartup.addListener(function () {
         (i) => i.date === date,
       )
       if (itemIndex === -1) {
-        listeningTrackingTimeData.push({
+        listeningTrackingTimeData.unshift({
           ts: now.getTime(),
           date,
-          value: listeningTime,
+          seconds: listeningTime,
         })
       } else {
         listeningTrackingTimeData[itemIndex].ts = now.getTime()
-        listeningTrackingTimeData[itemIndex].value += listeningTime
+        listeningTrackingTimeData[itemIndex].seconds += listeningTime
       }
 
       // sort and delete entries that has index > LISTENING_TRACKING_RETENTION_ITEMS
