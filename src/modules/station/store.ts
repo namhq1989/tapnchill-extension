@@ -250,6 +250,23 @@ const useStationsStore = create<IStationsStore>((set, get) => ({
   ],
   selectedFilterId: 'all',
   selectedGenreId: 'all',
+  resetAllFilters: () => {
+    const { selectedFilterId, selectedGenreId } = get()
+    if (
+      selectedFilterId === FILTER_STATIONS_ALL &&
+      selectedGenreId === FILTER_STATIONS_ALL
+    )
+      return
+
+    set({
+      selectedFilterId: FILTER_STATIONS_ALL,
+      selectedGenreId: FILTER_STATIONS_ALL,
+    })
+    chrome.storage.local.set({
+      stationSelectedFilterId: FILTER_STATIONS_ALL,
+      stationSelectedGenreId: FILTER_STATIONS_ALL,
+    })
+  },
   selectFilter: (id: string) => {
     const { selectedFilterId } = get()
     if (selectedFilterId === id) return

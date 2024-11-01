@@ -1,11 +1,11 @@
 const WaveForm = () => {
   return (
     <div id='bars'>
-      <div className='bar'></div>
-      <div className='bar'></div>
-      <div className='bar'></div>
-      <div className='bar'></div>
-      <div className='bar'></div>
+      {Array(5)
+        .fill(0)
+        .map((_, i) => (
+          <div className='bar' key={i}></div>
+        ))}
     </div>
   )
 }

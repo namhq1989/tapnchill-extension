@@ -13,12 +13,16 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 
-import { ArrowRightLeft, Heart, Pause, Play } from 'lucide-react'
+import { ArrowRightLeft, Heart, Pause, Play, RefreshCw } from 'lucide-react'
 import useStationsStore, {
+  FILTER_STATIONS_ALL,
   FILTER_STATIONS_FAVORITES,
 } from '@/modules/station/store.ts'
 import { IStation } from '@/modules/station/types.ts'
 import LoadingIndicator from '@/loading-indicator.tsx'
+import StationInformation from '@/modules/station/information.tsx'
+import { Separator } from '@/components/ui/separator.tsx'
+import WaveForm from '@/wave-form.tsx'
 
 const side = 'right'
 
@@ -37,11 +41,17 @@ const StationView = () => {
     genres,
     selectedGenreId,
     selectGenre,
+    resetAllFilters,
   } = useStationsStore()
 
   let filteredStations = [...stations]
   if (selectedFilterId === FILTER_STATIONS_FAVORITES) {
     filteredStations = stations.filter((s) => s.isFavorite)
+  }
+  if (selectedGenreId !== FILTER_STATIONS_ALL) {
+    filteredStations = filteredStations.filter((s) =>
+      s.genres.includes(selectedGenreId),
+    )
   }
 
   const PlayIcon = isSwitchingStation
@@ -56,51 +66,67 @@ const StationView = () => {
         <SheetTrigger asChild>
           <ArrowRightLeft className='text-white cursor-pointer' />
         </SheetTrigger>
-        <SheetContent side={side} className='w-full overflow-auto p-0'>
+        <SheetContent
+          id='list-stations'
+          side={side}
+          className='w-full overflow-auto p-0'
+        >
           <SheetHeader className='p-4'>
-            <SheetTitle>Stations</SheetTitle>
+            <SheetTitle>
+              <div className='flex flex-row gap-4 justify-center'>
+                <h2 className='text-base text-primary font-bold tracking-wide'>
+                  Stations
+                </h2>
+                {isPlaying && <WaveForm />}
+              </div>
+            </SheetTitle>
           </SheetHeader>
-          <div className='flex flex-col gap-2'>
+          <div className='flex flex-col gap-8'>
             {selectedStation && (
-              <div className='flex h-[240px] rounded-xl p-4 my-4'>
-                <div
-                  className={`flex w-full h-full bg-cover rounded-xl`}
-                  style={{
-                    backgroundImage: `url(${selectedStation.cover})`,
-                  }}
-                >
-                  <div className='flex flex-col self-end items-start justify-center px-4 py-2 w-full bg-black/70 rounded-bl-xl rounded-br-xl gap-1'>
-                    <h2 className='text-2xl text-white font-bold tracking-wide'>
-                      {selectedStation.name}
-                    </h2>
-                    <div className='flex flex-row w-full gap-8'>
-                      <PlayIcon
-                        strokeWidth={1}
-                        size={32}
-                        className={`text-white dark:text-white cursor-pointer ${isSwitchingStation ? 'w-8 h-8' : ''}`}
-                        onClick={() =>
-                          isPlaying ? pause() : play(selectedStation.id)
-                        }
-                        fill={isPlaying ? 'white' : 'none'}
-                      />
-                      <Heart
-                        strokeWidth={1}
-                        size={32}
-                        className='text-white cursor-pointer'
-                        fill={selectedStation.isFavorite ? 'white' : 'none'}
-                        stroke='white'
-                        onClick={() => toggleFavorite(selectedStation.id)}
-                      />
+              <div className='flex flex-col gap-2  my-4'>
+                <div className='flex h-[240px] rounded-xl'>
+                  <div
+                    className={`flex w-full h-full bg-cover`}
+                    style={{
+                      backgroundImage: `url(${selectedStation.cover})`,
+                    }}
+                  >
+                    <div className='flex flex-col self-end items-start justify-center p-4 w-full bg-black/70 rounded-bl-xl rounded-br-xl'>
+                      <div className='flex flex-row w-full justify-between'>
+                        <PlayIcon
+                          strokeWidth={1}
+                          size={32}
+                          className={`text-white dark:text-white cursor-pointer ${isSwitchingStation ? 'w-8 h-8' : ''}`}
+                          onClick={() =>
+                            isPlaying ? pause() : play(selectedStation.id)
+                          }
+                          fill={isPlaying ? 'white' : 'none'}
+                        />
+                        <Heart
+                          strokeWidth={1}
+                          size={32}
+                          className='text-white cursor-pointer'
+                          fill={selectedStation.isFavorite ? 'white' : 'none'}
+                          stroke='white'
+                          onClick={() => toggleFavorite(selectedStation.id)}
+                        />
+                        <StationInformation
+                          station={selectedStation}
+                          strokeWidth={1}
+                          size={32}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
+                <h2 className='text-xl font-bold tracking-wide px-4'>
+                  {selectedStation.name}
+                </h2>
               </div>
             )}
-            <div className='flex flex-col items-start justify-center p-4 gap-2'>
-              <h2 className='font-bold text-base tracking-wide'>
-                List stations
-              </h2>
-              <div className='flex flex-row gap-4'>
+            {selectedStation && <Separator className='w-[60%] self-center' />}
+            <div className='flex flex-col p-4 gap-4'>
+              <div className='flex flex-row gap-4 items-center justify-start'>
                 <Select
                   defaultValue={selectedFilterId}
                   onValueChange={(id) => selectFilter(id)}
@@ -131,26 +157,32 @@ const StationView = () => {
                     ))}
                   </SelectContent>
                 </Select>
+                <RefreshCw
+                  className='cursor-pointer'
+                  size={20}
+                  onClick={() => resetAllFilters()}
+                />
               </div>
-            </div>
-            <div className='flex w-full p-4'>
-              <div className='w-full grid grid-cols-2 gap-4'>
-                {filteredStations.map((station) => {
-                  if (selectedStation && selectedStation.id === station.id)
-                    return null
+              <div className='flex w-full'>
+                <div className='w-full grid grid-cols-2 gap-4'>
+                  {filteredStations.map((station) => {
+                    if (selectedStation && selectedStation.id === station.id)
+                      return null
 
-                  return (
-                    <StationItem
-                      key={station.id}
-                      station={station}
-                      onPlay={() => play(station.id)}
-                      onToggleFavorite={(id) => toggleFavorite(id)}
-                    />
-                  )
-                })}
+                    return (
+                      <StationItem
+                        key={station.id}
+                        station={station}
+                        onPlay={() => play(station.id)}
+                        onToggleFavorite={(id) => toggleFavorite(id)}
+                      />
+                    )
+                  })}
+                </div>
               </div>
             </div>
           </div>
+          <div className='h-2' />
         </SheetContent>
       </Sheet>
     </div>
@@ -167,31 +199,42 @@ const StationItem = (props: IStationItemProps) => {
   const { station, onPlay, onToggleFavorite } = props
 
   return (
-    <div className='flex col-span-1 aspect-square items-center justify-center rounded-xl'>
-      <div
-        className={`flex w-full h-full bg-cover rounded-xl`}
-        style={{
-          backgroundImage: `url(${station.cover})`,
-        }}
-      >
-        <div className='flex flex-col self-end items-start justify-center p-2 w-full bg-black/70 rounded-bl-xl rounded-br-xl gap-2'>
-          <h2 className='text-sm text-white font-bold'>{station.name}</h2>
-          <div className='flex flex-row w-full gap-8'>
-            <Play
-              strokeWidth={2}
-              className={`cursor-pointer`}
-              onClick={() => onPlay()}
-            />
-            <Heart
-              strokeWidth={1}
-              className='text-white cursor-pointer'
-              fill={station.isFavorite ? 'white' : 'none'}
-              stroke='white'
-              onClick={() => onToggleFavorite(station.id)}
-            />
+    <div className='flex flex-col gap-2'>
+      <div className='flex col-span-1 h-[120px] items-center justify-center rounded-xl'>
+        <div
+          className={`flex w-full h-full bg-cover rounded-xl`}
+          style={{
+            backgroundImage: `url(${station.cover})`,
+          }}
+        >
+          <div className='flex flex-col self-end items-start justify-center p-4 w-full bg-black/70 rounded-bl-xl rounded-br-xl justify-between'>
+            <div className='flex flex-row w-full gap-8'>
+              <Play
+                strokeWidth={1}
+                className={`text-white cursor-pointer`}
+                onClick={() => {
+                  onPlay()
+                  setTimeout(() => {
+                    const d = document.querySelector('#list-stations')
+                    if (d) {
+                      d.scrollTo({ top: 0, behavior: 'smooth' })
+                    }
+                  }, 0)
+                }}
+              />
+              <Heart
+                strokeWidth={1}
+                className='text-white cursor-pointer'
+                fill={station.isFavorite ? 'white' : 'none'}
+                stroke='white'
+                onClick={() => onToggleFavorite(station.id)}
+              />
+              <StationInformation station={station} strokeWidth={1} size={24} />
+            </div>
           </div>
         </div>
       </div>
+      <h2 className='text-sm font-bold'>{station.name}</h2>
     </div>
   )
 }

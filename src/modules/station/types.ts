@@ -34,6 +34,7 @@ export interface IStationsStore {
   genres: IStationFilter[]
   selectedFilterId: string
   selectedGenreId: string
+  resetAllFilters: () => void
   selectFilter: (id: string) => void
   selectGenre: (id: string) => void
 }

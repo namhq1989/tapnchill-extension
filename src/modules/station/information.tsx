@@ -9,14 +9,20 @@ import { Badge } from '@/components/ui/badge.tsx'
 
 export interface IStationInformationProps {
   station: IStation
+  size: number
+  strokeWidth: number
 }
 
 const StationInformation = (props: IStationInformationProps) => {
-  const { station } = props
+  const { station, size, strokeWidth } = props
   return (
     <HoverCard>
       <HoverCardTrigger>
-        <Info className='text-white cursor-pointer' size={16} />
+        <Info
+          className='text-white cursor-pointer'
+          size={size || 16}
+          strokeWidth={strokeWidth || 2}
+        />
       </HoverCardTrigger>
       <HoverCardContent className='rounded-xl w-[300px]'>
         <div className='flex flex-col gap-4'>

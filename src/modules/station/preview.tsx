@@ -30,9 +30,15 @@ const StationPreview = () => {
   return (
     <div
       className={`flex flex-col w-full min-h-[120px] bg-cover rounded-xl p-4 relative overflow-hidden`}
-      style={{
-        backgroundImage: `url(${selectedStation?.cover})`,
-      }}
+      style={
+        selectedStation
+          ? {
+              backgroundImage: `url(${selectedStation?.cover})`,
+            }
+          : {
+              backgroundColor: 'hsl(var(--primary))',
+            }
+      }
     >
       <div className='overlay rounded-xl'></div>
       <div className='relative flex flex-grow py-2 px-0'>
@@ -45,7 +51,11 @@ const StationPreview = () => {
                 {selectedStation?.name || 'Station Unselected'}
               </p>
               {selectedStation && (
-                <StationInformation station={selectedStation} />
+                <StationInformation
+                  station={selectedStation}
+                  size={16}
+                  strokeWidth={2}
+                />
               )}
             </div>
             <StationView />
