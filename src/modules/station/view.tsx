@@ -14,10 +14,11 @@ import {
 } from '@/components/ui/select'
 
 import { ArrowRightLeft, Heart, Pause, Play } from 'lucide-react'
-import useStationsStore from '@/modules/station/store.ts'
+import useStationsStore, {
+  FILTER_STATIONS_FAVORITES,
+} from '@/modules/station/store.ts'
 import { IStation } from '@/modules/station/types.ts'
 import LoadingIndicator from '@/loading-indicator.tsx'
-import { Badge } from '@/components/ui/badge.tsx'
 
 const side = 'right'
 
@@ -38,10 +39,10 @@ const StationView = () => {
     selectGenre,
   } = useStationsStore()
 
-  // let filteredStations = [...stations]
-  // if (selectedFilterId === FILTER_STATIONS_FAVORITES) {
-  //   filteredStations = stations.filter((s) => s.isFavorite)
-  // }
+  let filteredStations = [...stations]
+  if (selectedFilterId === FILTER_STATIONS_FAVORITES) {
+    filteredStations = stations.filter((s) => s.isFavorite)
+  }
 
   const PlayIcon = isSwitchingStation
     ? LoadingIndicator
@@ -63,10 +64,13 @@ const StationView = () => {
             {selectedStation && (
               <div className='flex h-[240px] rounded-xl p-4 my-4'>
                 <div
-                  className={`flex w-full h-full bg-[url('/covers/acoustic.jpg')] bg-cover rounded-xl`}
+                  className={`flex w-full h-full bg-cover rounded-xl`}
+                  style={{
+                    backgroundImage: `url(${selectedStation.cover})`,
+                  }}
                 >
-                  <div className='flex flex-col self-end items-start justify-center p-4 w-full bg-black/70 rounded-bl-xl rounded-br-xl gap-2'>
-                    <h2 className='text-xl text-white font-bold tracking-wide'>
+                  <div className='flex flex-col self-end items-start justify-center px-4 py-2 w-full bg-black/70 rounded-bl-xl rounded-br-xl gap-1'>
+                    <h2 className='text-2xl text-white font-bold tracking-wide'>
                       {selectedStation.name}
                     </h2>
                     <div className='flex flex-row w-full gap-8'>
@@ -131,79 +135,22 @@ const StationView = () => {
             </div>
             <div className='flex w-full p-4'>
               <div className='w-full grid grid-cols-2 gap-4'>
-                <div className='flex col-span-1 aspect-square bg-gray-500 items-center justify-center rounded-xl'>
-                  STATION
-                </div>
-                <div className='flex col-span-1 aspect-square bg-gray-500 items-center justify-center rounded-xl'>
-                  STATION
-                </div>
-                <div className='flex col-span-1 aspect-square bg-gray-500 items-center justify-center rounded-xl'>
-                  STATION
-                </div>
-                <div className='flex col-span-1 aspect-square bg-gray-500 items-center justify-center rounded-xl'>
-                  STATION
-                </div>
-                <div className='flex col-span-1 aspect-square bg-gray-500 items-center justify-center rounded-xl'>
-                  STATION
-                </div>
-                <div className='flex col-span-1 aspect-square bg-gray-500 items-center justify-center rounded-xl'>
-                  STATION
-                </div>
-                <div className='flex col-span-1 aspect-square bg-gray-500 items-center justify-center rounded-xl'>
-                  STATION
-                </div>
-                <div className='flex col-span-1 aspect-square bg-gray-500 items-center justify-center rounded-xl'>
-                  STATION
-                </div>
+                {filteredStations.map((station) => {
+                  if (selectedStation && selectedStation.id === station.id)
+                    return null
+
+                  return (
+                    <StationItem
+                      key={station.id}
+                      station={station}
+                      onPlay={() => play(station.id)}
+                      onToggleFavorite={(id) => toggleFavorite(id)}
+                    />
+                  )
+                })}
               </div>
             </div>
           </div>
-          {/*{selectedStation && (*/}
-          {/*  <div className='flex flex-col my-4 gap-2 container-selected'>*/}
-          {/*    /!*<div className='text-base ml-4'>Now playing</div>*!/*/}
-          {/*    <StationItem*/}
-          {/*      key={selectedStation.id}*/}
-          {/*      station={selectedStation}*/}
-          {/*      isSelected={selectedStation.id === selectedStation?.id}*/}
-          {/*      isSwitchingStation={isSwitchingStation}*/}
-          {/*      isPlaying={isPlaying}*/}
-          {/*      onPlay={() => play(selectedStation.id)}*/}
-          {/*      onPause={() => pause()}*/}
-          {/*      onToggleFavorite={(id) => toggleFavorite(id)}*/}
-          {/*    />*/}
-          {/*  </div>*/}
-          {/*)}*/}
-          {/*<div className='p-4'>*/}
-          {/*  {filters.map((filter) => (*/}
-          {/*    <Badge*/}
-          {/*      variant={selectedFilterId === filter.id ? 'default' : 'outline'}*/}
-          {/*      key={filter.id}*/}
-          {/*      className='cursor-pointer py-2 px-4 mx-1'*/}
-          {/*      onClick={() => selectFilter(filter.id)}*/}
-          {/*    >*/}
-          {/*      {filter.name}*/}
-          {/*    </Badge>*/}
-          {/*  ))}*/}
-          {/*</div>*/}
-          {/*<div className='flex flex-col'>*/}
-          {/*  {filteredStations.map((station) => {*/}
-          {/*    if (selectedStation && selectedStation.id === station.id)*/}
-          {/*      return null*/}
-
-          {/*    return (*/}
-          {/*      <StationItem*/}
-          {/*        key={station.id}*/}
-          {/*        station={station}*/}
-          {/*        isSelected={station.id === selectedStation?.id}*/}
-          {/*        isSwitchingStation={isSwitchingStation}*/}
-          {/*        isPlaying={isPlaying}*/}
-          {/*        onPlay={() => play(station.id)}*/}
-          {/*        onPause={() => pause()}*/}
-          {/*        onToggleFavorite={(id) => toggleFavorite(id)}*/}
-          {/*      />*/}
-          {/*    )*/}
-          {/*  })}*/}
-          {/*</div>*/}
         </SheetContent>
       </Sheet>
     </div>
@@ -212,93 +159,37 @@ const StationView = () => {
 
 interface IStationItemProps {
   station: IStation
-  isSelected: boolean
-  isSwitchingStation: boolean
-  isPlaying: boolean
   onPlay: () => void
-  onPause: () => void
   onToggleFavorite: (id: string) => void
 }
 
 const StationItem = (props: IStationItemProps) => {
-  const {
-    station,
-    isSelected,
-    isSwitchingStation,
-    isPlaying,
-    onPlay,
-    onPause,
-    onToggleFavorite,
-  } = props
-  const PlayIcon = !isSelected
-    ? Play
-    : isSwitchingStation
-      ? LoadingIndicator
-      : isSelected && isPlaying
-        ? Pause
-        : Play
+  const { station, onPlay, onToggleFavorite } = props
 
   return (
-    <div
-      className={`group flex flex-row gap-4 px-4 py-4 ${isSelected ? '' : 'container-hover'}`}
-    >
-      <div className='flex flex-col gap-2'>
-        <div className='relative rounded-xl w-[80px] aspect-square'>
-          <img
-            className='object-cover rounded-xl'
-            src={station.image}
-            alt='logo'
-          />
-          {isSelected && (
-            <div
-              className={`${isSelected ? '' : 'hidden group-hover:block'}`}
-            ></div>
-          )}
-
-          <div
-            className={`absolute inset-0 bg-black/70 rounded-xl items-center justify-center ${
-              isSelected ? 'flex' : 'hidden group-hover:flex'
-            }`}
-          >
-            <PlayIcon
+    <div className='flex col-span-1 aspect-square items-center justify-center rounded-xl'>
+      <div
+        className={`flex w-full h-full bg-cover rounded-xl`}
+        style={{
+          backgroundImage: `url(${station.cover})`,
+        }}
+      >
+        <div className='flex flex-col self-end items-start justify-center p-2 w-full bg-black/70 rounded-bl-xl rounded-br-xl gap-2'>
+          <h2 className='text-sm text-white font-bold'>{station.name}</h2>
+          <div className='flex flex-row w-full gap-8'>
+            <Play
               strokeWidth={2}
-              size={28}
               className={`cursor-pointer`}
-              onClick={() => (isSelected && isPlaying ? onPause() : onPlay())}
+              onClick={() => onPlay()}
+            />
+            <Heart
+              strokeWidth={1}
+              className='text-white cursor-pointer'
+              fill={station.isFavorite ? 'white' : 'none'}
+              stroke='white'
+              onClick={() => onToggleFavorite(station.id)}
             />
           </div>
-        </div>
-      </div>
-      <div className='flex flex-row gap-2 justify-between w-full'>
-        <div className='flex flex-col gap-2'>
-          <div className='text-base font-bold'>{station.name}</div>
-          {station.genres.length > 0 && (
-            <div className='flex flex-row flex-wrap gap-2 mb-2'>
-              {station.genres.map((genre, index) => (
-                <Badge
-                  key={index}
-                  variant={isSelected ? 'default' : 'secondary'}
-                  className='text-xs'
-                >
-                  {genre}
-                </Badge>
-              ))}
-            </div>
-          )}
-        </div>
-        <div className='flex mx-2 justify-center items-center'>
-          <Heart
-            strokeWidth={1}
-            size={28}
-            className='flex cursor-pointer'
-            fill={station.isFavorite ? 'hsl(var(--primary))' : 'none'}
-            stroke={
-              station.isFavorite
-                ? 'hsl(var(--primary))'
-                : 'hsl(var(--foreground))'
-            }
-            onClick={() => onToggleFavorite(station.id)}
-          />
         </div>
       </div>
     </div>

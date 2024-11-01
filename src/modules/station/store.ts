@@ -14,7 +14,6 @@ const useStationsStore = create<IStationsStore>((set, get) => ({
   selectedStation: null,
   initStations: () => {
     chrome.storage.local.get((result) => {
-      console.log('result', result)
       let stations = listStations()
       const selectedStationId: string = result.selectedStationId || ''
       const favoriteStationIds: string[] = result.favoriteStationIds || []
@@ -134,27 +133,6 @@ const useStationsStore = create<IStationsStore>((set, get) => ({
     )
   },
 
-  onPlaying: () => {
-    set({
-      isPlaying: true,
-      isSwitchingStation: false,
-    })
-    chrome.storage.local.set({
-      isStationPlaying: true,
-    })
-  },
-
-  onStopping: () => {
-    set({
-      isPlaying: false,
-      isSwitchingStation: false,
-    })
-    chrome.storage.local
-      .set({
-        isStationPlaying: false,
-      })
-      .then()
-  },
   toggleFavorite: (id: string) => {
     chrome.storage.local.get((result) => {
       const favoriteStationIds: string[] = result.favoriteStationIds || []

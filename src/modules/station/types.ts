@@ -5,7 +5,8 @@ export interface IStation {
   name: string
   description: string
   website: string
-  image: string
+  logo: string
+  cover: string
   isFavorite: boolean
   genres: string[]
 }
@@ -26,8 +27,6 @@ export interface IStationsStore {
   play: (id: string) => Promise<void>
   pause: () => void
   changeVolumeValue: (value: number) => void
-  onPlaying: () => void
-  onStopping: () => void
   toggleFavorite: (id: string) => void
   isMuted: boolean
   toggleMute: () => void
