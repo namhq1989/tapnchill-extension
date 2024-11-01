@@ -66,6 +66,7 @@ const useAmbiencesStore = create<IAmbiencesStore>((set, get) => ({
               volume: ambience.volume,
             })
             chrome.storage.session.set({ selectedAmbiances })
+            chrome.runtime.sendMessage({ type: 'ambience-is-playing' }).then()
           })
         },
       )
@@ -89,6 +90,12 @@ const useAmbiencesStore = create<IAmbiencesStore>((set, get) => ({
             )
             selectedAmbiances.splice(index, 1)
             chrome.storage.session.set({ selectedAmbiances })
+            chrome.runtime
+              .sendMessage({
+                type: 'ambience-is-stopped',
+                totalPlaying: selectedAmbiances.length,
+              })
+              .then()
           })
         },
       )
