@@ -1,4 +1,5 @@
-const LISTENING_TRACKING_INTERVAL = 60000 // 1 minute
+// const LISTENING_TRACKING_INTERVAL = 60000 // 1 minute
+const LISTENING_TRACKING_INTERVAL = 5000 // 1 minute
 const LISTENING_TRACKING_RETENTION_ITEMS = 30
 
 chrome.runtime.onStartup.addListener(function () {
@@ -284,7 +285,7 @@ const createOffscreen = async () => {
     offScreenCreating = chrome.offscreen.createDocument({
       url: offscreenUrl,
       reasons: ['AUDIO_PLAYBACK'],
-      justification: 'Play audio offscreen',
+      justification: 'Keep audio playing in the background',
     })
     await offScreenCreating
     offScreenCreating = null
