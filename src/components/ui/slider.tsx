@@ -7,7 +7,6 @@ const Slider = React.forwardRef<
   React.ElementRef<typeof SliderPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root>
 >(({ className, ...props }, ref) => {
-  console.log('force-white', className?.includes('force-white'))
   return (
     <SliderPrimitive.Root
       ref={ref}

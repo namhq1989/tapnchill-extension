@@ -7,6 +7,9 @@ import StationPreview from '@/modules/station/preview.tsx'
 import { Info } from 'lucide-react'
 import useStationsStore, { setState } from '@/modules/station/store.ts'
 import WaveForm from '@/wave-form.tsx'
+import TimerPreview from '@/modules/timer/preview.tsx'
+import WeatherPreview from '@/modules/weather/preview.tsx'
+import TaskPreview from '@/modules/task/preview.tsx'
 
 chrome.runtime.onMessage.addListener((request) => {
   if (request.type === 'offscreen-station-is-playing') {
@@ -61,9 +64,11 @@ const App = () => {
         </div>
         <div id='content' className='flex flex-col p-4 gap-4 scrollbar-hide'>
           <StationPreview />
-          {/*<TimerPreview />*/}
-          {/*<WeatherPreview />*/}
-          {/*<div className='h-0' />*/}
+          <div className='grid grid-cols-3 gap-4'>
+            <WeatherPreview />
+            <TimerPreview />
+          </div>
+          <TaskPreview />
         </div>
       </div>
     </ThemeProvider>

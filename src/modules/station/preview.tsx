@@ -28,19 +28,35 @@ const StationPreview = () => {
   const VolumeIcon = isMuted ? VolumeOff : Volume2
 
   return (
-    <div className='flex flex-col w-full min-h-[120px] bg-primary rounded-xl p-4'>
-      <div className='flex flex-grow py-2 px-0'>
+    <div
+      className={`flex flex-col w-full min-h-[120px] bg-cover rounded-xl p-4 relative overflow-hidden`}
+      style={
+        selectedStation
+          ? {
+              backgroundImage: `url(${selectedStation?.cover})`,
+            }
+          : {
+              backgroundColor: 'hsl(var(--primary))',
+            }
+      }
+    >
+      <div className='overlay rounded-xl'></div>
+      <div className='relative flex flex-grow py-2 px-0'>
         <div className='flex flex-col gap-2 w-full'>
           <div className='flex flex-row w-full justify-between items-center gap-4'>
             <div className='flex flex-row gap-2 items-center'>
-              {selectedStation && (
-                <StationInformation station={selectedStation} />
-              )}
               <p
                 className={`${selectedStation ? 'text-2xl' : 'text-xl'} font-bold text-white`}
               >
                 {selectedStation?.name || 'Station Unselected'}
               </p>
+              {selectedStation && (
+                <StationInformation
+                  station={selectedStation}
+                  size={16}
+                  strokeWidth={2}
+                />
+              )}
             </div>
             <StationView />
           </div>
