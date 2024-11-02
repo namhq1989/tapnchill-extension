@@ -10,8 +10,12 @@ chrome.runtime.onStartup.addListener(function () {
       lastTrackingTime: '',
     })
     .then()
+})
 
-  setInterval(() => {
+let trackListeningTimeJobIntervalId
+
+if (!trackListeningTimeJobIntervalId) {
+  trackListeningTimeJobIntervalId = setInterval(() => {
     chrome.storage.local.get((result) => {
       const { isStationPlaying, isAmbiencePlaying } = result
       if (!isStationPlaying && !isAmbiencePlaying) return
@@ -68,7 +72,7 @@ chrome.runtime.onStartup.addListener(function () {
         .then()
     })
   }, LISTENING_TRACKING_INTERVAL)
-})
+}
 
 const formatDateToDDMM = (isoDateStr) => {
   const date = new Date(isoDateStr)
