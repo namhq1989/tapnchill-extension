@@ -104,7 +104,7 @@ const listStations = (): IStation[] => {
       'mp3',
       "80s 90s & Today's Hits",
       "100Hitz free internet music streaming Great music without all the fuss, frills and spills of other internet radio portals. It's fun, It's free!",
-      'https://100hitz.com/',
+      'https://100hitz.com',
       'https://cdn-profiles.tunein.com/s111391/images/logod.png',
       'https://pub-201fde14d9f8483d8fc77f86a4efcc41.r2.dev/disk.jpg',
       [Genres.HITS],
