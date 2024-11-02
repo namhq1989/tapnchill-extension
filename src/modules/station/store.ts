@@ -96,9 +96,11 @@ const useStationsStore = create<IStationsStore>((set, get) => ({
           () => {
             set({
               selectedStation: newStation,
+              isMuted: false,
             })
             chrome.storage.local.set({
               selectedStationId: id,
+              isStationMuted: false,
             })
           },
         )

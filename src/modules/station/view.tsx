@@ -91,7 +91,7 @@ const StationView = () => {
                       backgroundImage: `url(${selectedStation.cover})`,
                     }}
                   >
-                    <div className='flex flex-col self-end items-start justify-center p-4 w-full bg-black/70 rounded-bl-xl rounded-br-xl'>
+                    <div className='flex flex-col self-end items-start justify-center p-4 w-full bg-black/70'>
                       <div className='flex flex-row w-full justify-between'>
                         <PlayIcon
                           strokeWidth={1}
@@ -207,7 +207,7 @@ const StationItem = (props: IStationItemProps) => {
             backgroundImage: `url(${station.cover})`,
           }}
         >
-          <div className='flex flex-col self-end items-start justify-center p-4 w-full bg-black/70 rounded-bl-xl rounded-br-xl justify-between'>
+          <div className='flex flex-col self-end items-start p-4 w-full bg-black/70 rounded-bl-xl rounded-br-xl justify-between'>
             <div className='flex flex-row w-full gap-8'>
               <Play
                 strokeWidth={1}

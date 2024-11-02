@@ -7,7 +7,6 @@ import StationPreview from '@/modules/station/preview.tsx'
 import { Info } from 'lucide-react'
 import useStationsStore, { setState } from '@/modules/station/store.ts'
 import WaveForm from '@/wave-form.tsx'
-import TimerPreview from '@/modules/timer/preview.tsx'
 import WeatherPreview from '@/modules/weather/preview.tsx'
 import TaskPreview from '@/modules/task/preview.tsx'
 import StatisticPreview from '@/modules/statistic/preview.tsx'
@@ -57,16 +56,13 @@ const App = () => {
         </div>
         <div
           id='content'
-          className='flex flex-col p-4 gap-x-4 gap-y-8 scrollbar-hide'
+          className='flex flex-col p-4 gap-x-4 gap-y-4 scrollbar-hide'
         >
           <StationPreview />
           <QuotePreview />
-          <div className='grid grid-cols-3 gap-4'>
-            <WeatherPreview />
-            <TimerPreview />
-          </div>
-          <StatisticPreview />
           <TaskPreview />
+          <WeatherPreview />
+          <StatisticPreview />
         </div>
       </div>
     </ThemeProvider>

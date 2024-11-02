@@ -26,7 +26,7 @@ const StatisticPreview = () => {
   if (!listeningTrackingTime.length) return null
 
   return (
-    <div className='flex flex-col w-full'>
+    <div className='flex flex-col w-full my-4'>
       <h2 className='text-base font-bold tracking-wide'>Tuning In</h2>
       <h2 className='text-sm text-muted-foreground tracking-wide'>
         Your Last 7 Days of Listening
@@ -48,7 +48,7 @@ const StatisticPreview = () => {
             tickFormatter={(value) => value}
           />
           <ChartTooltip content={<ChartTooltipContent />} />
-          <Bar dataKey='minutes' fill='var(--color-date)' radius={2}>
+          <Bar dataKey='minutes' fill='var(--color-date)' radius={8}>
             <LabelList
               position='top'
               offset={12}
@@ -58,23 +58,6 @@ const StatisticPreview = () => {
           </Bar>
         </BarChart>
       </ChartContainer>
-      {/*<ChartContainer config={chartConfig} className='min-h-[200px] w-full'>*/}
-      {/*  <BarChart accessibilityLayer data={listeningTrackingTime}>*/}
-      {/*    <CartesianGrid vertical={false} />*/}
-      {/*    <XAxis*/}
-      {/*      dataKey='seconds'*/}
-      {/*      tickLine={false}*/}
-      {/*      tickMargin={10}*/}
-      {/*      axisLine={false}*/}
-      {/*      // tickFormatter={(value) => value.slice(0, 3)}*/}
-      {/*    />*/}
-      {/*    <ChartTooltip*/}
-      {/*      cursor={false}*/}
-      {/*      content={<ChartTooltipContent hideLabel />}*/}
-      {/*    />*/}
-      {/*    <Bar dataKey='desktop' fill='var(--color-date)' radius={8} />*/}
-      {/*  </BarChart>*/}
-      {/*</ChartContainer>*/}
     </div>
   )
 }
