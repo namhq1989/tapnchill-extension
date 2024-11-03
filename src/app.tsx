@@ -4,13 +4,13 @@ import useAmbiencesStore from '@/modules/ambience/store.ts'
 import { ThemeProvider } from '@/components/theme/theme-provider.tsx'
 import { ModeToggle } from '@/components/theme/mode-toggle.tsx'
 import StationPreview from '@/modules/station/preview.tsx'
-import { Info } from 'lucide-react'
 import useStationsStore, { setState } from '@/modules/station/store.ts'
 import WaveForm from '@/wave-form.tsx'
 import WeatherPreview from '@/modules/weather/preview.tsx'
 import TaskPreview from '@/modules/task/preview.tsx'
 import StatisticPreview from '@/modules/statistic/preview.tsx'
 import QuotePreview from '@/modules/quote/preview.tsx'
+import InformationView from '@/modules/information/view.tsx'
 
 chrome.runtime.onMessage.addListener((request) => {
   if (request.type === 'station-is-playing') {
@@ -50,7 +50,7 @@ const App = () => {
             {isPlaying && <WaveForm />}
           </div>
           <div className='flex flex-row gap-4 items-center'>
-            <Info size={20} className='cursor-pointer' />
+            <InformationView />
             <ModeToggle />
           </div>
         </div>

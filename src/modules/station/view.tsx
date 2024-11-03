@@ -22,7 +22,7 @@ import { IStation } from '@/modules/station/types.ts'
 import LoadingIndicator from '@/loading-indicator.tsx'
 import StationInformation from '@/modules/station/information.tsx'
 import { Separator } from '@/components/ui/separator.tsx'
-import WaveForm from '@/wave-form.tsx'
+import HeaderTitle from '@/header-title.tsx'
 
 const side = 'right'
 
@@ -73,12 +73,7 @@ const StationView = () => {
         >
           <SheetHeader className='p-4'>
             <SheetTitle>
-              <div className='flex flex-row gap-4 justify-center'>
-                <h2 className='text-base text-primary font-bold tracking-wide'>
-                  Stations
-                </h2>
-                {isPlaying && <WaveForm />}
-              </div>
+              <HeaderTitle title='Stations' />
             </SheetTitle>
           </SheetHeader>
           <div className='flex flex-col gap-8'>
