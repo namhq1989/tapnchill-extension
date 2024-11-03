@@ -10,6 +10,7 @@ import { IAmbience } from '@/modules/ambience/types.ts'
 import { Slider } from '@/components/ui/slider.tsx'
 import useAmbiencesStore from '@/modules/ambience/store.ts'
 import { useCallback } from 'react'
+import HeaderTitle from '@/header-title.tsx'
 
 const side = 'right'
 
@@ -42,7 +43,9 @@ const AmbienceView = () => {
         </SheetTrigger>
         <SheetContent side={side} className='w-full overflow-auto p-0'>
           <SheetHeader className='p-4'>
-            <SheetTitle>Ambiences</SheetTitle>
+            <SheetTitle>
+              <HeaderTitle title='Ambiences' />
+            </SheetTitle>
           </SheetHeader>
           <div className='grid grid-cols-3 gap-4 p-4'>
             {ambiences.map((a) => {

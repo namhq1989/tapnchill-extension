@@ -49,7 +49,7 @@ const useAmbiencesStore = create<IAmbiencesStore>((set, get) => ({
         {
           type: 'play-ambience',
           id: ambience.id,
-          audioUrl: `${import.meta.env.VITE_BASE_URL}/ambiences/${ambience.file}`,
+          audioUrl: `${import.meta.env.VITE_CDN_ENDPOINT}/${ambience.file}`,
           volume: ambience.volume,
         },
         () => {

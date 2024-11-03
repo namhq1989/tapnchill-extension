@@ -18,17 +18,16 @@ const WeatherPreview = () => {
     <div
       className='flex flex-row relative gap-4 w-full rounded-xl bg-cover text-white'
       style={{
-        backgroundImage: `url('https://pub-201fde14d9f8483d8fc77f86a4efcc41.r2.dev/${weather.icon}.jpg')`,
+        backgroundImage: `url('${import.meta.env.VITE_CDN_ENDPOINT}/${weather.icon}.jpg')`,
       }}
     >
       <div className='overlay rounded-xl'></div>
-      <div className='relative flex flex-row items-center justify-center p-4 gap-4 w-full'>
-        <div className='flex flex-col flex-grow justify-between items-center gap-2'>
-          <div className='text-xl font-bold'>{city}</div>
+      <div className='relative grid grid-cols-3 items-center justify-center p-4 gap-4 w-full'>
+        <div className='flex flex-col col-span-2 flex-grow justify-between items-center gap-2'>
+          <div className='text-xl font-bold text-center'>{city}</div>
           <div className='text-6xl'>{weather?.temp}°</div>
-          {/*<Cloudy className='min-w-[30px] self-start' size={28} />*/}
         </div>
-        <div className='grid grid-cols-2 gap-2'>
+        <div className='grid grid-cols-2 col-span-1 gap-2'>
           <div
             className='flex flex-col col-span-1 gap-2 p-2 items-center'
             title='Wind speed'
