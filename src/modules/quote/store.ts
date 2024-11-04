@@ -6,7 +6,7 @@ import {
 } from '@/modules/quote/types.ts'
 import useHttpStore from '@/modules/http/store.ts'
 
-const FETCH_QUOTE_INTERVAL = 10800000 // 3 hours
+const FETCH_QUOTE_INTERVAL = 3600000 // 1 hour
 
 const useQuoteStore = create<IQuoteStore>((set) => ({
   quote: null,
@@ -17,8 +17,7 @@ const useQuoteStore = create<IQuoteStore>((set) => ({
       const quoteLastFetchTs: number = result.quoteLastFetchTs || 0
 
       if (quoteStr && quoteLastFetchTs > 0) {
-        const quoteLastFetchDate = new Date(quoteLastFetchTs)
-        const diff = now.getTime() - quoteLastFetchDate.getTime()
+        const diff = now.getTime() - quoteLastFetchTs
         if (diff < FETCH_QUOTE_INTERVAL) {
           const quote = JSON.parse(quoteStr) as IQuote
           set({ quote })

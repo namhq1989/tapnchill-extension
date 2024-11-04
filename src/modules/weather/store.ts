@@ -6,7 +6,7 @@ import {
   IWeatherStore,
 } from '@/modules/weather/types.ts'
 
-const FETCH_WEATHER_INTERVAL = 10800000 // 3 hours
+const FETCH_WEATHER_INTERVAL = 3600000 // 1 hour
 
 const useWeatherStore = create<IWeatherStore>((set) => ({
   city: '',
@@ -19,8 +19,7 @@ const useWeatherStore = create<IWeatherStore>((set) => ({
       const weatherLastFetchTs: number = result.weatherLastFetchTs || 0
 
       if (weatherStr && weatherLastFetchTs > 0) {
-        const weatherLastFetchDate = new Date(weatherLastFetchTs)
-        const diff = now.getTime() - weatherLastFetchDate.getTime()
+        const diff = now.getTime() - weatherLastFetchTs
         if (diff < FETCH_WEATHER_INTERVAL) {
           const weather = JSON.parse(weatherStr) as IWeather
           set({ city, weather })
