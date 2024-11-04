@@ -12,6 +12,7 @@
   },
   "permissions": [
     "offscreen",
-    "storage"
+    "storage",
+    "contextMenus"
   ]
 }

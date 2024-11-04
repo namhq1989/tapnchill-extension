@@ -11,6 +11,27 @@ import TaskPreview from '@/modules/task/preview.tsx'
 import StatisticPreview from '@/modules/statistic/preview.tsx'
 import QuotePreview from '@/modules/quote/preview.tsx'
 import InformationView from '@/modules/information/view.tsx'
+import NoteCreateView from '@/modules/note/create.tsx'
+import useNoteStore from '@/modules/note/store.ts'
+
+chrome.storage.local.get((result) => {
+  if (result.selectedText) {
+    useNoteStore
+      .getState()
+      .openCreateNoteDialog(
+        result.selectedText,
+        result.pageUrl,
+        result.pageTitle,
+      )
+    chrome.storage.local
+      .set({
+        selectedText: '',
+        pageUrl: '',
+        pageTitle: '',
+      })
+      .then()
+  }
+})
 
 chrome.runtime.onMessage.addListener((request) => {
   if (request.type === 'station-is-playing') {
@@ -58,6 +79,7 @@ const App = () => {
           id='content'
           className='flex flex-col p-4 gap-x-4 gap-y-4 scrollbar-hide'
         >
+          <NoteCreateView />
           <StationPreview />
           <QuotePreview />
           <TaskPreview />

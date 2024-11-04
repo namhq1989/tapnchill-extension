@@ -295,3 +295,30 @@ const createOffscreen = async () => {
     offScreenCreating = null
   }
 }
+
+//
+// MENU CONTEXT
+//
+
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.contextMenus.create({
+    id: 'take-note',
+    title: 'Take Note',
+    contexts: ['selection'],
+  })
+})
+
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  console.log('info', info)
+  console.log('tab', tab)
+  if (info.menuItemId === 'take-note' && info.selectionText) {
+    chrome.storage.local
+      .set({
+        selectedText: info.selectionText,
+        pageUrl: info.pageUrl,
+        pageTitle: tab.title,
+      })
+      .then()
+    chrome.action.openPopup().then()
+  }
+})
