@@ -51,7 +51,7 @@ const listStations = (): IStation[] => {
       'Contemporary indie folk music. Sometimes softer, sometimes a little harder, but always authentic. A modern take on classic folk music, with occasional appearances by the classic masters.',
       'https://somafm.com/folkfwd',
       'https://cdn-profiles.tunein.com/s190122/images/logod.jpg',
-      'https://pub-201fde14d9f8483d8fc77f86a4efcc41.r2.dev/folk.jpg',
+      `${import.meta.env.VITE_CDN_ENDPOINT}/folk.jpg`,
       [Genres.FOLK, Genres.ALTERNATIVE_ROCK],
     ),
     createItem(
@@ -62,7 +62,7 @@ const listStations = (): IStation[] => {
       'Welcome to Jazz24 from Seattle and Tacoma, Washington. Our free jazz stream features some of the all-time greatest artists, like Miles Davis, Billie Holiday and Dave Brubeck; as well as today’s top talents, like Wynton Marsalis, Diana Krall and Pat Metheny.',
       'https://www.jazz24.org',
       'https://cdn-profiles.tunein.com/s34682/images/logod.jpg',
-      'https://pub-201fde14d9f8483d8fc77f86a4efcc41.r2.dev/jazz.jpg',
+      `${import.meta.env.VITE_CDN_ENDPOINT}/jazz.jpg`,
       [Genres.JAZZ],
     ),
     createItem(
@@ -73,7 +73,7 @@ const listStations = (): IStation[] => {
       'We play the best in Funky, Soul, Rhythm and Blues, Disco from the 70s and 80s.',
       'https://www.funkycorner.it',
       'https://cdn-profiles.tunein.com/s231747/images/logoq.png',
-      'https://pub-201fde14d9f8483d8fc77f86a4efcc41.r2.dev/blue.jpg',
+      `${import.meta.env.VITE_CDN_ENDPOINT}/blue.jpg`,
       [Genres.FUNK, Genres.SOUL, Genres.RNB, Genres.BLUES, Genres.DISCO],
     ),
     createItem(
@@ -84,7 +84,7 @@ const listStations = (): IStation[] => {
       'Highway 65 Radio is a 365/24/7 destination for all things Music City! MCR features all genres of music found in our great city!',
       'https://www.highway65radio.com',
       'https://cdn-radiotime-logos.tunein.com/s174864q.png',
-      'https://pub-201fde14d9f8483d8fc77f86a4efcc41.r2.dev/country.jpg',
+      `${import.meta.env.VITE_CDN_ENDPOINT}/country.jpg`,
       [Genres.COUNTRY, Genres.ROCK, Genres.BLUES],
     ),
     createItem(
@@ -95,7 +95,7 @@ const listStations = (): IStation[] => {
       'Playing The Greatest Hits Of The 70s!!',
       'https://www.americasgreatest70s.com',
       'https://cdn-profiles.tunein.com/s294324/images/logod.jpg',
-      'https://pub-201fde14d9f8483d8fc77f86a4efcc41.r2.dev/america-hits.jpg',
+      `${import.meta.env.VITE_CDN_ENDPOINT}/america-hits.jpg`,
       [Genres.HITS],
     ),
     createItem(
@@ -104,9 +104,9 @@ const listStations = (): IStation[] => {
       'mp3',
       "80s 90s & Today's Hits",
       "100Hitz free internet music streaming Great music without all the fuss, frills and spills of other internet radio portals. It's fun, It's free!",
-      'https://100hitz.com',
+      'https://100hitz.com/radiochannel/hot-ac-hitz/',
       'https://cdn-profiles.tunein.com/s111391/images/logod.png',
-      'https://pub-201fde14d9f8483d8fc77f86a4efcc41.r2.dev/disk.jpg',
+      `${import.meta.env.VITE_CDN_ENDPOINT}/disk.jpg`,
       [Genres.HITS],
     ),
   ]

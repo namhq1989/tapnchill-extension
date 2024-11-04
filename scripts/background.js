@@ -1,5 +1,5 @@
-// const LISTENING_TRACKING_INTERVAL = 60000 // 1 minute
-const LISTENING_TRACKING_INTERVAL = 5000 // 1 minute
+const LISTENING_TRACKING_INTERVAL = 60000 // 1 minute
+// const LISTENING_TRACKING_INTERVAL = 5000 // 1 minute
 const LISTENING_TRACKING_RETENTION_ITEMS = 30
 
 chrome.runtime.onStartup.addListener(function () {
