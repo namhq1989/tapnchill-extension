@@ -14,8 +14,8 @@ const QuotePreview = () => {
   if (!quote) return null
 
   return (
-    <div className='flex w-full p-4'>
-      <blockquote className='border-l-4 pl-6 py-2 italic text-sm'>
+    <div className='flex w-full px-4'>
+      <blockquote className='border-l-4 pl-4 py-2 italic text-sm'>
         {quote.content} - {quote.author}
       </blockquote>
     </div>
