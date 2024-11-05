@@ -82,8 +82,8 @@ const App = () => {
         >
           <NoteCreateView />
           <StationPreview />
-          <QuotePreview />
           <NotePreview />
+          <QuotePreview />
           <TaskPreview />
           <WeatherPreview />
           <StatisticPreview />
