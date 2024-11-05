@@ -13,6 +13,7 @@ import QuotePreview from '@/modules/quote/preview.tsx'
 import InformationView from '@/modules/information/view.tsx'
 import NoteCreateView from '@/modules/note/create.tsx'
 import useNoteStore from '@/modules/note/store.ts'
+import NotePreview from '@/modules/note/preview.tsx'
 
 chrome.storage.local.get((result) => {
   if (result.selectedText) {
@@ -77,11 +78,12 @@ const App = () => {
         </div>
         <div
           id='content'
-          className='flex flex-col p-4 gap-x-4 gap-y-4 scrollbar-hide'
+          className='flex flex-col p-4 gap-x-4 gap-y-8 scrollbar-hide'
         >
           <NoteCreateView />
           <StationPreview />
           <QuotePreview />
+          <NotePreview />
           <TaskPreview />
           <WeatherPreview />
           <StatisticPreview />
