@@ -1,7 +1,8 @@
-import { ChevronRight, Goal, ListPlus, Plus, Timer } from 'lucide-react'
+import { ChevronRight, Goal, ListPlus, Timer } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox.tsx'
 import useTaskStore from '@/modules/task/task.ts'
 import { ITask } from '@/modules/task/types.ts'
+import CreateTaskView from '@/modules/task/create.tsx'
 
 const TaskPreview = () => {
   const { tasks, toggleTask } = useTaskStore()
@@ -11,7 +12,7 @@ const TaskPreview = () => {
       <div className='flex flex-row justify-between items-center'>
         <h2 className='text-base font-bold tracking-wide'>Tasks</h2>
         <div className='flex flex-row gap-4'>
-          <Plus className='cursor-pointer'></Plus>
+          <CreateTaskView />
           <ListPlus className='cursor-pointer'></ListPlus>
         </div>
       </div>

@@ -64,7 +64,7 @@
     @apply outline-none;
   }
   *:focus-visible {
-    @apply ring-0 ring-offset-0 ring-transparent;
+    @apply outline-none ring-0 ring-offset-0 ring-transparent;
   }
 
   body {

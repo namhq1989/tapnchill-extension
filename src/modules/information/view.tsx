@@ -141,11 +141,11 @@ const InformationView = () => {
                     )}
                   />
                   <Button
-                    type='submit'
-                    className='self-end rounded-xl'
+                    className='font-bold'
                     disabled={isFeedbackSending}
+                    onClick={() => onSubmit(form.getValues())}
                   >
-                    Submit
+                    Send
                   </Button>
                 </form>
               </Form>
