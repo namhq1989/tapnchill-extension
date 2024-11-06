@@ -143,9 +143,9 @@ const InformationView = () => {
                   <Button
                     className='font-bold'
                     disabled={isFeedbackSending}
-                    onClick={() => onSubmit(form.getValues())}
+                    // onClick={() => onSubmit(form.getValues())}
                   >
-                    Send
+                    Send feedback
                   </Button>
                 </form>
               </Form>

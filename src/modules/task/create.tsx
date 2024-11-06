@@ -30,6 +30,14 @@ import { cn } from '@/lib/utils.ts'
 import { format } from 'date-fns'
 import { Calendar } from '@/components/ui/calendar.tsx'
 import { TimePickerDemo } from '@/components/ui/timer-picker.tsx'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select.tsx'
+import useTaskStore from '@/modules/task/task.ts'
 
 const side = 'right'
 
@@ -45,10 +53,15 @@ const FormSchema = z.object({
   description: z.string().max(300, {
     message: 'Task description must not be longer than 300 characters',
   }),
+  goalId: z.string({
+    required_error: 'Please select a goal',
+  }),
   dueDate: z.date(),
 })
 
 const CreateTaskView = () => {
+  const { goals } = useTaskStore()
+
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -107,7 +120,7 @@ const CreateTaskView = () => {
                                 !field.value && 'text-muted-foreground',
                               )}
                             >
-                              <CalendarIcon className='mr-2 h-4 w-4' />
+                              <CalendarIcon className='h-4 w-4' />
                               {field.value ? (
                                 format(field.value, 'dd/MM/yyyy, HH:mm')
                               ) : (
@@ -169,11 +182,39 @@ const CreateTaskView = () => {
                     </FormItem>
                   )}
                 />
+                <FormField
+                  control={form.control}
+                  name='goalId'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Goal</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder='Select a goal' />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {goals.map((g) => {
+                            return (
+                              <SelectItem key={g.id} value={g.id}>
+                                {g.name}
+                              </SelectItem>
+                            )
+                          })}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
                 <Button
                   className='font-bold'
-                  onClick={() => onSubmit(form.getValues())}
+                  // onClick={() => onSubmit(form.getValues())}
                 >
-                  Add
+                  Add task
                 </Button>
               </form>
             </Form>

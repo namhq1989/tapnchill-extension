@@ -2,7 +2,22 @@ import { create } from 'zustand'
 import { ITasksStore } from '@/modules/task/types.ts'
 
 const useTaskStore = create<ITasksStore>((set, get) => ({
-  goals: [],
+  goals: [
+    {
+      id: '1',
+      name: 'Programming',
+      isCompleted: false,
+      description: 'Learn the basics of programming',
+      createdAt: new Date(),
+    },
+    {
+      id: '2',
+      name: 'Design',
+      isCompleted: false,
+      description: 'Learn the basics of design',
+      createdAt: new Date(),
+    },
+  ],
   tasks: [
     {
       id: '1',
