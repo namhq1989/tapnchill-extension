@@ -9,16 +9,11 @@ export interface IWeather {
   feelsLike: number
   humidity: number
   windSpeed: number
-  precipitationProbability: number
-  conditions: string
+  precipProb: number
   icon: string
-}
-
-export interface IWeatherResponse {
-  current: IWeather
 }
 
 export interface IGetWeatherApiResponse {
   city: string
-  weather: IWeatherResponse
+  weather: IWeather
 }

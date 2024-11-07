@@ -29,18 +29,18 @@ const useWeatherStore = create<IWeatherStore>((set) => ({
 
       const { get: httpGet } = useHttpStore.getState()
       const response = await httpGet<IGetWeatherApiResponse>(
-        'api/weather/fetch',
+        'api/common/weather',
         {},
       )
       if (response && response.weather) {
         set({
           city: response.city,
-          weather: response.weather.current,
+          weather: response.weather,
         })
         chrome.storage.local
           .set({
             city: response.city,
-            weather: JSON.stringify(response.weather.current),
+            weather: JSON.stringify(response.weather),
             weatherLastFetchTs: now.getTime(),
           })
           .then()
