@@ -27,7 +27,7 @@ const useQuoteStore = create<IQuoteStore>((set) => ({
 
       const { get: httpGet } = useHttpStore.getState()
       const response = await httpGet<IGetQuoteApiResponse>(
-        'api/quote/fetch',
+        'api/common/quote',
         {},
       )
       if (response && response.quote) {

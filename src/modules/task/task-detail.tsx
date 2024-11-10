@@ -1,0 +1,97 @@
+import { ITask, TaskStatus } from '@/modules/task/types.ts'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet.tsx'
+import { ChevronRight, Circle, CircleCheckBig, Goal } from 'lucide-react'
+import { Button } from '@/components/ui/button.tsx'
+import useTaskStore from '@/modules/task/store.ts'
+import EditTaskView from '@/modules/task/task-edit.tsx'
+import { useState } from 'react'
+import TaskTimeView from '@/modules/task/task-time.tsx'
+
+const side = 'bottom'
+
+export interface ITaskDetailProps {
+  task: ITask
+}
+
+const TaskDetailView = (props: ITaskDetailProps) => {
+  const [isOpen, setIsOpen] = useState(false)
+
+  const { toggleTask } = useTaskStore()
+  const { task } = props
+  const isCompleted = task.status === TaskStatus.done
+
+  return (
+    <div className='flex cursor-pointer'>
+      <Sheet key={side} open={isOpen} onOpenChange={setIsOpen}>
+        <SheetTrigger asChild>
+          <ChevronRight strokeWidth={1} className='cursor-pointer' />
+        </SheetTrigger>
+        {isOpen && (
+          <SheetContent
+            side={side}
+            className='w-full min-h-[250px] max-h-[90%] overflow-auto p-0 rounded-tl-xl rounded-tr-xl'
+            onOpenAutoFocus={(e) => e.preventDefault()}
+          >
+            <SheetHeader className='p-4'>
+              <SheetTitle>
+                <p className='text-base text-primary font-bold tracking-wide'>
+                  Task information
+                </p>
+              </SheetTitle>
+            </SheetHeader>
+            <div className='flex flex-col gap-2 p-4'>
+              <h3
+                className={`scroll-m-20 text-xl font-semibold tracking-tight ${isCompleted ? 'line-through' : ''}`}
+              >
+                {task.name}
+              </h3>
+              <p className='leading-7 text-sm mb-2'>
+                {task.description || 'No description'}
+              </p>
+              <div className='flex flex-row gap-4 items-start'>
+                {task.dueDate && (
+                  <div className='flex flex-row gap-1 items-center'>
+                    <TaskTimeView
+                      isDetailView={true}
+                      status={task.status}
+                      dueDate={task.dueDate}
+                      createdAt={task.createdAt}
+                      completedAt={task.completedAt}
+                    />
+                  </div>
+                )}
+                <div className='flex flex-row gap-1 items-center'>
+                  <Goal size={20} />
+                  <p className='text-sm'>Programming</p>
+                </div>
+              </div>
+              {isCompleted ? (
+                <Button
+                  variant='outline'
+                  className='mt-8'
+                  onClick={() => toggleTask(task.id)}
+                >
+                  <Circle /> Reopen Task
+                </Button>
+              ) : (
+                <Button className='mt-8' onClick={() => toggleTask(task.id)}>
+                  <CircleCheckBig /> Mark as Done
+                </Button>
+              )}
+
+              <EditTaskView task={task} />
+            </div>
+          </SheetContent>
+        )}
+      </Sheet>
+    </div>
+  )
+}
+
+export default TaskDetailView

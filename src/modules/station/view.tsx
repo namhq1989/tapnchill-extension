@@ -38,9 +38,9 @@ const StationView = () => {
     filters,
     selectedFilterId,
     selectFilter,
-    genres,
-    selectedGenreId,
-    selectGenre,
+    types,
+    selectedTypeId,
+    selectType,
     resetAllFilters,
   } = useStationsStore()
 
@@ -48,10 +48,8 @@ const StationView = () => {
   if (selectedFilterId === FILTER_STATIONS_FAVORITES) {
     filteredStations = stations.filter((s) => s.isFavorite)
   }
-  if (selectedGenreId !== FILTER_STATIONS_ALL) {
-    filteredStations = filteredStations.filter((s) =>
-      s.genres.includes(selectedGenreId),
-    )
+  if (selectedTypeId !== FILTER_STATIONS_ALL) {
+    filteredStations = filteredStations.filter((s) => s.type === selectedTypeId)
   }
 
   const PlayIcon = isSwitchingStation
@@ -138,14 +136,14 @@ const StationView = () => {
                   </SelectContent>
                 </Select>
                 <Select
-                  defaultValue={selectedGenreId}
-                  onValueChange={(id) => selectGenre(id)}
+                  defaultValue={selectedTypeId}
+                  onValueChange={(id) => selectType(id)}
                 >
                   <SelectTrigger className='w-[140px]'>
                     <SelectValue placeholder='All' />
                   </SelectTrigger>
                   <SelectContent>
-                    {genres.map((f) => (
+                    {types.map((f) => (
                       <SelectItem key={`genre_${f.id}`} value={f.id}>
                         {f.name}
                       </SelectItem>

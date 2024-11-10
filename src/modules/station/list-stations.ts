@@ -10,6 +10,7 @@ const createItem = (
   logo: string,
   cover: string,
   genres: string[],
+  type: string,
 ): IStation => {
   return {
     id,
@@ -21,8 +22,14 @@ const createItem = (
     logo,
     cover,
     genres,
+    type,
     isFavorite: false,
   }
+}
+
+export enum StationTypes {
+  Music = 'music',
+  Podcast = 'podcast',
 }
 
 export enum Genres {
@@ -53,6 +60,7 @@ const listStations = (): IStation[] => {
       'https://cdn-profiles.tunein.com/s190122/images/logod.jpg',
       `${import.meta.env.VITE_CDN_ENDPOINT}/folk.jpg`,
       [Genres.FOLK, Genres.ALTERNATIVE_ROCK],
+      StationTypes.Music,
     ),
     createItem(
       'jazz24',
@@ -64,6 +72,7 @@ const listStations = (): IStation[] => {
       'https://cdn-profiles.tunein.com/s34682/images/logod.jpg',
       `${import.meta.env.VITE_CDN_ENDPOINT}/jazz.jpg`,
       [Genres.JAZZ],
+      StationTypes.Music,
     ),
     createItem(
       'funky-corner-radio',
@@ -75,6 +84,7 @@ const listStations = (): IStation[] => {
       'https://cdn-profiles.tunein.com/s231747/images/logoq.png',
       `${import.meta.env.VITE_CDN_ENDPOINT}/blue.jpg`,
       [Genres.FUNK, Genres.SOUL, Genres.RNB, Genres.BLUES, Genres.DISCO],
+      StationTypes.Music,
     ),
     createItem(
       'highway-65-radio',
@@ -86,6 +96,7 @@ const listStations = (): IStation[] => {
       'https://cdn-radiotime-logos.tunein.com/s174864q.png',
       `${import.meta.env.VITE_CDN_ENDPOINT}/country.jpg`,
       [Genres.COUNTRY, Genres.ROCK, Genres.BLUES],
+      StationTypes.Music,
     ),
     createItem(
       'america-greatest-70s-hits',
@@ -97,6 +108,7 @@ const listStations = (): IStation[] => {
       'https://cdn-profiles.tunein.com/s294324/images/logod.jpg',
       `${import.meta.env.VITE_CDN_ENDPOINT}/america-hits.jpg`,
       [Genres.HITS],
+      StationTypes.Music,
     ),
     createItem(
       '80s-90s-hitz',
@@ -104,10 +116,23 @@ const listStations = (): IStation[] => {
       'mp3',
       "80s 90s & Today's Hits",
       "100Hitz free internet music streaming Great music without all the fuss, frills and spills of other internet radio portals. It's fun, It's free!",
-      'https://100hitz.com/radiochannel/hot-ac-hitz/',
+      'https://100hitz.com/radiochannel/hot-ac-hitz',
       'https://cdn-profiles.tunein.com/s111391/images/logod.png',
       `${import.meta.env.VITE_CDN_ENDPOINT}/disk.jpg`,
       [Genres.HITS],
+      StationTypes.Music,
+    ),
+    createItem(
+      'k-pop',
+      'https://boxradio-edge-00.streamafrica.net/kpop',
+      'mp3',
+      'K-Pop',
+      'Playing Hits Of K-Pop',
+      'https://boxradio-edge-01.streamafrica.net/kpop',
+      'https://boxradio.net/wp-content/uploads/2024/06/kpopv221.png',
+      `${import.meta.env.VITE_CDN_ENDPOINT}/kpop.jpg`,
+      [Genres.HITS],
+      StationTypes.Music,
     ),
   ]
 }

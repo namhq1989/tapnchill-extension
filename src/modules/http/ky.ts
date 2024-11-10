@@ -1,7 +1,7 @@
 import ky, { KyInstance } from 'ky'
 
 const http: KyInstance = ky.create({
-  prefixUrl: import.meta.env.VITE_API_HOST || 'http://localhost:5555',
+  prefixUrl: import.meta.env.VITE_API_HOST || 'http://localhost:3000',
   headers: {
     'Content-Type': 'application/json',
   },

@@ -11,9 +11,8 @@ import TaskPreview from '@/modules/task/preview.tsx'
 import StatisticPreview from '@/modules/statistic/preview.tsx'
 import QuotePreview from '@/modules/quote/preview.tsx'
 import InformationView from '@/modules/information/view.tsx'
-import NoteCreateView from '@/modules/note/create.tsx'
 import useNoteStore from '@/modules/note/store.ts'
-import NotePreview from '@/modules/note/preview.tsx'
+import useAppStore from '@/store.ts'
 
 chrome.storage.local.get((result) => {
   if (result.selectedText) {
@@ -49,17 +48,29 @@ chrome.runtime.onMessage.addListener((request) => {
 })
 
 const App = () => {
+  const { initApp } = useAppStore()
   const { initStations, isPlaying } = useStationsStore()
   const { initAmbiences } = useAmbiencesStore()
 
   useEffect(() => {
-    initStations()
-    initAmbiences()
-  }, [initStations, initAmbiences])
+    const init = async () => {
+      await initApp()
+      initStations()
+      initAmbiences()
+    }
+
+    init().then()
+  }, [initApp, initStations, initAmbiences])
 
   return (
     <ThemeProvider defaultTheme='dark' storageKey='vite-ui-theme'>
       <Toaster />
+
+      {/*Hidden class for task statuses color*/}
+      <div className='hidden'>
+        <span className='text-red-600 text-orange-600 text-yellow-600 text-gray-600 text-muted-foreground' />
+      </div>
+
       <div className='flex flex-col w-[400px] h-[600px] scrollbar-hide'>
         <div
           id='header'
@@ -80,11 +91,11 @@ const App = () => {
           id='content'
           className='flex flex-col p-4 gap-x-4 gap-y-8 scrollbar-hide'
         >
-          <NoteCreateView />
+          {/*<NoteCreateView />*/}
           <StationPreview />
-          <NotePreview />
-          <QuotePreview />
           <TaskPreview />
+          {/*<NotePreview />*/}
+          <QuotePreview />
           <WeatherPreview />
           <StatisticPreview />
         </div>

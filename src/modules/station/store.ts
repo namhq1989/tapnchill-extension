@@ -1,6 +1,6 @@
 import { create } from 'zustand/index'
 import { IStationsStore } from '@/modules/station/types.ts'
-import listStations, { Genres } from '@/modules/station/list-stations.ts'
+import listStations, { StationTypes } from '@/modules/station/list-stations.ts'
 
 export const FILTER_STATIONS_ALL = 'all'
 export const FILTER_STATIONS_FAVORITES = 'favorites'
@@ -22,7 +22,7 @@ const useStationsStore = create<IStationsStore>((set, get) => ({
       const isMuted: boolean = result.isStationMuted || false
       const startTime: Date = result.stationStartTime || new Date()
       const selectedFilterId: string = result.stationSelectedFilterId || 'all'
-      const selectedGenreId: string = result.stationSelectedGenreId || 'all'
+      const selectedTypeId: string = result.stationSelectedTypeId || 'all'
 
       let selectedStation = null
       if (selectedStationId) {
@@ -44,7 +44,7 @@ const useStationsStore = create<IStationsStore>((set, get) => ({
         isMuted,
         startTime,
         selectedFilterId,
-        selectedGenreId,
+        selectedTypeId,
       })
     })
   },
@@ -196,77 +196,33 @@ const useStationsStore = create<IStationsStore>((set, get) => ({
       name: 'Favorites',
     },
   ],
-  genres: [
+  types: [
     {
       id: FILTER_STATIONS_ALL,
       name: 'All',
     },
     {
-      id: Genres.JAZZ,
-      name: 'Jazz',
-    },
-    {
-      id: Genres.ROCK,
-      name: 'Rock',
-    },
-    {
-      id: Genres.POP,
-      name: 'Pop',
-    },
-    {
-      id: Genres.BLUES,
-      name: 'Blues',
-    },
-    {
-      id: Genres.ALTERNATIVE_ROCK,
-      name: 'Alt Rock',
-    },
-    {
-      id: Genres.CLASSICAL,
-      name: 'Classical',
-    },
-    {
-      id: Genres.FOLK,
-      name: 'Folk',
-    },
-    {
-      id: Genres.COUNTRY,
-      name: 'Country',
-    },
-    {
-      id: Genres.DISCO,
-      name: 'Disco',
-    },
-    {
-      id: Genres.RNB,
-      name: 'R&B',
-    },
-    {
-      id: Genres.SOUL,
-      name: 'Soul',
-    },
-    {
-      id: Genres.FUNK,
-      name: 'Funk',
+      id: StationTypes.Music,
+      name: 'Music',
     },
   ],
   selectedFilterId: 'all',
-  selectedGenreId: 'all',
+  selectedTypeId: 'all',
   resetAllFilters: () => {
-    const { selectedFilterId, selectedGenreId } = get()
+    const { selectedFilterId, selectedTypeId } = get()
     if (
       selectedFilterId === FILTER_STATIONS_ALL &&
-      selectedGenreId === FILTER_STATIONS_ALL
+      selectedTypeId === FILTER_STATIONS_ALL
     )
       return
 
     set({
       selectedFilterId: FILTER_STATIONS_ALL,
-      selectedGenreId: FILTER_STATIONS_ALL,
+      selectedTypeId: FILTER_STATIONS_ALL,
     })
     chrome.storage.local.set({
       stationSelectedFilterId: FILTER_STATIONS_ALL,
-      stationSelectedGenreId: FILTER_STATIONS_ALL,
+      stationSelectedTypeId: FILTER_STATIONS_ALL,
     })
   },
   selectFilter: (id: string) => {
@@ -278,13 +234,13 @@ const useStationsStore = create<IStationsStore>((set, get) => ({
       stationSelectedFilterId: id,
     })
   },
-  selectGenre: (id: string) => {
-    const { selectedGenreId } = get()
-    if (selectedGenreId === id) return
+  selectType: (id: string) => {
+    const { selectedTypeId } = get()
+    if (selectedTypeId === id) return
 
-    set({ selectedGenreId: id })
+    set({ selectedTypeId: id })
     chrome.storage.local.set({
-      stationSelectedGenreId: id,
+      stationSelectedTypeId: id,
     })
   },
 }))

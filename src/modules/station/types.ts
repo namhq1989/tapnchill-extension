@@ -9,6 +9,7 @@ export interface IStation {
   cover: string
   isFavorite: boolean
   genres: string[]
+  type: string
 }
 
 export interface IStationFilter {
@@ -31,10 +32,10 @@ export interface IStationsStore {
   isMuted: boolean
   toggleMute: () => void
   filters: IStationFilter[]
-  genres: IStationFilter[]
+  types: IStationFilter[]
   selectedFilterId: string
-  selectedGenreId: string
+  selectedTypeId: string
   resetAllFilters: () => void
   selectFilter: (id: string) => void
-  selectGenre: (id: string) => void
+  selectType: (id: string) => void
 }
