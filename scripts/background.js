@@ -82,9 +82,9 @@ const formatDateToDDMM = (isoDateStr) => {
 }
 
 const setBadge = () => {
-  chrome.action.setBadgeBackgroundColor({ color: '#6d28d9' }).then()
+  chrome.action.setBadgeBackgroundColor({ color: '#facc15' }).then()
   chrome.action.setBadgeText({ text: '♬' }).then()
-  chrome.action.setBadgeTextColor({ color: '#fff' }).then()
+  chrome.action.setBadgeTextColor({ color: '#000' }).then()
 }
 
 const resetBadge = () => {

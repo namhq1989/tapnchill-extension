@@ -8,6 +8,7 @@ export interface IHttpStore {
   put: <T>(path: string, payload: object) => Promise<T>
   delete: <T>(path: string, payload: object) => Promise<T>
   patch: <T>(path: string, payload: object) => Promise<T>
+  setAccessToken: (token: string) => void
 }
 
 export interface IApiResponse<T> {

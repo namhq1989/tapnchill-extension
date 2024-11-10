@@ -11,7 +11,7 @@ const handleApiResponse = async <T>(response: Response): Promise<T> => {
   return data.data
 }
 
-const useHttpStore = create<IHttpStore>((_, get) => ({
+const useHttpStore = create<IHttpStore>((set, get) => ({
   http: http,
 
   get: async <T>(path: string, payload?: object): Promise<T> => {
@@ -41,6 +41,15 @@ const useHttpStore = create<IHttpStore>((_, get) => ({
   patch: async <T>(path: string, payload: object): Promise<T> => {
     const response = await get().http.patch(path, { json: payload })
     return handleApiResponse<T>(response)
+  },
+
+  setAccessToken: (token: string) => {
+    const newHttp = get().http.extend({
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    set({ http: newHttp })
   },
 }))
 

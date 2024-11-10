@@ -19,7 +19,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet.tsx'
-import { CalendarIcon, Plus } from 'lucide-react'
+import { CalendarIcon, Edit } from 'lucide-react'
 import HeaderTitle from '@/header-title.tsx'
 import {
   Popover,
@@ -30,14 +30,7 @@ import { cn } from '@/lib/utils.ts'
 import { format } from 'date-fns'
 import { Calendar } from '@/components/ui/calendar.tsx'
 import { TimePickerDemo } from '@/components/ui/timer-picker.tsx'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select.tsx'
-import useTaskStore from '@/modules/task/task.ts'
+import { ITask } from '@/modules/task/types.ts'
 
 const side = 'right'
 
@@ -53,20 +46,22 @@ const FormSchema = z.object({
   description: z.string().max(300, {
     message: 'Task description must not be longer than 300 characters',
   }),
-  goalId: z.string({
-    required_error: 'Please select a goal',
-  }),
   dueDate: z.date(),
 })
 
-const CreateTaskView = () => {
-  const { goals } = useTaskStore()
+export interface IEditTaskViewProps {
+  task: ITask
+}
+
+const EditTaskView = (props: IEditTaskViewProps) => {
+  const { task } = props
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      name: '',
-      description: '',
+      name: task.name,
+      description: task.description,
+      dueDate: task.dueDate || undefined,
     },
   })
 
@@ -90,12 +85,14 @@ const CreateTaskView = () => {
         }}
       >
         <SheetTrigger asChild>
-          <Plus className='cursor-pointer' />
+          <Button variant='secondary' className='w-full my-2'>
+            <Edit /> Edit
+          </Button>
         </SheetTrigger>
         <SheetContent side={side} className='w-full overflow-auto p-0'>
           <SheetHeader className='p-4'>
             <SheetTitle>
-              <HeaderTitle title='Add task' />
+              <HeaderTitle title='Edit task' />
             </SheetTitle>
           </SheetHeader>
           <div className='flex flex-col w-full p-4 gap-4'>
@@ -134,7 +131,6 @@ const CreateTaskView = () => {
                             mode='single'
                             selected={field.value}
                             onSelect={field.onChange}
-                            // initialFocus
                           />
                           <div className='p-3 border-t border-border'>
                             <TimePickerDemo
@@ -174,7 +170,7 @@ const CreateTaskView = () => {
                         <Textarea
                           className='focus-visible:ring-transparent resize-none'
                           placeholder='Input a description'
-                          rows={4}
+                          rows={8}
                           {...field}
                         />
                       </FormControl>
@@ -182,39 +178,38 @@ const CreateTaskView = () => {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name='goalId'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Goal</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder='Select a goal' />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {goals.map((g) => {
-                            return (
-                              <SelectItem key={g.id} value={g.id}>
-                                {g.name}
-                              </SelectItem>
-                            )
-                          })}
-                        </SelectContent>
-                      </Select>
-                    </FormItem>
-                  )}
-                />
+                {/*<FormField*/}
+                {/*  control={form.control}*/}
+                {/*  name='goalId'*/}
+                {/*  render={({ field }) => (*/}
+                {/*    <FormItem>*/}
+                {/*      <FormLabel>Goal</FormLabel>*/}
+                {/*      <Select*/}
+                {/*        onValueChange={field.onChange}*/}
+                {/*        defaultValue={field.value}*/}
+                {/*      >*/}
+                {/*        <FormControl>*/}
+                {/*          <SelectTrigger>*/}
+                {/*            <SelectValue placeholder='Select a goal' />*/}
+                {/*          </SelectTrigger>*/}
+                {/*        </FormControl>*/}
+                {/*        <SelectContent>*/}
+                {/*          {goals.map((g) => {*/}
+                {/*            return (*/}
+                {/*              <SelectItem key={g.id} value={g.id}>*/}
+                {/*                {g.name}*/}
+                {/*              </SelectItem>*/}
+                {/*            )*/}
+                {/*          })}*/}
+                {/*        </SelectContent>*/}
+                {/*      </Select>*/}
+                {/*    </FormItem>*/}
+                {/*  )}*/}
+                {/*/>*/}
                 <Button
-                  className='font-bold'
-                  // onClick={() => onSubmit(form.getValues())}
+                // onClick={() => onSubmit(form.getValues())}
                 >
-                  Add task
+                  Update task
                 </Button>
               </form>
             </Form>
@@ -225,4 +220,4 @@ const CreateTaskView = () => {
   )
 }
 
-export default CreateTaskView
+export default EditTaskView

@@ -79,6 +79,12 @@
   li {
     list-style: none;
   }
+
+  /* Task due date color */
+  .duedate-text-red-600 { @apply text-red-600; }
+  .duedate-text-orange-600 { @apply text-orange-600; }
+  .duedate-text-yellow-600 { @apply text-yellow-600; }
+  .duedate-text-gray-600 { @apply text-gray-600; }
 }
 
 @layer utilities {

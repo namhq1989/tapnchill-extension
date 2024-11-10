@@ -72,7 +72,11 @@ const InformationView = () => {
         <SheetTrigger asChild>
           <Info size={20} className='cursor-pointer' />
         </SheetTrigger>
-        <SheetContent side={side} className='w-full overflow-auto p-0'>
+        <SheetContent
+          side={side}
+          className='w-full overflow-auto p-0'
+          onOpenAutoFocus={(e) => e.preventDefault()}
+        >
           <SheetHeader className='p-4'>
             <SheetTitle>
               <HeaderTitle title='Information' />
@@ -140,13 +144,7 @@ const InformationView = () => {
                       </FormItem>
                     )}
                   />
-                  <Button
-                    className='font-bold'
-                    disabled={isFeedbackSending}
-                    // onClick={() => onSubmit(form.getValues())}
-                  >
-                    Send feedback
-                  </Button>
+                  <Button disabled={isFeedbackSending}>Send feedback</Button>
                 </form>
               </Form>
             </div>
