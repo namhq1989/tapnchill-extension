@@ -13,6 +13,7 @@ import QuotePreview from '@/modules/quote/preview.tsx'
 import InformationView from '@/modules/information/view.tsx'
 import useNoteStore from '@/modules/note/store.ts'
 import useAppStore from '@/store.ts'
+import useTaskStore from '@/modules/task/store.ts'
 
 chrome.storage.local.get((result) => {
   if (result.selectedText) {
@@ -51,16 +52,18 @@ const App = () => {
   const { initApp } = useAppStore()
   const { initStations, isPlaying } = useStationsStore()
   const { initAmbiences } = useAmbiencesStore()
+  const { initTasks } = useTaskStore()
 
   useEffect(() => {
     const init = async () => {
       await initApp()
       initStations()
       initAmbiences()
+      await initTasks()
     }
 
     init().then()
-  }, [initApp, initStations, initAmbiences])
+  }, [initApp, initStations, initAmbiences, initTasks])
 
   return (
     <ThemeProvider defaultTheme='dark' storageKey='vite-ui-theme'>

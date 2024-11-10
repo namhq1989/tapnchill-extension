@@ -30,7 +30,9 @@ import { cn } from '@/lib/utils.ts'
 import { format } from 'date-fns'
 import { Calendar } from '@/components/ui/calendar.tsx'
 import { TimePickerDemo } from '@/components/ui/timer-picker.tsx'
-import { ITask } from '@/modules/task/types.ts'
+import useTaskStore from '@/modules/task/store.ts'
+import { useState } from 'react'
+import useNotificationStore from '@/modules/notification/store.ts'
 
 const side = 'right'
 
@@ -50,38 +52,61 @@ const FormSchema = z.object({
 })
 
 export interface IEditTaskViewProps {
-  task: ITask
+  taskId: string
 }
 
 const EditTaskView = (props: IEditTaskViewProps) => {
-  const { task } = props
+  const [isOpen, setIsOpen] = useState(false)
+  const { showErrorNotification } = useNotificationStore()
+  const { tasks, updateTask } = useTaskStore()
+  const { taskId } = props
+
+  const task = tasks.find((t) => t.id === taskId)
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      name: task.name,
-      description: task.description,
-      dueDate: task.dueDate || undefined,
+      name: task?.name || '',
+      description: task?.description || '',
+      dueDate: task?.dueDate || undefined,
     },
   })
 
+  if (!task) {
+    showErrorNotification({
+      description: 'Task not found',
+    })
+    setIsOpen(false)
+    return null
+  }
+
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
-    console.log('data', data)
-    // const success = await sendFeedback({
-    //   email: data.email || '',
-    //   feedback: data.feedback,
-    // })
-    // if (success) {
-    //   form.reset()
-    // }
+    const isSuccess = await updateTask(
+      task.id,
+      data.name,
+      data.description,
+      data.dueDate,
+    )
+    if (isSuccess) {
+      form.reset()
+      setIsOpen(false)
+    }
   }
 
   return (
     <div className='flex cursor-pointer'>
       <Sheet
         key={side}
-        onOpenChange={() => {
-          form.reset()
+        open={isOpen}
+        onOpenChange={(open) => {
+          setIsOpen(open)
+          if (open && task) {
+            form.reset({
+              name: task.name,
+              description: task.description,
+              dueDate: task.dueDate || undefined,
+            })
+          }
         }}
       >
         <SheetTrigger asChild>
@@ -178,39 +203,7 @@ const EditTaskView = (props: IEditTaskViewProps) => {
                     </FormItem>
                   )}
                 />
-                {/*<FormField*/}
-                {/*  control={form.control}*/}
-                {/*  name='goalId'*/}
-                {/*  render={({ field }) => (*/}
-                {/*    <FormItem>*/}
-                {/*      <FormLabel>Goal</FormLabel>*/}
-                {/*      <Select*/}
-                {/*        onValueChange={field.onChange}*/}
-                {/*        defaultValue={field.value}*/}
-                {/*      >*/}
-                {/*        <FormControl>*/}
-                {/*          <SelectTrigger>*/}
-                {/*            <SelectValue placeholder='Select a goal' />*/}
-                {/*          </SelectTrigger>*/}
-                {/*        </FormControl>*/}
-                {/*        <SelectContent>*/}
-                {/*          {goals.map((g) => {*/}
-                {/*            return (*/}
-                {/*              <SelectItem key={g.id} value={g.id}>*/}
-                {/*                {g.name}*/}
-                {/*              </SelectItem>*/}
-                {/*            )*/}
-                {/*          })}*/}
-                {/*        </SelectContent>*/}
-                {/*      </Select>*/}
-                {/*    </FormItem>*/}
-                {/*  )}*/}
-                {/*/>*/}
-                <Button
-                // onClick={() => onSubmit(form.getValues())}
-                >
-                  Update task
-                </Button>
+                <Button>Update task</Button>
               </form>
             </Form>
           </div>

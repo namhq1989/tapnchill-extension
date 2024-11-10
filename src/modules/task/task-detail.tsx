@@ -21,9 +21,9 @@ export interface ITaskDetailProps {
 
 const TaskDetailView = (props: ITaskDetailProps) => {
   const [isOpen, setIsOpen] = useState(false)
-
   const { toggleTask } = useTaskStore()
   const { task } = props
+
   const isCompleted = task.status === TaskStatus.done
 
   return (
@@ -51,9 +51,9 @@ const TaskDetailView = (props: ITaskDetailProps) => {
               >
                 {task.name}
               </h3>
-              <p className='leading-7 text-sm mb-2'>
-                {task.description || 'No description'}
-              </p>
+              <blockquote className='border-l-2 pl-4 leading-6 text-sm mb-4 whitespace-pre-line'>
+                {task.description || '-'}
+              </blockquote>
               <div className='flex flex-row gap-4 items-start'>
                 {task.dueDate && (
                   <div className='flex flex-row gap-1 items-center'>
@@ -66,10 +66,12 @@ const TaskDetailView = (props: ITaskDetailProps) => {
                     />
                   </div>
                 )}
-                <div className='flex flex-row gap-1 items-center'>
-                  <Goal size={20} />
-                  <p className='text-sm'>Programming</p>
-                </div>
+                {task.goal && (
+                  <div className='flex flex-row gap-1 items-center'>
+                    <Goal size={20} />
+                    <p className='text-sm'>{task.goal.name}</p>
+                  </div>
+                )}
               </div>
               {isCompleted ? (
                 <Button
@@ -85,7 +87,7 @@ const TaskDetailView = (props: ITaskDetailProps) => {
                 </Button>
               )}
 
-              <EditTaskView task={task} />
+              <EditTaskView taskId={task.id} />
             </div>
           </SheetContent>
         )}

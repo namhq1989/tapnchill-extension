@@ -16,6 +16,13 @@ const TaskPreview = () => {
         </div>
       </div>
       <div className='flex flex-col gap-4'>
+        {tasks.length === 0 && (
+          <div className='flex flex-col gap-2 items-center py-4 mb-4'>
+            <p className='text-sm text-muted-foreground'>
+              Start your journey! Create your first task now!
+            </p>
+          </div>
+        )}
         {tasks.map((task) => (
           <TaskPreviewItem
             key={task.id}

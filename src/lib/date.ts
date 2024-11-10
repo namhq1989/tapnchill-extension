@@ -82,15 +82,20 @@ const getTotalTimeTaken = (
   )
   const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60))
 
+  // Helper function to add leading zeros
+  const formatWithZero = (value: number) =>
+    value < 10 ? `0${value}` : `${value}`
+
   // Format the output based on the rules
   if (days < 1) {
     if (hours === 0 && minutes === 0) {
-      return '1m' // Minimum time display when less than 1 minute has passed
+      return '01m' // Minimum time display when less than 1 minute has passed
+    } else if (hours === 0) {
+      return `${formatWithZero(minutes)}m` // Less than 1 hour, show minutes only
     }
-
-    return `${hours}h ${minutes}m` // Less than 1 day
+    return `${formatWithZero(hours)}h ${formatWithZero(minutes)}m` // Less than 1 day
   } else if (days < 7) {
-    return `${days}d ${hours}h` // Less than 7 days
+    return `${days}d ${formatWithZero(hours)}h` // Less than 7 days
   } else {
     return `${days}d` // 7 days or more
   }
