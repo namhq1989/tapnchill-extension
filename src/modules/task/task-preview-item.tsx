@@ -35,10 +35,12 @@ const TaskPreviewItem = (props: ITaskPreviewItemProps) => {
             createdAt={task.createdAt}
             completedAt={task.completedAt}
           />
-          <div className='flex flex-row gap-1 items-center'>
-            <Goal size={16} strokeWidth={1} />
-            <p className='text-xs text-muted-foreground'>Programming</p>
-          </div>
+          {task.goal && (
+            <div className='flex flex-row gap-1 items-center'>
+              <Goal size={16} strokeWidth={1} />
+              <p className='text-xs text-muted-foreground'>{task.goal.name}</p>
+            </div>
+          )}
         </div>
       </div>
       <TaskDetailView task={task} />

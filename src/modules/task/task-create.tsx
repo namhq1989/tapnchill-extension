@@ -60,7 +60,7 @@ const FormSchema = z.object({
 })
 
 const CreateTaskView = () => {
-  const { goals } = useTaskStore()
+  const { goals, createTask } = useTaskStore()
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -71,24 +71,20 @@ const CreateTaskView = () => {
   })
 
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
-    console.log('data', data)
-    // const success = await sendFeedback({
-    //   email: data.email || '',
-    //   feedback: data.feedback,
-    // })
-    // if (success) {
-    //   form.reset()
-    // }
+    const isSuccess = await createTask(
+      data.name,
+      data.description,
+      data.dueDate,
+      data.goalId,
+    )
+    if (isSuccess) {
+      form.reset()
+    }
   }
 
   return (
     <div className='flex cursor-pointer'>
-      <Sheet
-        key={side}
-        onOpenChange={() => {
-          form.reset()
-        }}
-      >
+      <Sheet key={side}>
         <SheetTrigger asChild>
           <Plus className='cursor-pointer' />
         </SheetTrigger>
@@ -209,11 +205,7 @@ const CreateTaskView = () => {
                     </FormItem>
                   )}
                 />
-                <Button
-                // onClick={() => onSubmit(form.getValues())}
-                >
-                  Add task
-                </Button>
+                <Button>Add task</Button>
               </form>
             </Form>
           </div>

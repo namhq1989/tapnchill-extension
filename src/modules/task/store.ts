@@ -1,79 +1,143 @@
 import { create } from 'zustand'
-import { ITasksStore, TaskStatus } from '@/modules/task/types.ts'
+import {
+  ICreateTaskApiRequest,
+  ICreateTaskApiResponse,
+  IGetGoalsApiResponse,
+  IGetTasksApiRequest,
+  IGetTasksApiResponse,
+  IGoal,
+  ITask,
+  ITasksStore,
+  IUpdateTaskApiRequest,
+  TaskStatus,
+} from '@/modules/task/types.ts'
+import useHttpStore from '@/modules/http/store.ts'
+import useNotificationStore from '@/modules/notification/store.ts'
+
+const TASK_API_SYNC_INTERVAL = 1800000 // 30 minutes
 
 const useTaskStore = create<ITasksStore>((set, get) => ({
-  goals: [
-    {
-      id: '1',
-      name: 'Programming',
-      isCompleted: false,
-      description: 'Learn the basics of programming',
-      createdAt: new Date(),
-    },
-    {
-      id: '2',
-      name: 'Design',
-      isCompleted: false,
-      description: 'Learn the basics of design',
-      createdAt: new Date(),
-    },
-  ],
-  tasks: [
-    {
-      id: '1',
-      goalId: '1',
-      name: 'Create wireframe for Homepage',
-      description:
-        'Design a wireframe layout for the homepage based on client requirements',
-      status: TaskStatus.todo,
-      createdAt: new Date(),
-      dueDate: new Date(new Date().getTime() + 60000 * 1540),
-      completedAt: null,
-    },
-    {
-      id: '2',
-      goalId: '1',
-      name: 'Develop user authentication',
-      description:
-        'Implement login and signup functionality with validation and error handling',
-      status: TaskStatus.done,
-      createdAt: new Date('2024-10-20T09:00:00Z'),
-      dueDate: new Date(new Date().getTime() + 60000 * 30),
-      completedAt: new Date(),
-    },
-    {
-      id: '3',
-      goalId: '1',
-      name: 'Optimize image load times',
-      description:
-        'Reduce image file sizes and leverage lazy loading to improve page load speed',
-      status: TaskStatus.todo,
-      createdAt: new Date(),
-      dueDate: null,
-      completedAt: null,
-    },
-    {
-      id: '4',
-      goalId: '1',
-      name: 'Complete project report',
-      description:
-        'Finish the final report and submit it to the project manager',
-      status: TaskStatus.todo,
-      createdAt: new Date('2024-10-20T09:00:00Z'),
-      dueDate: new Date('2024-11-05T17:00:00Z'),
-      completedAt: null,
-    },
-    {
-      id: '5',
-      goalId: '1',
-      name: 'Prepare presentation slides',
-      description: 'Create slides for the quarterly review meeting',
-      status: TaskStatus.todo,
-      createdAt: new Date('2024-10-20T09:00:00Z'),
-      dueDate: new Date('2024-11-14T17:00:00Z'),
-      completedAt: null,
-    },
-  ],
+  goals: [],
+  tasks: [],
+  initTasks: async () => {
+    chrome.storage.local.get(async (result) => {
+      const tasks = result.tasks || undefined
+      const goals = result.goals || undefined
+      const tasksLastSyncedTs = result.tasksLastSynced || 0
+
+      const nowTs = new Date().getTime()
+
+      if (
+        tasks !== undefined &&
+        nowTs - tasksLastSyncedTs < TASK_API_SYNC_INTERVAL
+      ) {
+        set({ tasks, goals: goals || [] })
+        return
+      }
+
+      const { get: httpGet } = useHttpStore.getState()
+      const goalResponse = await httpGet<IGetGoalsApiResponse>(
+        'api/task/goal',
+        {},
+      )
+      if (goalResponse && goalResponse.goals && goalResponse.goals.length) {
+        set({
+          goals: goalResponse.goals,
+        })
+      }
+
+      const taskResponse = await httpGet<IGetTasksApiResponse>('api/task', {
+        limit: 5,
+      } as IGetTasksApiRequest)
+      if (taskResponse && taskResponse.tasks && taskResponse.tasks.length) {
+        set({
+          tasks: mapTasks(taskResponse, goalResponse.goals || []),
+        })
+      }
+    })
+  },
+  createTask: async (name, description, dueDate, goalId): Promise<boolean> => {
+    const { post: httpPost } = useHttpStore.getState()
+    const { showNotification, showErrorNotification } =
+      useNotificationStore.getState()
+
+    try {
+      const response = await httpPost<ICreateTaskApiResponse>('api/task', {
+        name,
+        description,
+        dueDate,
+        goalId,
+      } as ICreateTaskApiRequest)
+
+      showNotification({
+        description: 'Task created successfully',
+      })
+
+      // update task in store
+      const { tasks, goals } = get()
+      const goal = goals.find((g) => g.id === goalId)
+
+      tasks.unshift({
+        id: response.id,
+        goalId,
+        goal: goal || null,
+        name,
+        description,
+        status: TaskStatus.todo,
+        createdAt: new Date(),
+        dueDate,
+        completedAt: null,
+      })
+      set({ tasks })
+
+      return true
+    } catch (err) {
+      showErrorNotification({
+        description: `Something went wrong. Please try again (${err})`,
+      })
+      return false
+    }
+  },
+  updateTask: async (id, name, description, dueDate): Promise<boolean> => {
+    const { put: httpPut } = useHttpStore.getState()
+    const { showNotification, showErrorNotification } =
+      useNotificationStore.getState()
+
+    try {
+      await httpPut<ICreateTaskApiResponse>(`api/task/${id}`, {
+        name,
+        description,
+        dueDate,
+      } as IUpdateTaskApiRequest)
+
+      showNotification({
+        description: 'Task updated successfully',
+      })
+
+      // update task in store
+      const { tasks } = get()
+      set({
+        tasks: tasks.map((t) =>
+          t.id === id
+            ? {
+                ...t,
+                name,
+                description,
+                dueDate,
+              }
+            : t,
+        ),
+      })
+
+      return true
+    } catch (err) {
+      showErrorNotification({
+        description: `Something went wrong. Please try again (${err})`,
+      })
+
+      return false
+    }
+  },
   toggleTask: (id: string) => {
     const { tasks } = get()
     const task = tasks.find((t) => t.id === id)
@@ -111,5 +175,25 @@ const useTaskStore = create<ITasksStore>((set, get) => ({
       .then()
   },
 }))
+
+const mapTasks = (tasks: IGetTasksApiResponse, goals: IGoal[]): ITask[] => {
+  const result: ITask[] = []
+  for (const task of tasks.tasks) {
+    const goal = goals.find((g) => g.id === task.goalId)
+
+    result.push({
+      id: task.id,
+      goalId: task.goalId,
+      goal: goal || null,
+      name: task.name,
+      description: task.description,
+      status: task.status,
+      createdAt: new Date(task.createdAt),
+      dueDate: task.dueDate ? new Date(task.dueDate) : null,
+      completedAt: task.completedAt ? new Date(task.completedAt) : null,
+    })
+  }
+  return result
+}
 
 export default useTaskStore
