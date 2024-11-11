@@ -1,11 +1,3 @@
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet.tsx'
-import { Info } from 'lucide-react'
 import { z } from 'zod'
 import useInformationStore from '@/modules/information/store.ts'
 import { useForm } from 'react-hook-form'
@@ -22,8 +14,7 @@ import { Button } from '@/components/ui/button.tsx'
 import { Textarea } from '@/components/ui/textarea.tsx'
 import { Separator } from '@/components/ui/separator.tsx'
 import HeaderTitle from '@/header-title.tsx'
-
-const side = 'right'
+import BackButton from '@/back-button.tsx'
 
 const FormSchema = z.object({
   email: z
@@ -67,90 +58,77 @@ const InformationView = () => {
   }
 
   return (
-    <div className='flex cursor-pointer'>
-      <Sheet key={side}>
-        <SheetTrigger asChild>
-          <Info size={20} className='cursor-pointer' />
-        </SheetTrigger>
-        <SheetContent
-          side={side}
-          className='w-full overflow-auto p-0'
-          onOpenAutoFocus={(e) => e.preventDefault()}
-        >
-          <SheetHeader className='p-4'>
-            <SheetTitle>
-              <HeaderTitle title='Information' />
-            </SheetTitle>
-          </SheetHeader>
-          <div className='flex flex-col w-full p-4 gap-4'>
-            <p className='text-sm'>
-              tapnchill - Discover chilling music, long listening music, and
-              relaxing playlists with tapnchill's 24/7 live streaming station.
-              Tune in and chill out!
-            </p>
-            <p className='text-sm'>
-              Goes beyond music, offering task management tools to help you stay
-              organized and focused. Keep track of to-dos, set reminders, and
-              prioritize goals—all while enjoying relaxing tunes.
-            </p>
-            <p className='text-sm'>
-              Capture ideas and jot down notes effortlessly within the app,
-              seamlessly blending music and productivity. Tapnchill is the
-              perfect companion for both work and relaxation.
-            </p>
+    <div className='flex flex-col w-[400px] min-h-[600px] scrollbar-hide'>
+      <div className='flex w-full flex-row justify-between p-4 border-b-[1px]'>
+        <BackButton />
+        <HeaderTitle title='Information' />
+      </div>
+      <div className='flex flex-col p-4 gap-x-4 gap-y-8 scrollbar-hide'>
+        <p className='text-sm'>
+          tapnchill - Discover chilling music, long listening music, and
+          relaxing playlists with tapnchill's 24/7 live streaming station. Tune
+          in and chill out!
+        </p>
+        <p className='text-sm'>
+          Goes beyond music, offering task management tools to help you stay
+          organized and focused. Keep track of to-dos, set reminders, and
+          prioritize goals—all while enjoying relaxing tunes.
+        </p>
+        <p className='text-sm'>
+          Capture ideas and jot down notes effortlessly within the app,
+          seamlessly blending music and productivity. Tapnchill is the perfect
+          companion for both work and relaxation.
+        </p>
 
-            <Separator />
-            <div className='flex flex-col justify-start items-start gap-2'>
-              <p className='text-lg font-bold'>We appreciate you being here!</p>
-              <p className='mb-4 text-sm'>
-                Got feedback or a feature request? Let us know and help us
-                improve!
-              </p>
-              <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className='flex flex-col w-full gap-4'
-                >
-                  <FormField
-                    control={form.control}
-                    name='email'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input
-                            className='rounded-xl focus-visible:ring-transparent'
-                            placeholder='Email (optional)'
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name='feedback'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Textarea
-                            className='rounded-xl focus-visible:ring-transparent resize-none'
-                            placeholder='Type your feedback here'
-                            rows={8}
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button disabled={isFeedbackSending}>Send feedback</Button>
-                </form>
-              </Form>
-            </div>
-          </div>
-        </SheetContent>
-      </Sheet>
+        <Separator />
+        <div className='flex flex-col justify-start items-start gap-2'>
+          <p className='text-lg font-bold'>We appreciate you being here!</p>
+          <p className='mb-4 text-sm'>
+            Got feedback or a feature request? Let us know and help us improve!
+          </p>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className='flex flex-col w-full gap-4'
+            >
+              <FormField
+                control={form.control}
+                name='email'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        className='rounded-xl focus-visible:ring-transparent'
+                        placeholder='Email (optional)'
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='feedback'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Textarea
+                        className='rounded-xl focus-visible:ring-transparent resize-none'
+                        placeholder='Type your feedback here'
+                        rows={8}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button disabled={isFeedbackSending}>Send feedback</Button>
+            </form>
+          </Form>
+        </div>
+      </div>
     </div>
   )
 }

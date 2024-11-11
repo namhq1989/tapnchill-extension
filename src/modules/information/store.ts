@@ -13,19 +13,13 @@ const useInformationStore = create<IInformationStore>((set) => ({
     set({ isFeedbackSending: true })
     const { post: httpPost } = useHttpStore.getState()
     try {
-      const response = await httpPost<ISendFeedbackApiResponse>(
-        'api/feedback',
-        data,
-      )
+      await httpPost<ISendFeedbackApiResponse>('api/common/feedback', data)
       set({ isFeedbackSending: false })
-      if (response && response.ok) {
-        const { showNotification } = useNotificationStore.getState()
-        showNotification({
-          description: 'The feedback has been sent! Thank you for your input!',
-        })
-        return true
-      }
-      return false
+      const { showNotification } = useNotificationStore.getState()
+      showNotification({
+        description: 'The feedback has been sent! Thank you for your input!',
+      })
+      return true
     } catch (error) {
       const { showErrorNotification } = useNotificationStore.getState()
       showErrorNotification({
