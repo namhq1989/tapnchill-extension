@@ -1,22 +1,12 @@
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet'
-import { Sparkles } from 'lucide-react'
 import { IAmbience } from '@/modules/ambience/types.ts'
 import { Slider } from '@/components/ui/slider.tsx'
 import useAmbiencesStore from '@/modules/ambience/store.ts'
 import { useCallback } from 'react'
 import HeaderTitle from '@/header-title.tsx'
-
-const side = 'right'
+import BackButton from '@/back-button.tsx'
 
 const AmbienceView = () => {
   const { ambiences, changeVolumeValue, toggleAmbience } = useAmbiencesStore()
-  const totalAddedAmbiences = ambiences.filter((a) => a.isAdded).length
 
   const handleVolumeChange = useCallback(
     (id: string) => (value: number) => {
@@ -30,38 +20,26 @@ const AmbienceView = () => {
   }
 
   return (
-    <div className='flex cursor-pointer'>
-      <Sheet key={side}>
-        <SheetTrigger asChild>
-          <Sparkles
-            strokeWidth={1}
-            size={32}
-            className='text-white cursor-pointer'
-            fill={totalAddedAmbiences > 0 ? 'white' : 'none'}
-            stroke='white'
-          />
-        </SheetTrigger>
-        <SheetContent side={side} className='w-full overflow-auto p-0'>
-          <SheetHeader className='p-4'>
-            <SheetTitle>
-              <HeaderTitle title='Ambiences' />
-            </SheetTitle>
-          </SheetHeader>
-          <div className='grid grid-cols-3 gap-4 p-4'>
-            {ambiences.map((a) => {
-              return (
-                <AmbienceItem
-                  key={a.name}
-                  ambience={a}
-                  isAdded={a.isAdded}
-                  onVolumeChange={handleVolumeChange(a.id)}
-                  onToggleAmbience={() => handleToggleAmbience(a.id)}
-                />
-              )
-            })}
-          </div>
-        </SheetContent>
-      </Sheet>
+    <div className='flex flex-col w-[400px] min-h-[600px] scrollbar-hide'>
+      <div className='flex w-full flex-row justify-between p-4 border-b-[1px]'>
+        <BackButton />
+        <HeaderTitle title='Ambiences' />
+      </div>
+      <div className='flex flex-col gap-4 scrollbar-hide'>
+        <div className='grid grid-cols-3 gap-4 p-4'>
+          {ambiences.map((a) => {
+            return (
+              <AmbienceItem
+                key={a.name}
+                ambience={a}
+                isAdded={a.isAdded}
+                onVolumeChange={handleVolumeChange(a.id)}
+                onToggleAmbience={() => handleToggleAmbience(a.id)}
+              />
+            )
+          })}
+        </div>
+      </div>
     </div>
   )
 }

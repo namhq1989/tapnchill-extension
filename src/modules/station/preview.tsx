@@ -1,10 +1,20 @@
-import { Heart, Pause, Play, Volume2, VolumeOff } from 'lucide-react'
+import {
+  ArrowRightLeft,
+  Heart,
+  Pause,
+  Play,
+  Sparkles,
+  Volume2,
+  VolumeOff,
+} from 'lucide-react'
 import StationView from '@/modules/station/view.tsx'
 import AmbienceView from '@/modules/ambience/view.tsx'
 import useStationsStore from '@/modules/station/store.ts'
 import LoadingIndicator from '@/loading-indicator.tsx'
 import { Slider } from '@/components/ui/slider.tsx'
 import StationInformation from '@/modules/station/information.tsx'
+import { Link } from 'react-chrome-extension-router'
+import useAmbiencesStore from '@/modules/ambience/store.ts'
 
 const StationPreview = () => {
   const {
@@ -19,6 +29,9 @@ const StationPreview = () => {
     isMuted,
     toggleMute,
   } = useStationsStore()
+  const { ambiences } = useAmbiencesStore()
+  const totalAddedAmbiences = ambiences.filter((a) => a.isAdded).length
+
   const PlayIcon = isSwitchingStation
     ? LoadingIndicator
     : isPlaying
@@ -58,7 +71,9 @@ const StationPreview = () => {
                 />
               )}
             </div>
-            <StationView />
+            <Link component={StationView}>
+              <ArrowRightLeft className='text-white cursor-pointer' />
+            </Link>
           </div>
           {!selectedStation ? (
             <small className='text-sm text-gray-300'>
@@ -93,7 +108,15 @@ const StationPreview = () => {
                   onClick={() => toggleMute()}
                   fill={!isMuted ? 'white' : 'none'}
                 />
-                <AmbienceView />
+                <Link component={AmbienceView}>
+                  <Sparkles
+                    strokeWidth={1}
+                    size={32}
+                    className='text-white cursor-pointer'
+                    fill={totalAddedAmbiences > 0 ? 'white' : 'none'}
+                    stroke='white'
+                  />
+                </Link>
                 <Heart
                   strokeWidth={1}
                   size={32}

@@ -1,11 +1,4 @@
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet'
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -13,7 +6,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 
-import { ArrowRightLeft, Heart, Pause, Play, RefreshCw } from 'lucide-react'
+import { Heart, Pause, Play, RefreshCw } from 'lucide-react'
 import useStationsStore, {
   FILTER_STATIONS_ALL,
   FILTER_STATIONS_FAVORITES,
@@ -23,8 +16,7 @@ import LoadingIndicator from '@/loading-indicator.tsx'
 import StationInformation from '@/modules/station/information.tsx'
 import { Separator } from '@/components/ui/separator.tsx'
 import HeaderTitle from '@/header-title.tsx'
-
-const side = 'right'
+import BackButton from '@/back-button.tsx'
 
 const StationView = () => {
   const {
@@ -59,125 +51,112 @@ const StationView = () => {
       : Play
 
   return (
-    <div className='flex cursor-pointe'>
-      <Sheet key={side}>
-        <SheetTrigger asChild>
-          <ArrowRightLeft className='text-white cursor-pointer' />
-        </SheetTrigger>
-        <SheetContent
-          id='list-stations'
-          side={side}
-          className='w-full overflow-auto p-0'
-        >
-          <SheetHeader className='p-4'>
-            <SheetTitle>
-              <HeaderTitle title='Stations' />
-            </SheetTitle>
-          </SheetHeader>
-          <div className='flex flex-col gap-8'>
-            {selectedStation && (
-              <div className='flex flex-col gap-2  my-4'>
-                <div className='flex h-[240px] rounded-xl'>
-                  <div
-                    className={`flex w-full h-full bg-cover`}
-                    style={{
-                      backgroundImage: `url(${selectedStation.cover})`,
-                    }}
-                  >
-                    <div className='flex flex-col self-end items-start justify-center p-4 w-full bg-black/70'>
-                      <div className='flex flex-row w-full justify-between'>
-                        <PlayIcon
-                          strokeWidth={1}
-                          size={32}
-                          className={`text-white dark:text-white cursor-pointer ${isSwitchingStation ? 'w-8 h-8' : ''}`}
-                          onClick={() =>
-                            isPlaying ? pause() : play(selectedStation.id)
-                          }
-                          fill={isPlaying ? 'white' : 'none'}
-                        />
-                        <Heart
-                          strokeWidth={1}
-                          size={32}
-                          className='text-white cursor-pointer'
-                          fill={selectedStation.isFavorite ? 'white' : 'none'}
-                          stroke='white'
-                          onClick={() => toggleFavorite(selectedStation.id)}
-                        />
-                        <StationInformation
-                          station={selectedStation}
-                          strokeWidth={1}
-                          size={32}
-                        />
-                      </div>
-                    </div>
+    <div className='flex flex-col w-[400px] min-h-[600px] scrollbar-hide'>
+      <div className='flex w-full flex-row justify-between p-4 border-b-[1px]'>
+        <BackButton />
+        <HeaderTitle title='Stations' />
+      </div>
+      <div className='flex flex-col gap-4 scrollbar-hide'>
+        {selectedStation && (
+          <div className='flex flex-col gap-2'>
+            <div className='flex h-[240px] rounded-xl'>
+              <div
+                className={`flex w-full h-full bg-cover`}
+                style={{
+                  backgroundImage: `url(${selectedStation.cover})`,
+                }}
+              >
+                <div className='flex flex-col self-end items-start justify-center p-4 w-full bg-black/70'>
+                  <div className='flex flex-row w-full justify-between'>
+                    <PlayIcon
+                      strokeWidth={1}
+                      size={32}
+                      className={`text-white dark:text-white cursor-pointer ${isSwitchingStation ? 'w-8 h-8' : ''}`}
+                      onClick={() =>
+                        isPlaying ? pause() : play(selectedStation.id)
+                      }
+                      fill={isPlaying ? 'white' : 'none'}
+                    />
+                    <Heart
+                      strokeWidth={1}
+                      size={32}
+                      className='text-white cursor-pointer'
+                      fill={selectedStation.isFavorite ? 'white' : 'none'}
+                      stroke='white'
+                      onClick={() => toggleFavorite(selectedStation.id)}
+                    />
+                    <StationInformation
+                      station={selectedStation}
+                      strokeWidth={1}
+                      size={32}
+                    />
                   </div>
-                </div>
-                <h2 className='text-xl font-bold tracking-wide px-4'>
-                  {selectedStation.name}
-                </h2>
-              </div>
-            )}
-            {selectedStation && <Separator className='w-[60%] self-center' />}
-            <div className='flex flex-col p-4 gap-4'>
-              <div className='flex flex-row gap-4 items-center justify-start'>
-                <Select
-                  defaultValue={selectedFilterId}
-                  onValueChange={(id) => selectFilter(id)}
-                >
-                  <SelectTrigger className='w-[120px]'>
-                    <SelectValue placeholder='All' />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {filters.map((f) => (
-                      <SelectItem key={`filter_${f.id}`} value={f.id}>
-                        {f.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select
-                  defaultValue={selectedTypeId}
-                  onValueChange={(id) => selectType(id)}
-                >
-                  <SelectTrigger className='w-[140px]'>
-                    <SelectValue placeholder='All' />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {types.map((f) => (
-                      <SelectItem key={`genre_${f.id}`} value={f.id}>
-                        {f.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <RefreshCw
-                  className='cursor-pointer'
-                  size={20}
-                  onClick={() => resetAllFilters()}
-                />
-              </div>
-              <div className='flex w-full'>
-                <div className='w-full grid grid-cols-2 gap-4'>
-                  {filteredStations.map((station) => {
-                    if (selectedStation && selectedStation.id === station.id)
-                      return null
-
-                    return (
-                      <StationItem
-                        key={station.id}
-                        station={station}
-                        onPlay={() => play(station.id)}
-                        onToggleFavorite={(id) => toggleFavorite(id)}
-                      />
-                    )
-                  })}
                 </div>
               </div>
             </div>
+            <h2 className='text-xl font-bold tracking-wide px-4'>
+              {selectedStation.name}
+            </h2>
           </div>
-          <div className='h-2' />
-        </SheetContent>
-      </Sheet>
+        )}
+        {selectedStation && <Separator className='w-[60%] self-center my-4' />}
+        <div className='flex flex-col p-4 gap-4'>
+          <div className='flex flex-row gap-4 items-center justify-start'>
+            <Select
+              defaultValue={selectedFilterId}
+              onValueChange={(id) => selectFilter(id)}
+            >
+              <SelectTrigger className='w-[120px]'>
+                <SelectValue placeholder='All' />
+              </SelectTrigger>
+              <SelectContent>
+                {filters.map((f) => (
+                  <SelectItem key={`filter_${f.id}`} value={f.id}>
+                    {f.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              defaultValue={selectedTypeId}
+              onValueChange={(id) => selectType(id)}
+            >
+              <SelectTrigger className='w-[140px]'>
+                <SelectValue placeholder='All' />
+              </SelectTrigger>
+              <SelectContent>
+                {types.map((f) => (
+                  <SelectItem key={`genre_${f.id}`} value={f.id}>
+                    {f.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <RefreshCw
+              className='cursor-pointer'
+              size={20}
+              onClick={() => resetAllFilters()}
+            />
+          </div>
+          <div className='flex w-full'>
+            <div className='w-full grid grid-cols-2 gap-4'>
+              {filteredStations.map((station) => {
+                if (selectedStation && selectedStation.id === station.id)
+                  return null
+
+                return (
+                  <StationItem
+                    key={station.id}
+                    station={station}
+                    onPlay={() => play(station.id)}
+                    onToggleFavorite={(id) => toggleFavorite(id)}
+                  />
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
