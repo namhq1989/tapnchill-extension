@@ -23,10 +23,11 @@ import { cn } from '@/lib/utils.ts'
 import { format } from 'date-fns'
 import { Calendar } from '@/components/ui/calendar.tsx'
 import { TimePickerDemo } from '@/components/ui/timer-picker.tsx'
-import useTaskStore from '@/modules/task/store.ts'
 import useNotificationStore from '@/modules/notification/store.ts'
 import BackButton from '@/back-button.tsx'
 import { goBack } from 'react-chrome-extension-router'
+import { ITask } from '@/modules/task/types.ts'
+import useTaskManipulationStore from '@/modules/task/task-manipulation-store.ts'
 
 const FormSchema = z.object({
   name: z
@@ -44,15 +45,13 @@ const FormSchema = z.object({
 })
 
 export interface IEditTaskViewProps {
-  taskId: string
+  task: ITask
 }
 
 const EditTaskView = (props: IEditTaskViewProps) => {
   const { showErrorNotification } = useNotificationStore()
-  const { tasks, updateTask } = useTaskStore()
-  const { taskId } = props
-
-  const task = tasks.find((t) => t.id === taskId)
+  const { updateTask } = useTaskManipulationStore()
+  const { task } = props
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),

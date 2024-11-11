@@ -1,6 +1,5 @@
 import HeaderTitle from '@/header-title.tsx'
 import TaskPreviewItem from '@/modules/task/task-preview-item.tsx'
-import useTaskStore from '@/modules/task/store.ts'
 import {
   Select,
   SelectContent,
@@ -9,15 +8,29 @@ import {
   SelectValue,
 } from '@/components/ui/select.tsx'
 import BackButton from '@/back-button.tsx'
+import useListTasksStore from '@/modules/task/list-tasks-store.ts'
+import { useEffect } from 'react'
+import useTaskManipulationStore from '@/modules/task/task-manipulation-store.ts'
 
 const TaskView = () => {
   const {
     tasks,
-    toggleTask,
+    init,
+    fetchTasks,
     statusFilters,
     selectedStatusFilterId,
     selectStatusFilter,
-  } = useTaskStore()
+  } = useListTasksStore()
+  const { toggleTask } = useTaskManipulationStore()
+
+  useEffect(() => {
+    const fetch = async () => {
+      init()
+      await fetchTasks()
+    }
+
+    fetch().then()
+  }, [init, fetchTasks])
 
   return (
     <div className='flex flex-col w-[400px] min-h-[600px] scrollbar-hide'>
@@ -48,8 +61,8 @@ const TaskView = () => {
             <TaskPreviewItem
               key={task.id}
               task={task}
-              onToggleTask={() => {
-                toggleTask(task.id)
+              onToggleTask={async () => {
+                await toggleTask(task.id)
               }}
             />
           ))}

@@ -1,12 +1,14 @@
-import useTaskStore from '@/modules/task/store.ts'
 import CreateTaskView from '@/modules/task/task-create.tsx'
 import TaskView from '@/modules/task/view.tsx'
 import TaskPreviewItem from '@/modules/task/task-preview-item.tsx'
 import { Link } from 'react-chrome-extension-router'
 import { ListPlus, Plus } from 'lucide-react'
+import useTodoTasksStore from '@/modules/task/todo-tasks-store.ts'
+import useTaskManipulationStore from '@/modules/task/task-manipulation-store.ts'
 
 const TaskPreview = () => {
-  const { tasks, toggleTask } = useTaskStore()
+  const { tasks } = useTodoTasksStore()
+  const { toggleTask } = useTaskManipulationStore()
 
   return (
     <div className='flex flex-col w-full gap-2'>
@@ -25,7 +27,7 @@ const TaskPreview = () => {
         {tasks.length === 0 && (
           <div className='flex flex-col gap-2 items-center py-4 mb-4'>
             <p className='text-sm text-muted-foreground'>
-              Start your journey! Create your first task now!
+              You don't have any TODO tasks yet!
             </p>
           </div>
         )}
@@ -33,8 +35,8 @@ const TaskPreview = () => {
           <TaskPreviewItem
             key={task.id}
             task={task}
-            onToggleTask={() => {
-              toggleTask(task.id)
+            onToggleTask={async () => {
+              await toggleTask(task.id)
             }}
           />
         ))}

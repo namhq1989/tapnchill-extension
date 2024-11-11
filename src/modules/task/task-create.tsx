@@ -30,8 +30,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select.tsx'
-import useTaskStore from '@/modules/task/store.ts'
 import BackButton from '@/back-button.tsx'
+import useGoalsStore from '@/modules/task/goals-store.ts'
+import useTaskManipulationStore from '@/modules/task/task-manipulation-store.ts'
 
 const FormSchema = z.object({
   name: z
@@ -52,7 +53,8 @@ const FormSchema = z.object({
 })
 
 const CreateTaskView = () => {
-  const { goals, createTask } = useTaskStore()
+  const { goals } = useGoalsStore()
+  const { createTask } = useTaskManipulationStore()
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
