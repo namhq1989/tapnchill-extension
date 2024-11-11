@@ -46,6 +46,7 @@ export enum Genres {
   RNB = 'r&b',
   DISCO = 'disco',
   HITS = 'hits',
+  CHILL = 'chill',
 }
 
 const listStations = (): IStation[] => {
@@ -128,10 +129,22 @@ const listStations = (): IStation[] => {
       'mp3',
       'K-Pop',
       'Playing Hits Of K-Pop',
-      'https://boxradio-edge-01.streamafrica.net/kpop',
+      'https://boxradio.net/radio',
       'https://boxradio.net/wp-content/uploads/2024/06/kpopv221.png',
       `${import.meta.env.VITE_CDN_ENDPOINT}/kpop.jpg`,
       [Genres.HITS],
+      StationTypes.Music,
+    ),
+    createItem(
+      'lofi',
+      'https://boxradio-edge-00.streamafrica.net/lofi',
+      'mp3',
+      'Lofi',
+      'Chill out with our Lofi radio station, where smooth beats and mellow rhythms create a perfect backdrop for relaxation and focus!',
+      'https://boxradio.net/radio',
+      'https://boxradio.net/wp-content/uploads/2023/08/lofi2.u0vNfAfxE.jpg',
+      `${import.meta.env.VITE_CDN_ENDPOINT}/lofi.jpg`,
+      [Genres.CHILL],
       StationTypes.Music,
     ),
   ]

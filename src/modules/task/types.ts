@@ -34,12 +34,30 @@ export interface ITaskStatusFilter {
   name: string
 }
 
-export interface ITasksStore {
+export interface IGoalsStore {
   goals: IGoal[]
+  fetchGoals: () => Promise<void>
+}
+
+export interface ITodoTasksStore {
   tasks: ITask[]
+  fetchTasks: () => Promise<void>
+}
 
-  initTasks: () => Promise<void>
+export interface IListTasksStore {
+  init: () => void
+  tasks: ITask[]
+  isFetching: boolean
+  fetchTasks: () => Promise<void>
 
+  statusFilters: ITaskStatusFilter[]
+  selectedStatusFilterId: string
+  selectStatusFilter: (id: string) => void
+
+  nextPageToken: string
+}
+
+export interface ITaskManipulationStore {
   createTask: (
     name: string,
     description: string,
@@ -52,11 +70,7 @@ export interface ITasksStore {
     description: string,
     dueDate: Date | null,
   ) => Promise<boolean>
-  toggleTask: (id: string) => void
-
-  statusFilters: ITaskStatusFilter[]
-  selectedStatusFilterId: string
-  selectStatusFilter: (id: string) => void
+  toggleTask: (id: string) => Promise<void>
 }
 
 export interface IGetGoalsApiRequest {
@@ -101,5 +115,13 @@ export interface IUpdateTaskApiRequest {
 }
 
 export interface IUpdateTaskApiResponse {
+  id: string
+}
+
+export interface IChangeTaskStatusApiRequest {
+  status: TaskStatus
+}
+
+export interface IChangeTaskStatusApiResponse {
   id: string
 }

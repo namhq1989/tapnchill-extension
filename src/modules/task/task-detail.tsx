@@ -8,11 +8,11 @@ import {
 } from '@/components/ui/sheet.tsx'
 import { ChevronRight, Circle, CircleCheckBig, Edit, Goal } from 'lucide-react'
 import { Button } from '@/components/ui/button.tsx'
-import useTaskStore from '@/modules/task/store.ts'
 import EditTaskView from '@/modules/task/task-edit.tsx'
 import { useState } from 'react'
 import TaskTimeView from '@/modules/task/task-time.tsx'
 import { Link } from 'react-chrome-extension-router'
+import useTaskManipulationStore from '@/modules/task/task-manipulation-store.ts'
 
 const side = 'bottom'
 
@@ -22,7 +22,7 @@ export interface ITaskDetailProps {
 
 const TaskDetailView = (props: ITaskDetailProps) => {
   const [isOpen, setIsOpen] = useState(false)
-  const { toggleTask } = useTaskStore()
+  const { toggleTask } = useTaskManipulationStore()
   const { task } = props
 
   const isCompleted = task.status === TaskStatus.done
@@ -78,17 +78,20 @@ const TaskDetailView = (props: ITaskDetailProps) => {
                 <Button
                   variant='outline'
                   className='mt-8'
-                  onClick={() => toggleTask(task.id)}
+                  onClick={async () => await toggleTask(task.id)}
                 >
                   <Circle /> Reopen Task
                 </Button>
               ) : (
-                <Button className='mt-8' onClick={() => toggleTask(task.id)}>
+                <Button
+                  className='mt-8'
+                  onClick={async () => await toggleTask(task.id)}
+                >
                   <CircleCheckBig /> Mark as Done
                 </Button>
               )}
 
-              <Link component={EditTaskView} props={{ taskId: task.id }}>
+              <Link component={EditTaskView} props={{ task }}>
                 <Button variant='secondary' className='w-full my-2'>
                   <Edit /> Edit
                 </Button>

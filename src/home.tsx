@@ -2,7 +2,6 @@ import { useEffect } from 'react'
 import useAppStore from '@/store.ts'
 import useStationsStore from '@/modules/station/store.ts'
 import useAmbiencesStore from '@/modules/ambience/store.ts'
-import useTaskStore from '@/modules/task/store.ts'
 import { ModeToggle } from '@/components/theme/mode-toggle.tsx'
 import StationPreview from '@/modules/station/preview.tsx'
 import TaskPreview from '@/modules/task/preview.tsx'
@@ -13,23 +12,27 @@ import { Info } from 'lucide-react'
 import { Link } from 'react-chrome-extension-router'
 import InformationView from '@/modules/information/view.tsx'
 import HeaderTitle from '@/header-title.tsx'
+import useTodoTasksStore from '@/modules/task/todo-tasks-store.ts'
+import useGoalsStore from '@/modules/task/goals-store.ts'
 
 const HomeView = () => {
   const { initApp } = useAppStore()
   const { initStations } = useStationsStore()
   const { initAmbiences } = useAmbiencesStore()
-  const { initTasks } = useTaskStore()
+  const { fetchGoals } = useGoalsStore()
+  const { fetchTasks } = useTodoTasksStore()
 
   useEffect(() => {
     const init = async () => {
       await initApp()
       initStations()
       initAmbiences()
-      await initTasks()
+      await fetchGoals()
+      await fetchTasks()
     }
 
     init().then()
-  }, [initApp, initStations, initAmbiences, initTasks])
+  }, [initApp, initStations, initAmbiences, fetchGoals, fetchTasks])
 
   return (
     <>
