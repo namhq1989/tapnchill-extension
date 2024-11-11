@@ -12,14 +12,7 @@ import {
 import { Input } from '@/components/ui/input.tsx'
 import { Textarea } from '@/components/ui/textarea.tsx'
 import { Button } from '@/components/ui/button.tsx'
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet.tsx'
-import { CalendarIcon, Plus } from 'lucide-react'
+import { CalendarIcon } from 'lucide-react'
 import HeaderTitle from '@/header-title.tsx'
 import {
   Popover,
@@ -38,8 +31,7 @@ import {
   SelectValue,
 } from '@/components/ui/select.tsx'
 import useTaskStore from '@/modules/task/store.ts'
-
-const side = 'right'
+import BackButton from '@/back-button.tsx'
 
 const FormSchema = z.object({
   name: z
@@ -83,134 +75,126 @@ const CreateTaskView = () => {
   }
 
   return (
-    <div className='flex cursor-pointer'>
-      <Sheet key={side}>
-        <SheetTrigger asChild>
-          <Plus className='cursor-pointer' />
-        </SheetTrigger>
-        <SheetContent side={side} className='w-full overflow-auto p-0'>
-          <SheetHeader className='p-4'>
-            <SheetTitle>
-              <HeaderTitle title='Add task' />
-            </SheetTitle>
-          </SheetHeader>
-          <div className='flex flex-col w-full p-4 gap-4'>
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className='flex flex-col w-full gap-4'
-              >
-                <FormField
-                  control={form.control}
-                  name='dueDate'
-                  render={({ field }) => (
-                    <FormItem className='flex flex-col'>
-                      <FormLabel className='text-left'>Due date</FormLabel>
-                      <Popover modal={true}>
-                        <FormControl>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant='outline'
-                              className={cn(
-                                'justify-start text-left font-normal focus-visible:ring-transparent',
-                                !field.value && 'text-muted-foreground',
-                              )}
-                            >
-                              <CalendarIcon className='h-4 w-4' />
-                              {field.value ? (
-                                format(field.value, 'dd/MM/yyyy, HH:mm')
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
-                            </Button>
-                          </PopoverTrigger>
-                        </FormControl>
-                        <PopoverContent className='w-full p-0'>
-                          <Calendar
-                            mode='single'
-                            selected={field.value}
-                            onSelect={field.onChange}
-                          />
-                          <div className='p-3 border-t border-border'>
-                            <TimePickerDemo
-                              setDate={field.onChange}
-                              date={field.value}
-                            />
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name='name'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Name</FormLabel>
-                      <FormControl>
-                        <Input
-                          className='focus-visible:ring-transparent'
-                          placeholder='What is the task?'
-                          {...field}
+    <div className='flex flex-col w-[400px] min-h-[600px] scrollbar-hide'>
+      <div className='flex w-full flex-row justify-between p-4 border-b-[1px]'>
+        <BackButton />
+        <HeaderTitle title='Add task' />
+      </div>
+      <div className='flex flex-col p-4 gap-4 scrollbar-hide'>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className='flex flex-col w-full gap-4'
+          >
+            <FormField
+              control={form.control}
+              name='dueDate'
+              render={({ field }) => (
+                <FormItem className='flex flex-col'>
+                  <FormLabel className='text-left'>Due date</FormLabel>
+                  <Popover modal={true}>
+                    <FormControl>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant='outline'
+                          className={cn(
+                            'justify-start text-left font-normal focus-visible:ring-transparent',
+                            !field.value && 'text-muted-foreground',
+                          )}
+                        >
+                          <CalendarIcon className='h-4 w-4' />
+                          {field.value ? (
+                            format(field.value, 'dd/MM/yyyy, HH:mm')
+                          ) : (
+                            <span>Pick a date</span>
+                          )}
+                        </Button>
+                      </PopoverTrigger>
+                    </FormControl>
+                    <PopoverContent className='w-full p-0'>
+                      <Calendar
+                        mode='single'
+                        selected={field.value}
+                        onSelect={field.onChange}
+                      />
+                      <div className='p-3 border-t border-border'>
+                        <TimePickerDemo
+                          setDate={field.onChange}
+                          date={field.value}
                         />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name='description'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          className='focus-visible:ring-transparent resize-none'
-                          placeholder='Input a description'
-                          rows={8}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name='goalId'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Goal</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder='Select a goal' />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {goals.map((g) => {
-                            return (
-                              <SelectItem key={g.id} value={g.id}>
-                                {g.name}
-                              </SelectItem>
-                            )
-                          })}
-                        </SelectContent>
-                      </Select>
-                    </FormItem>
-                  )}
-                />
-                <Button>Add task</Button>
-              </form>
-            </Form>
-          </div>
-        </SheetContent>
-      </Sheet>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='name'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      className='focus-visible:ring-transparent'
+                      placeholder='What is the task?'
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='description'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      className='focus-visible:ring-transparent resize-none'
+                      placeholder='Input a description'
+                      rows={8}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='goalId'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Goal</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder='Select a goal' />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {goals.map((g) => {
+                        return (
+                          <SelectItem key={g.id} value={g.id}>
+                            {g.name}
+                          </SelectItem>
+                        )
+                      })}
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            />
+            <Button>Add task</Button>
+          </form>
+        </Form>
+      </div>
     </div>
   )
 }

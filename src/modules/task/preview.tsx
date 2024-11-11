@@ -2,6 +2,8 @@ import useTaskStore from '@/modules/task/store.ts'
 import CreateTaskView from '@/modules/task/task-create.tsx'
 import TaskView from '@/modules/task/view.tsx'
 import TaskPreviewItem from '@/modules/task/task-preview-item.tsx'
+import { Link } from 'react-chrome-extension-router'
+import { ListPlus, Plus } from 'lucide-react'
 
 const TaskPreview = () => {
   const { tasks, toggleTask } = useTaskStore()
@@ -11,8 +13,12 @@ const TaskPreview = () => {
       <div className='flex flex-row justify-between items-center'>
         <h2 className='text-base font-bold tracking-wide'>Tasks</h2>
         <div className='flex flex-row gap-4'>
-          <CreateTaskView />
-          <TaskView />
+          <Link component={CreateTaskView}>
+            <Plus className='cursor-pointer' />
+          </Link>
+          <Link component={TaskView}>
+            <ListPlus className='cursor-pointer'></ListPlus>
+          </Link>
         </div>
       </div>
       <div className='flex flex-col gap-4'>

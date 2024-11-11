@@ -6,12 +6,13 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet.tsx'
-import { ChevronRight, Circle, CircleCheckBig, Goal } from 'lucide-react'
+import { ChevronRight, Circle, CircleCheckBig, Edit, Goal } from 'lucide-react'
 import { Button } from '@/components/ui/button.tsx'
 import useTaskStore from '@/modules/task/store.ts'
 import EditTaskView from '@/modules/task/task-edit.tsx'
 import { useState } from 'react'
 import TaskTimeView from '@/modules/task/task-time.tsx'
+import { Link } from 'react-chrome-extension-router'
 
 const side = 'bottom'
 
@@ -87,7 +88,11 @@ const TaskDetailView = (props: ITaskDetailProps) => {
                 </Button>
               )}
 
-              <EditTaskView taskId={task.id} />
+              <Link component={EditTaskView} props={{ taskId: task.id }}>
+                <Button variant='secondary' className='w-full my-2'>
+                  <Edit /> Edit
+                </Button>
+              </Link>
             </div>
           </SheetContent>
         )}
