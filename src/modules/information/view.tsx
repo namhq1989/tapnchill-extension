@@ -15,6 +15,7 @@ import { Textarea } from '@/components/ui/textarea.tsx'
 import { Separator } from '@/components/ui/separator.tsx'
 import HeaderTitle from '@/header-title.tsx'
 import BackButton from '@/back-button.tsx'
+import useAppStore from '@/store.ts'
 
 const FormSchema = z.object({
   email: z
@@ -37,6 +38,7 @@ const FormSchema = z.object({
 })
 
 const InformationView = () => {
+  const { userId } = useAppStore()
   const { isFeedbackSending, sendFeedback } = useInformationStore()
 
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -125,6 +127,9 @@ const InformationView = () => {
                 )}
               />
               <Button disabled={isFeedbackSending}>Send feedback</Button>
+              <p className='text-sm text-muted-foreground self-end'>
+                Your id: {userId}
+              </p>
             </form>
           </Form>
         </div>

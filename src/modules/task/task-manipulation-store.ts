@@ -88,9 +88,7 @@ const useTaskManipulationStore = create<ITaskManipulationStore>(() => ({
         description: 'Task updated successfully',
       })
 
-      const { tasks: listTasks } = useListTasksStore.getState()
-
-      const task = listTasks.find((t) => t.id === id)
+      const task = findTaskById(id)
       if (!task) return false
 
       const newTaskData: ITask = {
@@ -112,9 +110,8 @@ const useTaskManipulationStore = create<ITaskManipulationStore>(() => ({
   },
   toggleTask: async (id: string) => {
     const { patch: httpPatch } = useHttpStore.getState()
-    const { tasks: listTasks } = useListTasksStore.getState()
 
-    const task = listTasks.find((t) => t.id === id)
+    const task = findTaskById(id)
     if (!task) return
 
     let newStatus = TaskStatus.todo
@@ -122,23 +119,50 @@ const useTaskManipulationStore = create<ITaskManipulationStore>(() => ({
       newStatus = TaskStatus.done
     }
 
+    const newTaskData: ITask = {
+      ...task,
+      status: newStatus,
+      completedAt: newStatus === TaskStatus.done ? new Date() : null,
+    }
+
+    updateTaskAndPersistTasksToLocalStorage(newTaskData)
+
     try {
       await httpPatch<IChangeTaskStatusApiResponse>(`api/task/${id}/status`, {
         status: newStatus,
       } as IChangeTaskStatusApiRequest)
+    } catch (err) {
+      console.log('err', err)
+
+      if (newStatus === TaskStatus.todo) {
+        newStatus = TaskStatus.done
+      }
 
       const newTaskData: ITask = {
         ...task,
         status: newStatus,
-        completedAt: new Date(),
+        completedAt: newStatus === TaskStatus.done ? new Date() : null,
       }
 
       updateTaskAndPersistTasksToLocalStorage(newTaskData)
-    } catch (err) {
-      console.log('err', err)
     }
   },
 }))
+
+const findTaskById = (id: string): ITask | null => {
+  const { tasks: listTasks } = useListTasksStore.getState()
+  const { tasks: todoTasks } = useTodoTasksStore.getState()
+
+  let task = listTasks.find((t) => t.id === id)
+  if (!task) {
+    task = todoTasks.find((t) => t.id === id)
+  }
+  if (!task) {
+    return null
+  }
+
+  return task
+}
 
 const updateTaskAndPersistTasksToLocalStorage = (newTaskData: ITask) => {
   const { tasks: todoTasks } = useTodoTasksStore.getState()
@@ -153,7 +177,7 @@ const updateTaskAndPersistTasksToLocalStorage = (newTaskData: ITask) => {
   const listIndex = listTasks.findIndex((t) => t.id === newTaskData.id)
   if (listIndex !== -1) {
     listTasks[listIndex] = newTaskData
-    useListTasksStore.setState({ tasks: todoTasks })
+    useListTasksStore.setState({ tasks: listTasks })
   }
 
   chrome.storage.local

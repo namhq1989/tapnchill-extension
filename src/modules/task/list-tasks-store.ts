@@ -44,29 +44,48 @@ const useListTasksStore = create<IListTasksStore>((set, get) => ({
         return
       }
 
+      set({ isFetching: true })
+
       const { tasks, selectedStatusFilterId, nextPageToken } = get()
       const { get: httpGet } = useHttpStore.getState()
-      const response = await httpGet<IGetTasksApiResponse>('api/task', {
-        limit: 20,
-        status:
-          selectedStatusFilterId === 'all' ? undefined : selectedStatusFilterId,
-        pageToken: nextPageToken,
-      } as IGetTasksApiRequest)
-      if (response && response.tasks && response.tasks.length) {
-        const { goals } = useGoalsStore.getState()
-        const newTasks = [...tasks, ...mapTasks(response.tasks, goals)]
-        set({
-          tasks: newTasks,
-          nextPageToken: response.nextPageToken,
-        })
-        chrome.storage.local
-          .set({
-            listTasks: JSON.stringify(newTasks),
-            listTasksLastSyncedTs: new Date().getTime(),
-            listTasksNextPageToken: response.nextPageToken,
+
+      try {
+        const response = await httpGet<IGetTasksApiResponse>('api/task', {
+          limit: 20,
+          status:
+            selectedStatusFilterId === 'all'
+              ? undefined
+              : selectedStatusFilterId,
+          pageToken: nextPageToken,
+        } as IGetTasksApiRequest)
+
+        set({ isFetching: false })
+
+        if (response.tasks && response.tasks.length) {
+          const { goals } = useGoalsStore.getState()
+          const newTasks = [...tasks, ...mapTasks(response.tasks, goals)]
+          set({
+            tasks: newTasks,
+            nextPageToken: response.nextPageToken,
           })
-          .then()
-      } else {
+          chrome.storage.local
+            .set({
+              listTasks: JSON.stringify(newTasks),
+              listTasksLastSyncedTs: new Date().getTime(),
+              listTasksNextPageToken: response.nextPageToken,
+            })
+            .then()
+        } else {
+          chrome.storage.local
+            .set({
+              listTasks: [],
+              listTasksLastSyncedTs: 0,
+              listTasksNextPageToken: '',
+            })
+            .then()
+        }
+      } catch (err) {
+        console.log('err', err)
         chrome.storage.local
           .set({
             listTasks: undefined,
@@ -84,16 +103,61 @@ const useListTasksStore = create<IListTasksStore>((set, get) => ({
     { id: TaskStatus.done, name: 'Done' },
   ],
   selectedStatusFilterId: 'all',
-  selectStatusFilter: (id: string) => {
-    const { selectedStatusFilterId } = get()
+  selectStatusFilter: async (id: string) => {
+    const { selectedStatusFilterId, nextPageToken } = get()
     if (selectedStatusFilterId === id) return
 
-    set({ selectedStatusFilterId: id })
-    chrome.storage.local
-      .set({
-        listTaskSelectedStatusFilterId: id,
+    set({ isFetching: true })
+
+    const { get: httpGet } = useHttpStore.getState()
+    try {
+      const response = await httpGet<IGetTasksApiResponse>('api/task', {
+        limit: 20,
+        status: id === 'all' ? undefined : id,
+        pageToken: nextPageToken,
+      } as IGetTasksApiRequest)
+
+      set({
+        isFetching: false,
+        selectedStatusFilterId: id,
       })
-      .then()
+
+      if (response.tasks && response.tasks.length) {
+        const { goals } = useGoalsStore.getState()
+        const newTasks = mapTasks(response.tasks, goals)
+        set({
+          tasks: newTasks,
+          nextPageToken: response.nextPageToken,
+        })
+        chrome.storage.local
+          .set({
+            listTasks: JSON.stringify(newTasks),
+            listTasksLastSyncedTs: new Date().getTime(),
+            listTasksNextPageToken: response.nextPageToken,
+            selectedStatusFilterId: id,
+          })
+          .then()
+      } else {
+        chrome.storage.local
+          .set({
+            listTasks: [],
+            listTasksLastSyncedTs: 0,
+            listTasksNextPageToken: '',
+            listTaskSelectedStatusFilterId: id,
+          })
+          .then()
+      }
+    } catch (err) {
+      console.log('err', err)
+      chrome.storage.local
+        .set({
+          listTasks: undefined,
+          listTasksLastSyncedTs: 0,
+          listTasksNextPageToken: '',
+          listTaskSelectedStatusFilterId: id,
+        })
+        .then()
+    }
   },
 
   nextPageToken: '',

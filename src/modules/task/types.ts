@@ -52,7 +52,7 @@ export interface IListTasksStore {
 
   statusFilters: ITaskStatusFilter[]
   selectedStatusFilterId: string
-  selectStatusFilter: (id: string) => void
+  selectStatusFilter: (id: string) => Promise<void>
 
   nextPageToken: string
 }

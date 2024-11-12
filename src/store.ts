@@ -9,7 +9,8 @@ import useHttpStore from '@/modules/http/store.ts'
 const ID_CHARS =
   'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
 
-const useAppStore = create<IAppStore>((_, get) => ({
+const useAppStore = create<IAppStore>((set, get) => ({
+  userId: '',
   initApp: async () => {
     chrome.storage.local.get(async (result) => {
       const anonymousUserId: string = result.anonymousUserId || ''
@@ -24,6 +25,9 @@ const useAppStore = create<IAppStore>((_, get) => ({
         // if user id found, this means current user is returning to the extension
         const { setAccessToken } = useHttpStore.getState()
         setAccessToken(accessToken)
+        set({
+          userId: anonymousUserId,
+        })
       }
     })
   },
@@ -70,6 +74,10 @@ const useAppStore = create<IAppStore>((_, get) => ({
     )
 
     if (response && response.accessToken) {
+      set({
+        userId: clientId,
+      })
+
       chrome.storage.local
         .set({
           anonymousUserId: clientId,

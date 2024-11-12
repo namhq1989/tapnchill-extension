@@ -42,7 +42,7 @@ const TaskView = () => {
         <div className='flex flex-row gap-4'>
           <Select
             defaultValue={selectedStatusFilterId}
-            onValueChange={(id) => selectStatusFilter(id)}
+            onValueChange={async (id) => await selectStatusFilter(id)}
           >
             <SelectTrigger className='w-[120px]'>
               <SelectValue placeholder='All' />

@@ -1,4 +1,5 @@
 export interface IAppStore {
+  userId: string
   initApp: () => Promise<void>
   generateAnonymousUserId: (length: number) => string
   createAnonymousSignUpChecksum: (anonymousUserId: string) => Promise<string>
