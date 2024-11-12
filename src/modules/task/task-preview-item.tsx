@@ -21,12 +21,11 @@ const TaskPreviewItem = (props: ITaskPreviewItemProps) => {
         checked={isCompleted}
       />
       <div className='flex flex-col flex-grow gap-2'>
-        <label
-          htmlFor={task.id}
+        <p
           className={`text-sm font-medium cursor-pointer leading-tight ${isCompleted ? 'line-through' : ''}`}
         >
           {task.name}
-        </label>
+        </p>
         <div className='flex flex-row gap-4 items-center'>
           <TaskTimeView
             isDetailView={false}

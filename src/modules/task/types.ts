@@ -1,16 +1,4 @@
-export interface IGoal {
-  id: string
-  name: string
-  description: string
-  stats: IGoalStats
-  isCompleted: boolean
-  createdAt: Date
-}
-
-export interface IGoalStats {
-  totalTask: number
-  totalCompletedTask: number
-}
+import { IGoal } from '@/modules/goal/types.ts'
 
 export enum TaskStatus {
   todo = 'todo',
@@ -34,13 +22,8 @@ export interface ITaskStatusFilter {
   name: string
 }
 
-export interface IGoalsStore {
-  hasFetched: boolean
-  goals: IGoal[]
-  fetchGoals: () => Promise<void>
-}
-
 export interface ITodoTasksStore {
+  hasFetched: boolean
   tasks: ITask[]
   fetchTasks: () => Promise<void>
   isFetching: boolean
@@ -69,16 +52,6 @@ export interface ITaskManipulationStore {
   ) => Promise<boolean>
   updateTask: (task: ITask) => Promise<boolean>
   toggleTask: (task: ITask) => Promise<void>
-}
-
-export interface IGetGoalsApiRequest {
-  keyword: string
-  pageToken: string
-}
-
-export interface IGetGoalsApiResponse {
-  goals: IGoal[]
-  nextPageToken: string
 }
 
 export interface IGetTasksApiRequest {

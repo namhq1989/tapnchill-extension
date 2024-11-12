@@ -7,7 +7,7 @@ import {
 } from '@/modules/task/types.ts'
 import useHttpStore from '@/modules/http/store.ts'
 import { mapTasks } from '@/modules/task/util.ts'
-import useGoalsStore from '@/modules/task/goals-store.ts'
+import useGoalsStore from '@/modules/goal/store.ts'
 
 const useListTasksStore = create<IListTasksStore>((set, get) => ({
   hasFetched: false,
@@ -51,7 +51,7 @@ const useListTasksStore = create<IListTasksStore>((set, get) => ({
     { id: TaskStatus.todo, name: 'Todo' },
     { id: TaskStatus.done, name: 'Done' },
   ],
-  selectedStatusFilterId: 'all',
+  selectedStatusFilterId: TaskStatus.todo,
   selectStatusFilter: async (id: string) => {
     const { selectedStatusFilterId } = get()
     if (selectedStatusFilterId === id) return

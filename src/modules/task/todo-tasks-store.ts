@@ -6,13 +6,17 @@ import {
   TaskStatus,
 } from '@/modules/task/types.ts'
 import useHttpStore from '@/modules/http/store.ts'
-import useGoalsStore from '@/modules/task/goals-store.ts'
 import { mapTasks } from '@/modules/task/util.ts'
+import useGoalsStore from '@/modules/goal/store.ts'
 
-const useTodoTasksStore = create<ITodoTasksStore>((set) => ({
+const useTodoTasksStore = create<ITodoTasksStore>((set, get) => ({
+  hasFetched: false,
   tasks: [],
   isFetching: false,
   fetchTasks: async () => {
+    const { hasFetched } = get()
+    if (hasFetched) return
+
     try {
       set({ isFetching: true })
 
@@ -24,11 +28,13 @@ const useTodoTasksStore = create<ITodoTasksStore>((set) => ({
       set({ isFetching: false })
 
       const { goals } = useGoalsStore.getState()
-      if (response.tasks && response.tasks.length) {
-        set({
-          tasks: mapTasks(response.tasks, goals),
-        })
-      }
+      set({
+        tasks:
+          response.tasks && response.tasks.length
+            ? mapTasks(response.tasks, goals)
+            : [],
+        hasFetched: true,
+      })
     } catch (err) {
       console.log('err', err)
     }
