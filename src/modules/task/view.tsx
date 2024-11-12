@@ -11,12 +11,14 @@ import BackButton from '@/back-button.tsx'
 import useListTasksStore from '@/modules/task/list-tasks-store.ts'
 import { useEffect } from 'react'
 import useTaskManipulationStore from '@/modules/task/task-manipulation-store.ts'
+import { Plus } from 'lucide-react'
+import { Link } from 'react-chrome-extension-router'
+import CreateTaskView from '@/modules/task/task-create.tsx'
 
 const TaskView = () => {
   const {
     tasks,
     init,
-    fetchTasks,
     statusFilters,
     selectedStatusFilterId,
     selectStatusFilter,
@@ -25,12 +27,11 @@ const TaskView = () => {
 
   useEffect(() => {
     const fetch = async () => {
-      init()
-      await fetchTasks()
+      await init()
     }
 
     fetch().then()
-  }, [init, fetchTasks])
+  }, [init])
 
   return (
     <div className='flex flex-col w-[400px] min-h-[600px] scrollbar-hide'>
@@ -39,7 +40,7 @@ const TaskView = () => {
         <HeaderTitle title='Tasks' />
       </div>
       <div className='flex flex-col p-4 gap-4 scrollbar-hide'>
-        <div className='flex flex-row gap-4'>
+        <div className='flex flex-row gap-4 justify-between items-center'>
           <Select
             defaultValue={selectedStatusFilterId}
             onValueChange={(id) => selectStatusFilter(id)}
@@ -55,6 +56,9 @@ const TaskView = () => {
               ))}
             </SelectContent>
           </Select>
+          <Link component={CreateTaskView}>
+            <Plus className='cursor-pointer' />
+          </Link>
         </div>
         <div className='flex flex-col gap-4'>
           {tasks.map((task) => (
@@ -62,7 +66,7 @@ const TaskView = () => {
               key={task.id}
               task={task}
               onToggleTask={async () => {
-                await toggleTask(task.id)
+                await toggleTask(task)
               }}
             />
           ))}

@@ -9,22 +9,30 @@ import useHttpStore from '@/modules/http/store.ts'
 const ID_CHARS =
   'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
 
-const useAppStore = create<IAppStore>((_, get) => ({
+const useAppStore = create<IAppStore>((set, get) => ({
+  isInitializing: false,
   initApp: async () => {
-    chrome.storage.local.get(async (result) => {
-      const anonymousUserId: string = result.anonymousUserId || ''
-      const accessToken: string = result.accessToken || ''
+    set({ isInitializing: true })
 
-      if (!anonymousUserId || !accessToken) {
-        // if user id not found, this means current user is new to the extension
-        // call server api to create a new user
-        const { anonymousSignUp } = get()
-        await anonymousSignUp()
-      } else {
-        // if user id found, this means current user is returning to the extension
-        const { setAccessToken } = useHttpStore.getState()
-        setAccessToken(accessToken)
-      }
+    return new Promise((resolve) => {
+      chrome.storage.local.get(async (result) => {
+        const anonymousUserId: string = result.anonymousUserId || ''
+        const accessToken: string = result.accessToken || ''
+
+        if (!anonymousUserId || !accessToken) {
+          // if user id not found, this means current user is new to the extension
+          // call server api to create a new user
+          const { anonymousSignUp } = get()
+          await anonymousSignUp()
+        } else {
+          // if user id found, this means current user is returning to the extension
+          const { setAccessToken } = useHttpStore.getState()
+          setAccessToken(accessToken)
+        }
+
+        set({ isInitializing: false })
+        resolve()
+      })
     })
   },
   generateAnonymousUserId: (length = 24) => {

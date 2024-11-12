@@ -35,6 +35,7 @@ export interface ITaskStatusFilter {
 }
 
 export interface IGoalsStore {
+  hasFetched: boolean
   goals: IGoal[]
   fetchGoals: () => Promise<void>
 }
@@ -42,17 +43,19 @@ export interface IGoalsStore {
 export interface ITodoTasksStore {
   tasks: ITask[]
   fetchTasks: () => Promise<void>
+  isFetching: boolean
 }
 
 export interface IListTasksStore {
-  init: () => void
+  hasFetched: boolean
+  init: () => Promise<void>
   tasks: ITask[]
   isFetching: boolean
   fetchTasks: () => Promise<void>
 
   statusFilters: ITaskStatusFilter[]
   selectedStatusFilterId: string
-  selectStatusFilter: (id: string) => void
+  selectStatusFilter: (id: string) => Promise<void>
 
   nextPageToken: string
 }
@@ -64,13 +67,8 @@ export interface ITaskManipulationStore {
     dueDate: Date | null,
     goalId: string,
   ) => Promise<boolean>
-  updateTask: (
-    id: string,
-    name: string,
-    description: string,
-    dueDate: Date | null,
-  ) => Promise<boolean>
-  toggleTask: (id: string) => Promise<void>
+  updateTask: (task: ITask) => Promise<boolean>
+  toggleTask: (task: ITask) => Promise<void>
 }
 
 export interface IGetGoalsApiRequest {

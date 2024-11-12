@@ -33,9 +33,6 @@ const useTaskManipulationStore = create<ITaskManipulationStore>(() => ({
         description: 'Task created successfully',
       })
 
-      // update task in store
-      const { tasks: todoTasks } = useTodoTasksStore.getState()
-      const { tasks: listTasks } = useListTasksStore.getState()
       const { goals } = useGoalsStore.getState()
       const goal = goals.find((g) => g.id === goalId)
 
@@ -51,18 +48,23 @@ const useTaskManipulationStore = create<ITaskManipulationStore>(() => ({
         completedAt: null,
       }
 
+      const { tasks: todoTasks } = useTodoTasksStore.getState()
       todoTasks.unshift(newTask)
-      useTodoTasksStore.setState({ tasks: todoTasks })
+      useTodoTasksStore.setState({
+        tasks: todoTasks,
+      })
 
-      listTasks.unshift(newTask)
-      useListTasksStore.setState({ tasks: listTasks })
-
-      chrome.storage.local
-        .set({
-          todoTasks: JSON.stringify(todoTasks),
-          listTasks: JSON.stringify(listTasks),
+      const {
+        tasks: listTasks,
+        selectedStatusFilterId,
+        hasFetched,
+      } = useListTasksStore.getState()
+      if (hasFetched && selectedStatusFilterId !== TaskStatus.done) {
+        listTasks.unshift(newTask)
+        useListTasksStore.setState({
+          tasks: listTasks,
         })
-        .then()
+      }
 
       return true
     } catch (err) {
@@ -72,35 +74,32 @@ const useTaskManipulationStore = create<ITaskManipulationStore>(() => ({
       return false
     }
   },
-  updateTask: async (id, name, description, dueDate): Promise<boolean> => {
+  updateTask: async (task: ITask): Promise<boolean> => {
     const { put: httpPut } = useHttpStore.getState()
     const { showNotification, showErrorNotification } =
       useNotificationStore.getState()
 
     try {
-      await httpPut<ICreateTaskApiResponse>(`api/task/${id}`, {
-        name,
-        description,
-        dueDate,
+      await httpPut<ICreateTaskApiResponse>(`api/task/${task.id}`, {
+        name: task.name,
+        description: task.description,
+        dueDate: task.dueDate,
       } as IUpdateTaskApiRequest)
 
       showNotification({
         description: 'Task updated successfully',
       })
 
+      const { tasks: todoTasks } = useTodoTasksStore.getState()
+      useTodoTasksStore.setState({
+        tasks: todoTasks.map((t) => (t.id === task.id ? task : t)),
+      })
+
       const { tasks: listTasks } = useListTasksStore.getState()
+      useListTasksStore.setState({
+        tasks: listTasks.map((t) => (t.id === task.id ? task : t)),
+      })
 
-      const task = listTasks.find((t) => t.id === id)
-      if (!task) return false
-
-      const newTaskData: ITask = {
-        ...task,
-        name,
-        description,
-        dueDate,
-      }
-
-      updateTaskAndPersistTasksToLocalStorage(newTaskData)
       return true
     } catch (err) {
       showErrorNotification({
@@ -110,58 +109,40 @@ const useTaskManipulationStore = create<ITaskManipulationStore>(() => ({
       return false
     }
   },
-  toggleTask: async (id: string) => {
+  toggleTask: async (task: ITask): Promise<void> => {
     const { patch: httpPatch } = useHttpStore.getState()
-    const { tasks: listTasks } = useListTasksStore.getState()
 
-    const task = listTasks.find((t) => t.id === id)
-    if (!task) return
-
-    let newStatus = TaskStatus.todo
     if (task.status === TaskStatus.todo) {
-      newStatus = TaskStatus.done
+      task.status = TaskStatus.done
+    } else {
+      task.status = TaskStatus.todo
     }
 
     try {
-      await httpPatch<IChangeTaskStatusApiResponse>(`api/task/${id}/status`, {
-        status: newStatus,
-      } as IChangeTaskStatusApiRequest)
+      await httpPatch<IChangeTaskStatusApiResponse>(
+        `api/task/${task.id}/status`,
+        {
+          status: task.status,
+        } as IChangeTaskStatusApiRequest,
+      )
 
-      const newTaskData: ITask = {
-        ...task,
-        status: newStatus,
-        completedAt: new Date(),
+      if (task.status === TaskStatus.done) {
+        task.completedAt = new Date()
       }
 
-      updateTaskAndPersistTasksToLocalStorage(newTaskData)
+      const { tasks: todoTasks } = useTodoTasksStore.getState()
+      useTodoTasksStore.setState({
+        tasks: todoTasks.map((t) => (t.id === task.id ? task : t)),
+      })
+
+      const { tasks: listTasks } = useListTasksStore.getState()
+      useListTasksStore.setState({
+        tasks: listTasks.map((t) => (t.id === task.id ? task : t)),
+      })
     } catch (err) {
       console.log('err', err)
     }
   },
 }))
-
-const updateTaskAndPersistTasksToLocalStorage = (newTaskData: ITask) => {
-  const { tasks: todoTasks } = useTodoTasksStore.getState()
-  const { tasks: listTasks } = useListTasksStore.getState()
-
-  const todoIndex = todoTasks.findIndex((t) => t.id === newTaskData.id)
-  if (todoIndex !== -1) {
-    todoTasks[todoIndex] = newTaskData
-    useTodoTasksStore.setState({ tasks: todoTasks })
-  }
-
-  const listIndex = listTasks.findIndex((t) => t.id === newTaskData.id)
-  if (listIndex !== -1) {
-    listTasks[listIndex] = newTaskData
-    useListTasksStore.setState({ tasks: todoTasks })
-  }
-
-  chrome.storage.local
-    .set({
-      todoTasks: JSON.stringify(todoTasks),
-      listTasks: JSON.stringify(listTasks),
-    })
-    .then()
-}
 
 export default useTaskManipulationStore

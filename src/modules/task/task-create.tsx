@@ -12,7 +12,7 @@ import {
 import { Input } from '@/components/ui/input.tsx'
 import { Textarea } from '@/components/ui/textarea.tsx'
 import { Button } from '@/components/ui/button.tsx'
-import { CalendarIcon } from 'lucide-react'
+import { CalendarIcon, CircleMinus } from 'lucide-react'
 import HeaderTitle from '@/header-title.tsx'
 import {
   Popover,
@@ -22,7 +22,6 @@ import {
 import { cn } from '@/lib/utils.ts'
 import { format } from 'date-fns'
 import { Calendar } from '@/components/ui/calendar.tsx'
-import { TimePickerDemo } from '@/components/ui/timer-picker.tsx'
 import {
   Select,
   SelectContent,
@@ -33,6 +32,7 @@ import {
 import BackButton from '@/back-button.tsx'
 import useGoalsStore from '@/modules/task/goals-store.ts'
 import useTaskManipulationStore from '@/modules/task/task-manipulation-store.ts'
+import { TimePicker } from '@/components/ui/time-picker.tsx'
 
 const FormSchema = z.object({
   name: z
@@ -49,7 +49,7 @@ const FormSchema = z.object({
   goalId: z.string({
     required_error: 'Please select a goal',
   }),
-  dueDate: z.date(),
+  dueDate: z.date().optional(),
 })
 
 const CreateTaskView = () => {
@@ -68,7 +68,7 @@ const CreateTaskView = () => {
     const isSuccess = await createTask(
       data.name,
       data.description,
-      data.dueDate,
+      data.dueDate || null,
       data.goalId,
     )
     if (isSuccess) {
@@ -96,22 +96,33 @@ const CreateTaskView = () => {
                   <FormLabel className='text-left'>Due date</FormLabel>
                   <Popover modal={true}>
                     <FormControl>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant='outline'
-                          className={cn(
-                            'justify-start text-left font-normal focus-visible:ring-transparent',
-                            !field.value && 'text-muted-foreground',
-                          )}
-                        >
-                          <CalendarIcon className='h-4 w-4' />
-                          {field.value ? (
-                            format(field.value, 'dd/MM/yyyy, HH:mm')
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                        </Button>
-                      </PopoverTrigger>
+                      <div className='flex flex-row w-full gap-4 items-center'>
+                        <PopoverTrigger className='flex-grow' asChild>
+                          <Button
+                            variant='outline'
+                            className={cn(
+                              'justify-start text-left font-normal focus-visible:ring-transparent',
+                              !field.value && 'text-muted-foreground',
+                            )}
+                          >
+                            <CalendarIcon className='h-4 w-4' />
+                            {field.value ? (
+                              format(field.value, 'dd/MM/yyyy, HH:mm')
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                          </Button>
+                        </PopoverTrigger>
+                        {field.value && (
+                          <CircleMinus
+                            strokeWidth={1}
+                            className='cursor-pointer text-muted-foreground'
+                            onClick={() => {
+                              form.setValue('dueDate', undefined)
+                            }}
+                          />
+                        )}
+                      </div>
                     </FormControl>
                     <PopoverContent className='w-full p-0'>
                       <Calendar
@@ -120,7 +131,7 @@ const CreateTaskView = () => {
                         onSelect={field.onChange}
                       />
                       <div className='p-3 border-t border-border'>
-                        <TimePickerDemo
+                        <TimePicker
                           setDate={field.onChange}
                           date={field.value}
                         />
@@ -193,7 +204,7 @@ const CreateTaskView = () => {
                 </FormItem>
               )}
             />
-            <Button>Add task</Button>
+            <Button className='mt-4'>Add task</Button>
           </form>
         </Form>
       </div>

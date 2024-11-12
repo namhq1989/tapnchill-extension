@@ -78,14 +78,14 @@ const TaskDetailView = (props: ITaskDetailProps) => {
                 <Button
                   variant='outline'
                   className='mt-8'
-                  onClick={async () => await toggleTask(task.id)}
+                  onClick={async () => await toggleTask(task)}
                 >
                   <Circle /> Reopen Task
                 </Button>
               ) : (
                 <Button
                   className='mt-8'
-                  onClick={async () => await toggleTask(task.id)}
+                  onClick={async () => await toggleTask(task)}
                 >
                   <CircleCheckBig /> Mark as Done
                 </Button>
