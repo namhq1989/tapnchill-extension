@@ -30,9 +30,9 @@ import {
   SelectValue,
 } from '@/components/ui/select.tsx'
 import BackButton from '@/back-button.tsx'
-import useGoalsStore from '@/modules/task/goals-store.ts'
 import useTaskManipulationStore from '@/modules/task/task-manipulation-store.ts'
 import { TimePicker } from '@/components/ui/time-picker.tsx'
+import useGoalsStore from '@/modules/goal/store.ts'
 
 const FormSchema = z.object({
   name: z
@@ -61,6 +61,7 @@ const CreateTaskView = () => {
     defaultValues: {
       name: '',
       description: '',
+      goalId: goals[0].id,
     },
   })
 

@@ -1,5 +1,5 @@
 import { create } from 'zustand/index'
-import { IGetGoalsApiResponse, IGoalsStore } from '@/modules/task/types.ts'
+import { IGetGoalsApiResponse, IGoalsStore } from '@/modules/goal/types.ts'
 import useHttpStore from '@/modules/http/store.ts'
 
 const useGoalsStore = create<IGoalsStore>((set, get) => ({

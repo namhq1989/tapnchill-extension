@@ -15,6 +15,9 @@ import { Textarea } from '@/components/ui/textarea.tsx'
 import { Separator } from '@/components/ui/separator.tsx'
 import HeaderTitle from '@/header-title.tsx'
 import BackButton from '@/back-button.tsx'
+import useAppStore from '@/store.ts'
+import { copyToClipboard } from '@/lib/string.ts'
+import useNotificationStore from '@/modules/notification/store.ts'
 
 const FormSchema = z.object({
   email: z
@@ -37,7 +40,9 @@ const FormSchema = z.object({
 })
 
 const InformationView = () => {
+  const { userId } = useAppStore()
   const { isFeedbackSending, sendFeedback } = useInformationStore()
+  const { showNotification } = useNotificationStore()
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -83,8 +88,19 @@ const InformationView = () => {
         <Separator />
         <div className='flex flex-col justify-start items-start gap-2'>
           <p className='text-lg font-bold'>We appreciate you being here!</p>
-          <p className='mb-4 text-sm'>
+          <p className='text-sm'>
             Got feedback or a feature request? Let us know and help us improve!
+          </p>
+          <p
+            className='text-sm text-muted-foreground mb-4 cursor-pointer'
+            onClick={() => {
+              copyToClipboard(userId)
+              showNotification({
+                description: 'Copied to clipboard',
+              })
+            }}
+          >
+            Your ID: {userId}
           </p>
           <Form {...form}>
             <form

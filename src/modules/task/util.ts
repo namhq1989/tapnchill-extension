@@ -1,4 +1,5 @@
-import { IGoal, ITask } from '@/modules/task/types.ts'
+import { ITask } from '@/modules/task/types.ts'
+import { IGoal } from '@/modules/goal/types.ts'
 
 const mapTasks = (tasks: ITask[], goals: IGoal[]): ITask[] => {
   const result: ITask[] = []

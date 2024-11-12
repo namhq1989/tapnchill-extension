@@ -12,8 +12,9 @@ import { Info } from 'lucide-react'
 import { Link } from 'react-chrome-extension-router'
 import InformationView from '@/modules/information/view.tsx'
 import HeaderTitle from '@/header-title.tsx'
-import useGoalsStore from '@/modules/task/goals-store.ts'
 import useTodoTasksStore from '@/modules/task/todo-tasks-store.ts'
+import useGoalsStore from '@/modules/goal/store.ts'
+import { Badge } from '@/components/ui/badge.tsx'
 
 const HomeView = () => {
   const { initApp, isInitializing } = useAppStore()
@@ -63,6 +64,9 @@ const HomeView = () => {
             <Link component={InformationView}>
               <Info size={20} className='cursor-pointer' />
             </Link>
+            <Badge variant='default' className='cursor-pointer'>
+              Go Pro
+            </Badge>
           </div>
           <div className='flex flex-row gap-4 justify-center'>
             <HeaderTitle title='Tap n Chill' />
@@ -72,7 +76,6 @@ const HomeView = () => {
           {/*<NoteCreateView />*/}
           <StationPreview />
           <TaskPreview />
-          {/*<NotePreview />*/}
           <QuotePreview />
           <WeatherPreview />
           <StatisticPreview />

@@ -11,9 +11,9 @@ import {
 } from '@/modules/task/types.ts'
 import useHttpStore from '@/modules/http/store.ts'
 import useNotificationStore from '@/modules/notification/store.ts'
-import useGoalsStore from '@/modules/task/goals-store.ts'
 import useTodoTasksStore from '@/modules/task/todo-tasks-store.ts'
 import useListTasksStore from '@/modules/task/list-tasks-store.ts'
+import useGoalsStore from '@/modules/goal/store.ts'
 
 const useTaskManipulationStore = create<ITaskManipulationStore>(() => ({
   createTask: async (name, description, dueDate, goalId): Promise<boolean> => {
