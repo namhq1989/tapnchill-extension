@@ -12,7 +12,7 @@ import {
 import { Input } from '@/components/ui/input.tsx'
 import { Textarea } from '@/components/ui/textarea.tsx'
 import { Button } from '@/components/ui/button.tsx'
-import { CalendarIcon } from 'lucide-react'
+import { CalendarIcon, CircleMinus } from 'lucide-react'
 import HeaderTitle from '@/header-title.tsx'
 import {
   Popover,
@@ -22,12 +22,12 @@ import {
 import { cn } from '@/lib/utils.ts'
 import { format } from 'date-fns'
 import { Calendar } from '@/components/ui/calendar.tsx'
-import { TimePickerDemo } from '@/components/ui/timer-picker.tsx'
-import useNotificationStore from '@/modules/notification/store.ts'
+import { TimePicker } from '@/components/ui/time-picker.tsx'
 import BackButton from '@/back-button.tsx'
 import { goBack } from 'react-chrome-extension-router'
 import { ITask } from '@/modules/task/types.ts'
 import useTaskManipulationStore from '@/modules/task/task-manipulation-store.ts'
+import { useEffect } from 'react'
 
 const FormSchema = z.object({
   name: z
@@ -41,7 +41,7 @@ const FormSchema = z.object({
   description: z.string().max(300, {
     message: 'Task description must not be longer than 300 characters',
   }),
-  dueDate: z.date(),
+  dueDate: z.date().optional(),
 })
 
 export interface IEditTaskViewProps {
@@ -49,34 +49,28 @@ export interface IEditTaskViewProps {
 }
 
 const EditTaskView = (props: IEditTaskViewProps) => {
-  const { showErrorNotification } = useNotificationStore()
-  const { updateTask } = useTaskManipulationStore()
   const { task } = props
+  const { updateTask } = useTaskManipulationStore()
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      name: task?.name || '',
-      description: task?.description || '',
-      dueDate: task?.dueDate || undefined,
+      name: task.name || '',
+      description: task.description || '',
     },
   })
 
-  if (!task) {
-    showErrorNotification({
-      description: 'Task not found',
-    })
-    goBack()
-    return null
-  }
+  useEffect(() => {
+    form.setValue('dueDate', task.dueDate || undefined)
+  }, [form, task])
 
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
-    const isSuccess = await updateTask(
-      task.id,
-      data.name,
-      data.description,
-      data.dueDate,
-    )
+    const updateData = {
+      ...task,
+      ...data,
+    }
+
+    const isSuccess = await updateTask(updateData)
     if (isSuccess) {
       form.reset()
       goBack()
@@ -103,22 +97,33 @@ const EditTaskView = (props: IEditTaskViewProps) => {
                   <FormLabel className='text-left'>Due date</FormLabel>
                   <Popover modal={true}>
                     <FormControl>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant='outline'
-                          className={cn(
-                            'justify-start text-left font-normal focus-visible:ring-transparent',
-                            !field.value && 'text-muted-foreground',
-                          )}
-                        >
-                          <CalendarIcon className='h-4 w-4' />
-                          {field.value ? (
-                            format(field.value, 'dd/MM/yyyy, HH:mm')
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                        </Button>
-                      </PopoverTrigger>
+                      <div className='flex flex-row w-full gap-4 items-center'>
+                        <PopoverTrigger className='flex-grow' asChild>
+                          <Button
+                            variant='outline'
+                            className={cn(
+                              'justify-start text-left font-normal focus-visible:ring-transparent',
+                              !field.value && 'text-muted-foreground',
+                            )}
+                          >
+                            <CalendarIcon className='h-4 w-4' />
+                            {field.value ? (
+                              format(field.value, 'dd/MM/yyyy, HH:mm')
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                          </Button>
+                        </PopoverTrigger>
+                        {field.value && (
+                          <CircleMinus
+                            strokeWidth={1}
+                            className='cursor-pointer text-muted-foreground'
+                            onClick={() => {
+                              form.setValue('dueDate', undefined)
+                            }}
+                          />
+                        )}
+                      </div>
                     </FormControl>
                     <PopoverContent className='w-full p-0'>
                       <Calendar
@@ -127,7 +132,7 @@ const EditTaskView = (props: IEditTaskViewProps) => {
                         onSelect={field.onChange}
                       />
                       <div className='p-3 border-t border-border'>
-                        <TimePickerDemo
+                        <TimePicker
                           setDate={field.onChange}
                           date={field.value}
                         />
@@ -172,7 +177,7 @@ const EditTaskView = (props: IEditTaskViewProps) => {
                 </FormItem>
               )}
             />
-            <Button>Update task</Button>
+            <Button className='mt-4'>Update task</Button>
           </form>
         </Form>
       </div>

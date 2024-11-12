@@ -12,11 +12,11 @@ import { Info } from 'lucide-react'
 import { Link } from 'react-chrome-extension-router'
 import InformationView from '@/modules/information/view.tsx'
 import HeaderTitle from '@/header-title.tsx'
-import useTodoTasksStore from '@/modules/task/todo-tasks-store.ts'
 import useGoalsStore from '@/modules/task/goals-store.ts'
+import useTodoTasksStore from '@/modules/task/todo-tasks-store.ts'
 
 const HomeView = () => {
-  const { initApp } = useAppStore()
+  const { initApp, isInitializing } = useAppStore()
   const { initStations } = useStationsStore()
   const { initAmbiences } = useAmbiencesStore()
   const { fetchGoals } = useGoalsStore()
@@ -24,15 +24,27 @@ const HomeView = () => {
 
   useEffect(() => {
     const init = async () => {
-      await initApp()
       initStations()
       initAmbiences()
       await fetchGoals()
       await fetchTasks()
     }
 
-    init().then()
+    const initialize = async () => {
+      await initApp() // Wait for initApp to complete
+      await init()
+    }
+
+    initialize().then()
   }, [initApp, initStations, initAmbiences, fetchGoals, fetchTasks])
+
+  if (isInitializing) {
+    return (
+      <div className='flex flex-col w-full h-full justify-center items-center'>
+        <span className='loading loading-spinner text-primary'></span>
+      </div>
+    )
+  }
 
   return (
     <>

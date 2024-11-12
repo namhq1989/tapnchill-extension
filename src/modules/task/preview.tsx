@@ -36,7 +36,7 @@ const TaskPreview = () => {
             key={task.id}
             task={task}
             onToggleTask={async () => {
-              await toggleTask(task.id)
+              await toggleTask(task)
             }}
           />
         ))}
