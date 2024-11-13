@@ -1,6 +1,6 @@
 import BackButton from '@/back-button.tsx'
 import HeaderTitle from '@/header-title.tsx'
-import { Plus, Settings } from 'lucide-react'
+import { PencilRuler, Plus } from 'lucide-react'
 import { Link } from 'react-chrome-extension-router'
 import HabitCreateView from '@/modules/habit/habit-create.tsx'
 
@@ -13,12 +13,13 @@ const HabitView = () => {
       </div>
       <div className='flex flex-col p-4 gap-4 scrollbar-hide'>
         <WeekdaysView />
-        <div className='flex flex-row my-4 gap-2 justify-center items-center cursor-pointer'>
+        <Link
+          component={HabitCreateView}
+          className='flex flex-row my-4 gap-2 justify-center items-center cursor-pointer'
+        >
           <Plus />
-          <Link component={HabitCreateView}>
-            <p className='text-sm font-bold'>New activity</p>
-          </Link>
-        </div>
+          <p className='text-sm font-bold'>New activity</p>
+        </Link>
         <div className='flex flex-col gap-2'>
           <HabitRecordsView />
           <HabitRecordsView />
@@ -36,7 +37,7 @@ const WeekdaysView = () => {
     <div className='flex flex-row gap-2 justify-around'>
       <div className='flex flex-col gap-1 w-full cursor-pointer'>
         <p className='self-center'>M</p>
-        <div className='flex h-8 border border-dashed border-primary rounded-sm items-center justify-center'>
+        <div className='flex h-8 border border-dashed border-red-600 rounded-sm items-center justify-center'>
           15
         </div>
       </div>
@@ -85,11 +86,11 @@ const HabitRecordsView = () => {
     <div className='flex flex-col gap-4 container-selected p-4 rounded-xl'>
       <div className='flex flex-row w-full gap-2 items-center'>
         <img src='/habit/running.png' alt='running' width={40} height={40} />
-        <div className='flex flex-col flex-grow gap-2'>
-          <p className='text-sm font-medium leading-5'>Running (Streak: 3)</p>
+        <div className='flex flex-col flex-grow'>
+          <p className='text-sm font-medium leading-5'>Running</p>
           <p className='text-xs text-muted-foreground'>In 30 minutes</p>
         </div>
-        <Settings strokeWidth={1} size={20} className='w-8 cursor-pointer' />
+        <PencilRuler strokeWidth={1} size={16} className='w-8 cursor-pointer' />
       </div>
       <WeekdaysView />
     </div>

@@ -5,6 +5,8 @@ export interface IAppStore {
   generateAnonymousUserId: (length: number) => string
   createAnonymousSignUpChecksum: (anonymousUserId: string) => Promise<string>
   anonymousSignUp: () => Promise<void>
+
+  weekdays: IWeekday[]
 }
 
 export interface IAnonymousSignUpApiRequest {
@@ -15,4 +17,9 @@ export interface IAnonymousSignUpApiRequest {
 
 export interface IAnonymousSignUpApiResponse {
   accessToken: string
+}
+
+export interface IWeekday {
+  id: string
+  name: string
 }

@@ -91,6 +91,37 @@ const useAppStore = create<IAppStore>((set, get) => ({
         .then()
     }
   },
+
+  weekdays: [
+    {
+      id: 'monday',
+      name: 'Mon',
+    },
+    {
+      id: 'tuesday',
+      name: 'Tue',
+    },
+    {
+      id: 'wednesday',
+      name: 'Wed',
+    },
+    {
+      id: 'thursday',
+      name: 'Thu',
+    },
+    {
+      id: 'friday',
+      name: 'Fri',
+    },
+    {
+      id: 'saturday',
+      name: 'Sat',
+    },
+    {
+      id: 'sunday',
+      name: 'Sun',
+    },
+  ],
 }))
 
 export default useAppStore
