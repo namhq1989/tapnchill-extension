@@ -13,7 +13,7 @@ const TaskPreview = () => {
   return (
     <div className='flex flex-col w-full gap-2'>
       <div className='flex flex-row justify-between items-center'>
-        <h2 className='text-base font-bold tracking-wide'>Tasks</h2>
+        <h2 className='text-base font-bold tracking-wide'>TO-DO Tasks</h2>
         <div className='flex flex-row gap-4'>
           <Link component={CreateTaskView}>
             <Plus className='cursor-pointer' />
@@ -23,7 +23,7 @@ const TaskPreview = () => {
           </Link>
         </div>
       </div>
-      <div className='flex flex-col gap-4'>
+      <div className='flex flex-col gap-2'>
         {tasks.length === 0 && (
           <div className='flex flex-col gap-2 items-center py-4 mb-4'>
             <p className='text-sm text-muted-foreground'>

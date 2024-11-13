@@ -15,6 +15,7 @@ import HeaderTitle from '@/header-title.tsx'
 import useTodoTasksStore from '@/modules/task/todo-tasks-store.ts'
 import useGoalsStore from '@/modules/goal/store.ts'
 import { Badge } from '@/components/ui/badge.tsx'
+import HabitPreview from '@/modules/habit/preview.tsx'
 
 const HomeView = () => {
   const { initApp, isInitializing } = useAppStore()
@@ -75,6 +76,7 @@ const HomeView = () => {
         <div className='flex flex-col p-4 gap-x-4 gap-y-8 scrollbar-hide'>
           {/*<NoteCreateView />*/}
           <StationPreview />
+          <HabitPreview />
           <TaskPreview />
           <QuotePreview />
           <WeatherPreview />
