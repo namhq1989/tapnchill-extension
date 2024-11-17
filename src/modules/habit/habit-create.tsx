@@ -15,6 +15,10 @@ import { Button } from '@/components/ui/button.tsx'
 import { Input } from '@/components/ui/input.tsx'
 import useAppStore from '@/store.ts'
 import useHabitsStore from '@/modules/habit/store.ts'
+import { Info } from 'lucide-react'
+import { IHabit } from '@/modules/habit/types.ts'
+import { goBack } from 'react-chrome-extension-router'
+import { useEffect } from 'react'
 
 const FormSchema = z.object({
   name: z
@@ -25,33 +29,86 @@ const FormSchema = z.object({
     .max(30, {
       message: 'Activity name must not be longer than 30 characters',
     }),
-  target: z.string().max(50, {
-    message: 'Keep the target as short as possible',
-  }),
-  weekdays: z.array(z.string()).nonempty({
+  goal: z
+    .string()
+    .min(3, {
+      message: 'Activity goal must be at least 3 characters',
+    })
+    .max(50, {
+      message: 'Keep the goal as short as possible',
+    }),
+  daysOfWeek: z.array(z.number()).nonempty({
     message: 'Please select at least one day',
   }),
   icon: z.string({
     required_error: 'Please select an icon',
   }),
+  sortOrder: z.number().default(1),
 })
 
-const HabitCreateView = () => {
+interface IHabitCreateViewProps {
+  habit: IHabit | null
+}
+
+const HabitCreateView = (props: IHabitCreateViewProps) => {
+  const { habit } = props
   const { weekdays } = useAppStore()
-  const { icons } = useHabitsStore()
+  const { icons, createHabit, updateHabit } = useHabitsStore()
+
+  const isUpdating = habit !== null
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
       name: '',
-      target: '',
-      weekdays: [],
+      goal: '',
+      daysOfWeek: [],
       icon: '',
+      sortOrder: 1,
     },
   })
 
+  useEffect(() => {
+    if (isUpdating && habit) {
+      form.setValue('name', habit.name || '')
+      form.setValue('goal', habit.goal || '')
+      form.setValue(
+        'daysOfWeek',
+        (habit.daysOfWeek && habit.daysOfWeek.length > 0
+          ? habit.daysOfWeek
+          : [0]) as [number, ...number[]],
+      )
+      form.setValue('icon', habit.icon || '')
+      form.setValue('sortOrder', habit.sortOrder || 1)
+    }
+  }, [isUpdating, habit, form])
+
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
     console.log('data', data)
+
+    if (isUpdating) {
+      habit.name = data.name
+      habit.goal = data.goal
+      habit.daysOfWeek = data.daysOfWeek
+      habit.icon = data.icon
+      habit.sortOrder = data.sortOrder
+      const isSuccess = await updateHabit(habit)
+      if (isSuccess) {
+        form.reset()
+        goBack()
+      }
+    } else {
+      const isSuccess = await createHabit(
+        data.name,
+        data.goal,
+        data.daysOfWeek,
+        data.icon,
+        data.sortOrder,
+      )
+      if (isSuccess) {
+        form.reset()
+      }
+    }
   }
 
   return (
@@ -85,14 +142,14 @@ const HabitCreateView = () => {
             />
             <FormField
               control={form.control}
-              name='target'
+              name='goal'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Target</FormLabel>
+                  <FormLabel>Goal</FormLabel>
                   <FormControl>
                     <Input
                       className='focus-visible:ring-transparent'
-                      placeholder='Activity target (30 minutes, 2000ml, 5 cups...)'
+                      placeholder='Activity goal (in 30 minutes, 2000ml, 5 cups...)'
                       {...field}
                     />
                   </FormControl>
@@ -102,16 +159,16 @@ const HabitCreateView = () => {
             />
             <FormField
               control={form.control}
-              name='weekdays'
+              name='daysOfWeek'
               render={() => (
                 <FormItem>
-                  <FormLabel>Weekdays</FormLabel>
+                  <FormLabel>Days of week</FormLabel>
                   <FormControl>
                     <div className='flex flex-row gap-2 justify-around'>
                       {weekdays.map((day) => (
                         <Controller
                           key={day.id}
-                          name='weekdays'
+                          name='daysOfWeek'
                           control={form.control}
                           render={({ field }) => (
                             <div
@@ -176,7 +233,41 @@ const HabitCreateView = () => {
                 </FormItem>
               )}
             />
-            <Button className='mt-4'>Add activity</Button>
+            <FormField
+              control={form.control}
+              name='sortOrder'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Order</FormLabel>
+                  <FormControl>
+                    <Input
+                      className='focus-visible:ring-transparent'
+                      placeholder='Sort ascending'
+                      type='number'
+                      {...field}
+                      value={field.value || ''}
+                      onChange={(e) =>
+                        field.onChange(e.target.valueAsNumber || 0)
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className='flex flex-col m4-4 gap-4'>
+              {!isUpdating && (
+                <div className='flex flex-row gap-2'>
+                  <Info strokeWidth={1} />
+                  <span className='text-sm text-muted-foreground'>
+                    New habits will be added to your daily schedule starting the
+                    next day after creation
+                  </span>
+                </div>
+              )}
+              <Button>{isUpdating ? 'Update activity' : 'Add activity'}</Button>
+            </div>
           </form>
         </Form>
       </div>

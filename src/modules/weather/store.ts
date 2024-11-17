@@ -11,7 +11,7 @@ const FETCH_WEATHER_INTERVAL = 3600000 // 1 hour
 const useWeatherStore = create<IWeatherStore>((set) => ({
   city: '',
   weather: null,
-  getWeather: async () => {
+  fetchWeather: async () => {
     chrome.storage.local.get(async (result) => {
       const now = new Date()
       const city: string = result.city || ''

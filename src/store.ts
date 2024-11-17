@@ -94,31 +94,31 @@ const useAppStore = create<IAppStore>((set, get) => ({
 
   weekdays: [
     {
-      id: 'monday',
+      id: 1,
       name: 'Mon',
     },
     {
-      id: 'tuesday',
+      id: 2,
       name: 'Tue',
     },
     {
-      id: 'wednesday',
+      id: 3,
       name: 'Wed',
     },
     {
-      id: 'thursday',
+      id: 4,
       name: 'Thu',
     },
     {
-      id: 'friday',
+      id: 5,
       name: 'Fri',
     },
     {
-      id: 'saturday',
+      id: 6,
       name: 'Sat',
     },
     {
-      id: 'sunday',
+      id: 0,
       name: 'Sun',
     },
   ],

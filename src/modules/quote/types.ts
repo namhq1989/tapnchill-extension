@@ -9,5 +9,5 @@ export interface IGetQuoteApiResponse {
 
 export interface IQuoteStore {
   quote: IQuote | null
-  getQuote: () => Promise<void>
+  fetchQuote: () => Promise<void>
 }

@@ -10,7 +10,7 @@ const FETCH_QUOTE_INTERVAL = 3600000 // 1 hour
 
 const useQuoteStore = create<IQuoteStore>((set) => ({
   quote: null,
-  getQuote: async () => {
+  fetchQuote: async () => {
     chrome.storage.local.get(async (result) => {
       const now = new Date()
       const quoteStr: string = result.quote || ''

@@ -16,20 +16,36 @@ import useTodoTasksStore from '@/modules/task/todo-tasks-store.ts'
 import useGoalsStore from '@/modules/goal/store.ts'
 import { Badge } from '@/components/ui/badge.tsx'
 import HabitPreview from '@/modules/habit/preview.tsx'
+import useQuoteStore from '@/modules/quote/store.ts'
+import useWeatherStore from '@/modules/weather/store.ts'
+import useHabitsStore from '@/modules/habit/store.ts'
 
 const HomeView = () => {
   const { initApp, isInitializing } = useAppStore()
   const { initStations } = useStationsStore()
   const { initAmbiences } = useAmbiencesStore()
+  const { fetchQuote } = useQuoteStore()
+  const { fetchWeather } = useWeatherStore()
   const { fetchGoals } = useGoalsStore()
   const { fetchTasks } = useTodoTasksStore()
+  const { fetchStats, fetchHabits } = useHabitsStore()
 
   useEffect(() => {
     const init = async () => {
       initStations()
       initAmbiences()
-      await fetchGoals()
-      await fetchTasks()
+
+      await Promise.all([
+        fetchQuote(),
+        fetchWeather(),
+        fetchGoals(),
+        fetchStats(),
+      ])
+
+      await Promise.all([
+        fetchTasks(),
+        fetchHabits(),
+      ])
     }
 
     const initialize = async () => {
@@ -38,7 +54,15 @@ const HomeView = () => {
     }
 
     initialize().then()
-  }, [initApp, initStations, initAmbiences, fetchGoals, fetchTasks])
+  }, [
+    initApp,
+    initStations,
+    initAmbiences,
+    fetchQuote,
+    fetchWeather,
+    fetchGoals,
+    fetchTasks,
+  ])
 
   if (isInitializing) {
     return (
