@@ -20,7 +20,7 @@ const TaskPreviewItem = (props: ITaskPreviewItemProps) => {
         onCheckedChange={() => onToggleTask()}
         checked={isCompleted}
       />
-      <div className='flex flex-col flex-grow gap-2'>
+      <div className='flex flex-col flex-grow gap-1'>
         <p
           className={`text-sm font-medium cursor-pointer leading-tight ${isCompleted ? 'line-through' : ''}`}
         >

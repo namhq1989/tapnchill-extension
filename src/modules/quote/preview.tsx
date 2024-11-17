@@ -1,15 +1,7 @@
 import useQuoteStore from '@/modules/quote/store.ts'
-import { useEffect } from 'react'
 
 const QuotePreview = () => {
-  const { quote, getQuote } = useQuoteStore()
-
-  useEffect(() => {
-    const fetchData = async () => {
-      await getQuote()
-    }
-    fetchData().then()
-  }, [getQuote])
+  const { quote } = useQuoteStore()
 
   if (!quote) return null
 

@@ -20,6 +20,6 @@ export interface IAnonymousSignUpApiResponse {
 }
 
 export interface IWeekday {
-  id: string
+  id: number
   name: string
 }

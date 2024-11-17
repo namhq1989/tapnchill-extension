@@ -1,16 +1,8 @@
-import { useEffect } from 'react'
 import useWeatherStore from '@/modules/weather/store.ts'
 import { Droplets, Thermometer, Waves, Wind } from 'lucide-react'
 
 const WeatherPreview = () => {
-  const { city, weather, getWeather } = useWeatherStore()
-
-  useEffect(() => {
-    const fetchData = async () => {
-      await getWeather()
-    }
-    fetchData().then()
-  }, [getWeather])
+  const { city, weather } = useWeatherStore()
 
   if (!weather) return null
 

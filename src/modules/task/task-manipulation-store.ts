@@ -7,6 +7,7 @@ import {
   ITask,
   ITaskManipulationStore,
   IUpdateTaskApiRequest,
+  IUpdateTaskApiResponse,
   TaskStatus,
 } from '@/modules/task/types.ts'
 import useHttpStore from '@/modules/http/store.ts'
@@ -80,7 +81,7 @@ const useTaskManipulationStore = create<ITaskManipulationStore>(() => ({
       useNotificationStore.getState()
 
     try {
-      await httpPut<ICreateTaskApiResponse>(`api/task/${task.id}`, {
+      await httpPut<IUpdateTaskApiResponse>(`api/task/${task.id}`, {
         name: task.name,
         description: task.description,
         dueDate: task.dueDate,

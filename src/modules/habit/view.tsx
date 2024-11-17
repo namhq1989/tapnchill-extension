@@ -1,10 +1,18 @@
 import BackButton from '@/back-button.tsx'
 import HeaderTitle from '@/header-title.tsx'
-import { PencilRuler, Plus } from 'lucide-react'
+import { Plus, Settings } from 'lucide-react'
 import { Link } from 'react-chrome-extension-router'
 import HabitCreateView from '@/modules/habit/habit-create.tsx'
+import useHabitsStore from '@/modules/habit/store.ts'
+import { HabitStatus, IHabit, IHabitDailyStats } from '@/modules/habit/types.ts'
+import { addDays, format, isSameDay, subDays } from 'date-fns'
+import { getDateNameFirstLetter } from '@/lib/date.ts'
+import DailyActivitiesView from '@/modules/habit/daily-activities-view.tsx'
+import HabitInfoView from '@/modules/habit/habit-info.tsx'
 
 const HabitView = () => {
+  const { habits, stats } = useHabitsStore()
+
   return (
     <div className='flex flex-col w-[400px] min-h-[600px] scrollbar-hide'>
       <div className='flex w-full flex-row justify-between p-4 border-b-[1px]'>
@@ -12,7 +20,7 @@ const HabitView = () => {
         <HeaderTitle title='Daily activities' />
       </div>
       <div className='flex flex-col p-4 gap-4 scrollbar-hide'>
-        <WeekdaysView />
+        <StatsSummaryView stats={stats} />
         <Link
           component={HabitCreateView}
           className='flex flex-row my-4 gap-2 justify-center items-center cursor-pointer'
@@ -21,80 +29,174 @@ const HabitView = () => {
           <p className='text-sm font-bold'>New activity</p>
         </Link>
         <div className='flex flex-col gap-2'>
-          <HabitRecordsView />
-          <HabitRecordsView />
-          <HabitRecordsView />
-          <HabitRecordsView />
-          <HabitRecordsView />
+          {habits.map((habit) => (
+            <HabitRecordsView key={habit.id} habit={habit} stats={stats} />
+          ))}
         </div>
       </div>
     </div>
   )
 }
 
-const WeekdaysView = () => {
+interface IStatsSummaryViewProps {
+  stats: IHabitDailyStats[]
+}
+
+const StatsSummaryView = (props: IStatsSummaryViewProps) => {
+  const { stats } = props
+  const dates = generateDateArray()
+
+  const isAllCompleted = (date: Date): boolean => {
+    const stat = stats.find((stat) => isSameDay(new Date(stat.date), date))
+    return stat ? stat.completedCount >= stat.scheduledCount : false
+  }
+
   return (
     <div className='flex flex-row gap-2 justify-around'>
-      <div className='flex flex-col gap-1 w-full cursor-pointer'>
-        <p className='self-center'>M</p>
-        <div className='flex h-8 border border-dashed border-red-600 rounded-sm items-center justify-center'>
-          15
-        </div>
-      </div>
-      <div className='flex flex-col gap-1 w-full cursor-pointer'>
-        <p className='self-center'>T</p>
-        <div className='flex h-8 bg-primary text-primary-foreground rounded-sm items-center justify-center'>
-          16
-        </div>
-      </div>
-      <div className='flex flex-col gap-1 w-full cursor-pointer'>
-        <p className='self-center'>W</p>
-        <div className='flex h-8 bg-primary text-primary-foreground rounded-sm items-center justify-center'>
-          17
-        </div>
-      </div>
-      <div className='flex flex-col gap-1 w-full cursor-pointer'>
-        <p className='self-center'>T</p>
-        <div className='flex h-8 text-primary ring-1 ring-primary rounded-sm items-center justify-center'>
-          18
-        </div>
-      </div>
-      <div className='flex flex-col gap-1 w-full cursor-not-allowed'>
-        <p className='self-center'>F</p>
-        <div className='flex h-8 text-muted-foreground ring-1 ring-muted-foreground rounded-sm items-center justify-center'>
-          19
-        </div>
-      </div>
-      <div className='flex flex-col gap-1 w-full cursor-not-allowed'>
-        <p className='self-center'>S</p>
-        <div className='flex h-8 text-muted-foreground ring-1 ring-muted-foreground rounded-sm items-center justify-center'>
-          20
-        </div>
-      </div>
-      <div className='flex flex-col gap-1 w-full cursor-not-allowed'>
-        <p className='self-center'>S</p>
-        <div className='flex h-8 text-muted-foreground ring-1 ring-muted-foreground rounded-sm items-center justify-center'>
-          21
-        </div>
-      </div>
+      {dates.map((date, index) => {
+        let styles = ''
+        if (index === dates.length - 1) {
+          styles =
+            'text-muted-foreground ring-1 ring-muted-foreground cursor-not-allowed'
+        } else if (isAllCompleted(date)) {
+          styles = 'bg-primary text-primary-foreground'
+        } else if (index === dates.length - 2) {
+          styles = 'border border-primary'
+        } else {
+          styles = 'border border-dashed border-red-400'
+        }
+
+        return (
+          <DailyActivitiesView
+            key={date.getTime()}
+            date={date}
+            styles={styles}
+          />
+        )
+
+        // return (
+        //   <div
+        //     key={`stats-summary-${date.getDay()}`}
+        //     className='flex flex-col gap-1 w-full cursor-pointer'
+        //   >
+        //     <p className='self-center'>{getDateNameFirstLetter(date)}</p>
+        //     <div
+        //       className={`flex aspect-square rounded-full items-center justify-center ${styles}`}
+        //     >
+        //       {format(date, 'dd')}
+        //     </div>
+        //   </div>
+        // )
+      })}
     </div>
   )
 }
 
-const HabitRecordsView = () => {
+interface IHabitStatsViewProps {
+  habit: IHabit
+  stats: IHabitDailyStats[]
+}
+
+const HabitStatsView = (props: IHabitStatsViewProps) => {
+  const { habit, stats } = props
+  const dates = generateDateArray()
+
+  const isCompleted = (date: Date): boolean => {
+    const stat = stats.find((stat) => isSameDay(new Date(stat.date), date))
+    return stat ? stat.completedIds.includes(habit.id) : false
+  }
+
   return (
-    <div className='flex flex-col gap-4 container-selected p-4 rounded-xl'>
-      <div className='flex flex-row w-full gap-2 items-center'>
-        <img src='/habit/running.png' alt='running' width={40} height={40} />
-        <div className='flex flex-col flex-grow'>
-          <p className='text-sm font-medium leading-5'>Running</p>
-          <p className='text-xs text-muted-foreground'>In 30 minutes</p>
-        </div>
-        <PencilRuler strokeWidth={1} size={16} className='w-8 cursor-pointer' />
-      </div>
-      <WeekdaysView />
+    <div className='flex flex-row gap-2 justify-around'>
+      {dates.map((date, index) => {
+        const isScheduled = habit.daysOfWeek.includes(date.getDay())
+
+        let styles = ''
+        if (index === dates.length - 1) {
+          styles = 'text-muted-foreground ring-1 ring-muted-foreground'
+        } else if (isCompleted(date)) {
+          styles = 'bg-primary text-primary-foreground'
+        } else if (index === dates.length - 2) {
+          styles = 'border border-primary'
+        } else if (!isScheduled) {
+          styles = 'border border-dashed border-muted-foreground'
+        } else {
+          styles = 'border border-dashed border-red-400'
+        }
+
+        return (
+          <div
+            key={`habit-stat-${date.getDay()}`}
+            className='flex flex-col gap-1 w-full'
+          >
+            <p
+              className={`self-center ${isScheduled ? '' : 'text-muted-foreground line-through'}`}
+            >
+              {getDateNameFirstLetter(date)}
+            </p>
+            <div
+              className={`flex aspect-square rounded-full items-center justify-center ${styles}`}
+            >
+              {format(date, 'dd')}
+            </div>
+          </div>
+        )
+      })}
     </div>
   )
+}
+
+interface IHabitRecordsViewProps {
+  habit: IHabit
+  stats: IHabitDailyStats[]
+}
+
+const HabitRecordsView = (props: IHabitRecordsViewProps) => {
+  const { habit, stats } = props
+  const isActive = habit.status === HabitStatus.active
+
+  return (
+    <div
+      className={`flex flex-col gap-4 ${isActive ? 'container-selected' : 'bg-muted/40'} p-4 rounded-xl`}
+    >
+      <div className='flex flex-row w-full gap-2 items-center'>
+        <img
+          src={`/habit/${habit.icon}.png`}
+          alt={habit.icon}
+          width={40}
+          height={40}
+        />
+        <div className='flex flex-col flex-grow'>
+          <div className='flex flex-row gap-1'>
+            {!isActive && (
+              <p className='text-xs font-medium leading-5 text-red-400'>
+                [Inactive]
+              </p>
+            )}
+            <p
+              className={`text-sm font-medium leading-5 ${!isActive ? 'text-muted-foreground' : ''}`}
+            >
+              {habit.name}
+            </p>
+          </div>
+          <p className='text-xs text-muted-foreground'>{habit.goal}</p>
+        </div>
+        <div className='flex flex-row gap-2'>
+          <HabitInfoView habit={habit} />
+          <Link component={HabitCreateView} props={{ habit }}>
+            <Settings strokeWidth={1} size={16} className='cursor-pointer' />
+          </Link>
+        </div>
+      </div>
+      <HabitStatsView habit={habit} stats={stats} />
+    </div>
+  )
+}
+
+const generateDateArray = (): Date[] => {
+  const today = new Date()
+  const startDate = subDays(today, 5) // Start 5 days before today
+  return Array.from({ length: 7 }, (_, index) => addDays(startDate, index))
 }
 
 export default HabitView

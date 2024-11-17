@@ -1,7 +1,7 @@
 export interface IWeatherStore {
   city: string
   weather: IWeather | null
-  getWeather: () => Promise<void>
+  fetchWeather: () => Promise<void>
 }
 
 export interface IWeather {

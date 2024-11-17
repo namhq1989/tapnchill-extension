@@ -92,7 +92,7 @@ const TaskDetailView = (props: ITaskDetailProps) => {
               )}
 
               <Link component={EditTaskView} props={{ task }}>
-                <Button variant='secondary' className='w-full my-2'>
+                <Button variant='secondary' className='w-full'>
                   <Edit /> Edit
                 </Button>
               </Link>
