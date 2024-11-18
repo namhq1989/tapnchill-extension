@@ -47,7 +47,7 @@ const FormSchema = z.object({
 })
 
 interface IHabitCreateViewProps {
-  habit: IHabit | null
+  habit: IHabit | undefined
 }
 
 const HabitCreateView = (props: IHabitCreateViewProps) => {
@@ -55,7 +55,7 @@ const HabitCreateView = (props: IHabitCreateViewProps) => {
   const { weekdays } = useAppStore()
   const { icons, createHabit, updateHabit } = useHabitsStore()
 
-  const isUpdating = habit !== null
+  const isUpdating = habit !== undefined
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -84,8 +84,6 @@ const HabitCreateView = (props: IHabitCreateViewProps) => {
   }, [isUpdating, habit, form])
 
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
-    console.log('data', data)
-
     if (isUpdating) {
       habit.name = data.name
       habit.goal = data.goal
@@ -115,7 +113,7 @@ const HabitCreateView = (props: IHabitCreateViewProps) => {
     <div className='flex flex-col w-[400px] min-h-[600px] scrollbar-hide'>
       <div className='flex w-full flex-row justify-between p-4 border-b-[1px]'>
         <BackButton />
-        <HeaderTitle title='Create activity' />
+        <HeaderTitle title={isUpdating ? 'Edit Activity' : 'New Activity'} />
       </div>
       <div className='flex flex-col p-4 gap-4 scrollbar-hide'>
         <Form {...form}>

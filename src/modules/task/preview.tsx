@@ -33,7 +33,7 @@ const TaskPreview = () => {
         )}
         {tasks.map((task) => (
           <TaskPreviewItem
-            key={task.id}
+            key={`preview-task-${task.id}`}
             task={task}
             onToggleTask={async () => {
               await toggleTask(task)

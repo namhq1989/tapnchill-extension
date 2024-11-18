@@ -9,13 +9,15 @@ export interface IGoal {
 
 export interface IGoalStats {
   totalTask: number
-  totalCompletedTask: number
+  totalDoneTask: number
 }
 
 export interface IGoalsStore {
   hasFetched: boolean
   goals: IGoal[]
   fetchGoals: () => Promise<void>
+  createGoal: (name: string, description: string) => Promise<boolean>
+  updateGoal: (goal: IGoal) => Promise<boolean>
 }
 
 export interface IGetGoalsApiRequest {
@@ -26,4 +28,22 @@ export interface IGetGoalsApiRequest {
 export interface IGetGoalsApiResponse {
   goals: IGoal[]
   nextPageToken: string
+}
+
+export interface ICreateGoalApiRequest {
+  name: string
+  description: string
+}
+
+export interface ICreateGoalApiResponse {
+  id: string
+}
+
+export interface IUpdateGoalApiRequest {
+  name: string
+  description: string
+}
+
+export interface IUpdateGoalApiResponse {
+  id: string
 }

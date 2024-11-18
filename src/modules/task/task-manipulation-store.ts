@@ -67,6 +67,13 @@ const useTaskManipulationStore = create<ITaskManipulationStore>(() => ({
         })
       }
 
+      if (goal) {
+        goal.stats.totalTask++
+        useGoalsStore.setState({
+          goals: goals.map((g) => (g.id === goalId ? goal : g)),
+        })
+      }
+
       return true
     } catch (err) {
       showErrorNotification({
