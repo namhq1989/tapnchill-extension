@@ -26,7 +26,7 @@ const HabitView = () => {
           className='flex flex-row my-4 gap-2 justify-center items-center cursor-pointer'
         >
           <Plus />
-          <p className='text-sm font-bold'>New activity</p>
+          <p className='text-sm font-bold'>New Activity</p>
         </Link>
         <div className='flex flex-col gap-2'>
           {habits.map((habit) => (
@@ -73,20 +73,6 @@ const StatsSummaryView = (props: IStatsSummaryViewProps) => {
             styles={styles}
           />
         )
-
-        // return (
-        //   <div
-        //     key={`stats-summary-${date.getDay()}`}
-        //     className='flex flex-col gap-1 w-full cursor-pointer'
-        //   >
-        //     <p className='self-center'>{getDateNameFirstLetter(date)}</p>
-        //     <div
-        //       className={`flex aspect-square rounded-full items-center justify-center ${styles}`}
-        //     >
-        //       {format(date, 'dd')}
-        //     </div>
-        //   </div>
-        // )
       })}
     </div>
   )

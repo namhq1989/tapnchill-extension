@@ -49,17 +49,10 @@ const getRemainingTime = (
   } else {
     // Default for tasks far from due date
     color = 'muted-foreground'
-    remainingTime =
-      dueDate.toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-      }) +
-      ', ' +
-      dueDate.toLocaleTimeString('en-GB', {
-        hour: '2-digit',
-        minute: '2-digit',
-      })
+    remainingTime = dueDate.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+    })
   }
 
   return { remainingTime, color }
@@ -95,9 +88,9 @@ const getTotalTimeTaken = (
     }
     return `${formatWithZero(hours)}h ${formatWithZero(minutes)}m` // Less than 1 day
   } else if (days < 7) {
-    return `${days}d ${formatWithZero(hours)}h` // Less than 7 days
+    return `${formatWithZero(days)}d ${formatWithZero(hours)}h` // Less than 7 days
   } else {
-    return `${days}d` // 7 days or more
+    return `${formatWithZero(days)}d` // 7 days or more
   }
 }
 

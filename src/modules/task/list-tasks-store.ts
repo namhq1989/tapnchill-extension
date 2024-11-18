@@ -21,7 +21,8 @@ const useListTasksStore = create<IListTasksStore>((set, get) => ({
   tasks: [],
   isFetching: false,
   fetchTasks: async () => {
-    const { tasks, selectedStatusFilterId, nextPageToken } = get()
+    const { tasks, selectedStatusFilterId, selectedGoalId, nextPageToken } =
+      get()
     const { get: httpGet } = useHttpStore.getState()
 
     set({ isFetching: true })
@@ -29,8 +30,8 @@ const useListTasksStore = create<IListTasksStore>((set, get) => ({
     try {
       const response = await httpGet<IGetTasksApiResponse>('api/task', {
         limit: 20,
-        status:
-          selectedStatusFilterId === 'all' ? undefined : selectedStatusFilterId,
+        status: selectedStatusFilterId === 'all' ? '' : selectedStatusFilterId,
+        goalId: selectedGoalId === 'all' ? '' : selectedGoalId,
         pageToken: nextPageToken,
       } as IGetTasksApiRequest)
       set({ isFetching: false })
@@ -57,6 +58,16 @@ const useListTasksStore = create<IListTasksStore>((set, get) => ({
     if (selectedStatusFilterId === id) return
 
     set({ selectedStatusFilterId: id, tasks: [], nextPageToken: '' })
+    const { fetchTasks } = get()
+    await fetchTasks()
+  },
+
+  selectedGoalId: 'all',
+  selectGoalFilter: async (id: string) => {
+    const { selectedGoalId } = get()
+    if (selectedGoalId === id) return
+
+    set({ selectedGoalId: id, tasks: [], nextPageToken: '' })
     const { fetchTasks } = get()
     await fetchTasks()
   },

@@ -81,13 +81,13 @@ const CreateTaskView = () => {
     <div className='flex flex-col w-[400px] min-h-[600px] scrollbar-hide'>
       <div className='flex w-full flex-row justify-between p-4 border-b-[1px]'>
         <BackButton />
-        <HeaderTitle title='Add task' />
+        <HeaderTitle title='New Task' />
       </div>
       <div className='flex flex-col p-4 gap-4 scrollbar-hide'>
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className='flex flex-col w-full gap-4'
+            className='flex flex-col w-full gap-8'
           >
             <FormField
               control={form.control}

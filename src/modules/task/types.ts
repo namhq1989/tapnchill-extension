@@ -40,6 +40,9 @@ export interface IListTasksStore {
   selectedStatusFilterId: string
   selectStatusFilter: (id: string) => Promise<void>
 
+  selectedGoalId: string
+  selectGoalFilter: (id: string) => Promise<void>
+
   nextPageToken: string
 }
 
