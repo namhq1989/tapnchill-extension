@@ -134,7 +134,9 @@ const useTaskManipulationStore = create<ITaskManipulationStore>(() => ({
         } as IChangeTaskStatusApiRequest,
       )
 
-      if (task.status === TaskStatus.done) {
+      const isStatusDone = task.status === TaskStatus.done
+
+      if (isStatusDone) {
         task.completedAt = new Date()
       }
 
@@ -147,6 +149,15 @@ const useTaskManipulationStore = create<ITaskManipulationStore>(() => ({
       useListTasksStore.setState({
         tasks: listTasks.map((t) => (t.id === task.id ? task : t)),
       })
+
+      const { goals } = useGoalsStore.getState()
+      const goal = goals.find((g) => g.id === task.goalId)
+      if (goal) {
+        goal.stats.totalDoneTask += isStatusDone ? 1 : -1
+        useGoalsStore.setState({
+          goals: goals.map((g) => (g.id === goal.id ? goal : g)),
+        })
+      }
     } catch (err) {
       console.log('err', err)
     }
