@@ -147,7 +147,7 @@ const HabitRecordsView = (props: IHabitRecordsViewProps) => {
     >
       <div className='flex flex-row w-full gap-2 items-center'>
         <img
-          src={`/habit/${habit.icon}.png`}
+          src={`${import.meta.env.VITE_CDN_ENDPOINT}/${habit.icon}.png`}
           alt={habit.icon}
           width={40}
           height={40}

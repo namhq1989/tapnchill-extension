@@ -20,7 +20,7 @@ const SubscriptionView = () => {
             <p className='text-3xl font-bold text-primary'>$3</p>
             <p className='text-sm text-muted-foreground'>per month</p>
           </div>
-          <p className='text-sm text-primary underline underline-offset-4 cursor-pointer'>
+          <p className='text-sm text-primary font-bold underline underline-offset-4 cursor-pointer'>
             UPGRADE
           </p>
         </div>
@@ -32,7 +32,7 @@ const SubscriptionView = () => {
             </div>
             <p className='text-sm text-muted-foreground'>per year</p>
           </div>
-          <p className='text-sm text-primary underline underline-offset-4 cursor-pointer'>
+          <p className='text-sm text-primary font-bold underline underline-offset-4 cursor-pointer'>
             UPGRADE
           </p>
         </div>
@@ -68,7 +68,7 @@ const SubscriptionView = () => {
               <p className='text-xs'>Ambiences</p>
             </div>
             <div className='flex w-[30%] items-start'>
-              <p className='text-xs'>Play up to 2</p>
+              <p className='text-xs'>Play up to 1</p>
             </div>
             <div className='flex flex-col w-[30%] items-start gap-1'>
               <p className='text-xs'>Play unlimited</p>
@@ -96,7 +96,7 @@ const SubscriptionView = () => {
             </div>
             <div className='flex flex-col w-[30%] items-start gap-1'>
               <p className='text-xs'>Max 20 goals</p>
-              <p className='text-xs'>Max 100 tasks per goal</p>
+              <p className='text-xs'>Max 50 tasks per goal</p>
             </div>
           </div>
           <div className='flex px-0 py-4'>
