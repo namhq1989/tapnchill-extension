@@ -68,23 +68,13 @@ const InformationView = () => {
         <BackButton />
         <HeaderTitle title='Information' />
       </div>
-      <div className='flex flex-col p-4 gap-x-4 gap-y-8 scrollbar-hide'>
+      <div className='flex flex-col p-4 gap-4 scrollbar-hide'>
         <p className='text-sm'>
-          tapnchill - Discover chilling music, long listening music, and
-          relaxing playlists with tapnchill's 24/7 live streaming station. Tune
-          in and chill out!
+          An app designed to boost your productivity and bring relaxation to
+          your day. With features like radio stations, ambient sounds, habit
+          tracking, and task management, it helps you stay organized and unwind
+          in your own way.
         </p>
-        <p className='text-sm'>
-          Goes beyond music, offering task management tools to help you stay
-          organized and focused. Keep track of to-dos, set reminders, and
-          prioritize goals—all while enjoying relaxing tunes.
-        </p>
-        <p className='text-sm'>
-          Capture ideas and jot down notes effortlessly within the app,
-          seamlessly blending music and productivity. Tapnchill is the perfect
-          companion for both work and relaxation.
-        </p>
-
         <Separator />
         <div className='flex flex-col justify-start items-start gap-2'>
           <p className='text-lg font-bold'>We appreciate you being here!</p>
