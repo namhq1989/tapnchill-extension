@@ -11,16 +11,19 @@ const GoalItemView = (props: IGoalItemViewProps) => {
   const { goal } = props
 
   let completedWidthPercent = 0
-  let totalWidthPercent = 100
-  let totalBarBorderStyles = 'rounded-xl'
+  let totalWidthPercent = 1
+  let completedBarBorderStyles = 'rounded-tr-xl rounded-br-xl'
+  let totalBarBorderStyles = 'rounded-tr-xl rounded-br-xl'
 
   if (goal.stats.totalTask > 0) {
     completedWidthPercent = goal.stats.totalDoneTask / goal.stats.totalTask
     totalWidthPercent = 1 - completedWidthPercent
   }
 
-  if (totalWidthPercent === 100) {
-    totalBarBorderStyles = 'rounded-tr-xl rounded-br-xl'
+  if (totalWidthPercent === 1) {
+    totalBarBorderStyles = 'rounded-xl'
+  } else if (completedWidthPercent === 1) {
+    completedBarBorderStyles = 'rounded-xl'
   }
 
   return (
@@ -52,7 +55,7 @@ const GoalItemView = (props: IGoalItemViewProps) => {
         </div>
         <div className='flex flex-row mt-4'>
           <div
-            className={`flex h-2 bg-primary rounded-tl-xl rounded-bl-xl`}
+            className={`flex h-2 bg-primary ${completedBarBorderStyles}`}
             style={{
               width: `${Math.round(completedWidthPercent * 100)}%`,
             }}
