@@ -19,6 +19,7 @@ import HabitPreview from '@/modules/habit/preview.tsx'
 import useQuoteStore from '@/modules/quote/store.ts'
 import useWeatherStore from '@/modules/weather/store.ts'
 import useHabitsStore from '@/modules/habit/store.ts'
+import SubscriptionView from '@/modules/subscription/view.tsx'
 
 const HomeView = () => {
   const { initApp, isInitializing } = useAppStore()
@@ -89,12 +90,14 @@ const HomeView = () => {
             <Link component={InformationView}>
               <Info size={20} className='cursor-pointer' />
             </Link>
-            <Badge variant='default' className='cursor-pointer'>
-              Go Pro
-            </Badge>
+            <Link component={SubscriptionView}>
+              <Badge variant='default' className='cursor-pointer'>
+                Go Pro
+              </Badge>
+            </Link>
           </div>
           <div className='flex flex-row gap-4 justify-center'>
-            <HeaderTitle title='Tap n Chill' />
+            <HeaderTitle title='BapBi' />
           </div>
         </div>
         <div className='flex flex-col p-4 gap-x-4 gap-y-8 scrollbar-hide'>

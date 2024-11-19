@@ -1,11 +1,11 @@
 {
   "manifest_version": 3,
-  "name": "tapnchill Extension",
-  "description": "tapnchill.live - Discover chilling music, long listening music, and relaxing playlists with tapnchill's 24/7 live streaming station. Tune in and chill out!",
+  "name": "BapBi",
+  "description": "An app designed to boost your productivity and bring relaxation to your day!",
   "version": "1.0.0",
   "action": {
     "default_popup": "index.html",
-    "default_icon": "icon.png"
+    "default_icon": "icons/icon128.png"
   },
   "background": {
     "service_worker": "scripts/background.js"
@@ -15,8 +15,9 @@
     "storage"
   ],
   "icons": {
-    "16": "icon.png",
-    "48": "icon.png",
-    "128": "icon.png"
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
   }
 }

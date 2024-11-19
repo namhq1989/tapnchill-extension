@@ -1,61 +1,97 @@
 import { IHabitIcon } from '@/modules/habit/types.ts'
 
+const getIconUrl = (name: string) => {
+  return `${import.meta.env.VITE_CDN_ENDPOINT}/${name}`
+}
+
 const listHabitIcons: IHabitIcon[] = [
   {
     id: 'drink-water',
-    url: '/habit/drink-water.png',
+    url: getIconUrl('drink-water.png'),
   },
   {
     id: 'eating',
-    url: '/habit/eating.png',
+    url: getIconUrl('eating.png'),
   },
   {
     id: 'health-checkups',
-    url: '/habit/health-checkups.png',
+    url: getIconUrl('health-checkups.png'),
   },
   {
     id: 'learning',
-    url: '/habit/learning.png',
+    url: getIconUrl('learning.png'),
   },
   {
     id: 'mindfulness',
-    url: '/habit/mindfulness.png',
+    url: getIconUrl('mindfulness.png'),
   },
   {
     id: 'outdoor-activity',
-    url: '/habit/outdoor-activity.png',
+    url: getIconUrl('outdoor-activity.png'),
   },
   {
     id: 'recycle-bin',
-    url: '/habit/recycle-bin.png',
-  },
-  {
-    id: 'running',
-    url: '/habit/running.png',
+    url: getIconUrl('recycle-bin.png'),
   },
   {
     id: 'skin-protection',
-    url: '/habit/skin-protection.png',
+    url: getIconUrl('skin-protection.png'),
   },
   {
     id: 'sleep-hygiene',
-    url: '/habit/sleep-hygiene.png',
+    url: getIconUrl('sleep-hygiene.png'),
   },
   {
     id: 'snack',
-    url: '/habit/snack.png',
+    url: getIconUrl('snack.png'),
   },
   {
     id: 'taking-exercise',
-    url: '/habit/taking-exercise.png',
-  },
-  {
-    id: 'treadmill',
-    url: '/habit/treadmill.png',
+    url: getIconUrl('taking-exercise.png'),
   },
   {
     id: 'yoga',
-    url: '/habit/yoga.png',
+    url: getIconUrl('yoga.png'),
+  },
+  {
+    id: 'search',
+    url: getIconUrl('search.png'),
+  },
+  {
+    id: 'team',
+    url: getIconUrl('team.png'),
+  },
+  {
+    id: 'cooking',
+    url: getIconUrl('cooking.png'),
+  },
+  {
+    id: 'reading',
+    url: getIconUrl('reading.png'),
+  },
+  {
+    id: 'social-view',
+    url: getIconUrl('social-view.png'),
+  },
+  {
+    id: 'gaming',
+    url: getIconUrl('gaming.png'),
+  },
+  {
+    id: 'athlete',
+    url: getIconUrl('athlete.png'),
+  },
+  {
+    id: 'headphones',
+    url: getIconUrl('headphones.png'),
+  },
+  {
+    id: 'shower',
+    url: getIconUrl('shower.png'),
+  },
+  {
+    id: 'swimming',
+    url: getIconUrl('swimming.png'),
   },
 ]
 

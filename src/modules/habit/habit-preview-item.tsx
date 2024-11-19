@@ -25,7 +25,7 @@ const HabitPreviewItem = (props: IHabitPreviewItemProps) => {
   return (
     <div className='flex flex-row w-full gap-2 rounded-xl container-selected p-4 items-center'>
       <img
-        src={`/habit/${habit.icon}.png`}
+        src={`${import.meta.env.VITE_CDN_ENDPOINT}/${habit.icon}.png`}
         alt={habit.icon}
         width={40}
         height={40}
