@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/sheet.tsx'
 import { useState } from 'react'
 import useHabitsStore from '@/modules/habit/store.ts'
-import { format, isBefore, isSameDay } from 'date-fns'
+import { format, isAfter, isBefore, isSameDay } from 'date-fns'
 import HabitPreviewItem from '@/modules/habit/habit-preview-item.tsx'
 import { getDateNameFirstLetter } from '@/lib/date.ts'
 
@@ -24,10 +24,8 @@ const DailyActivitiesView = (props: IDailyActivitiesViewProps) => {
     useHabitsStore()
 
   const { date, styles } = props
-  let isAfter = false
   let dateStats = stats.find((s) => isSameDay(s.date, date))
   if (!dateStats) {
-    isAfter = true
     dateStats = createDefaultDailyStats(date)
   }
 
@@ -47,6 +45,8 @@ const DailyActivitiesView = (props: IDailyActivitiesViewProps) => {
     return null
   })
 
+  const isInFuture = isAfter(date, new Date())
+
   return (
     <div className='flex w-full cursor-pointer'>
       <Sheet key={side} open={isOpen} onOpenChange={setIsOpen}>
@@ -57,13 +57,13 @@ const DailyActivitiesView = (props: IDailyActivitiesViewProps) => {
           >
             <p className='self-center'>{getDateNameFirstLetter(date)}</p>
             <div
-              className={`flex aspect-square rounded-full items-center justify-center ${styles}`}
+              className={`flex h-8 rounded-xl items-center justify-center ${styles}`}
             >
               {format(date, 'dd')}
             </div>
           </div>
         </SheetTrigger>
-        {isOpen && !isAfter && (
+        {isOpen && !isInFuture && (
           <SheetContent
             side={side}
             className='w-full min-h-[250px] max-h-[90%] overflow-auto p-0 rounded-tl-xl rounded-tr-xl'

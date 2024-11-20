@@ -11,6 +11,7 @@ export interface IHabit {
   statsTotalCompletions: number
   createdAt: Date
   lastCompletedAt: Date | null
+  lastActivatedAt: Date
 }
 
 export enum HabitStatus {
@@ -72,6 +73,7 @@ export interface IHabitApiData {
   statsTotalCompletions: number
   createdAt: string
   lastCompletedAt: string
+  lastActivatedAt: string
 }
 
 export interface IHabitDailyStatsApiData {

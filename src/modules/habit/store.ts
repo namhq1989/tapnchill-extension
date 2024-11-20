@@ -21,6 +21,7 @@ import useHttpStore from '@/modules/http/store.ts'
 import { mapHabits, mapStats } from '@/modules/habit/util.ts'
 import useNotificationStore from '@/modules/notification/store.ts'
 import { getRFC3339WithTimezone } from '@/lib/date.ts'
+import { isYesterday } from 'date-fns/isYesterday'
 
 const useHabitsStore = create<IHabitsStore>((set, get) => ({
   icons: listHabitIcons,
@@ -110,6 +111,7 @@ const useHabitsStore = create<IHabitsStore>((set, get) => ({
         statsTotalCompletions: 0,
         createdAt: new Date(),
         lastCompletedAt: null,
+        lastActivatedAt: new Date(),
       }
 
       const { habits } = get()
@@ -175,6 +177,7 @@ const useHabitsStore = create<IHabitsStore>((set, get) => ({
         habits: habits.map((h) => {
           if (h.id === id) {
             h.status = status
+            h.lastActivatedAt = new Date()
           }
           return h
         }),
@@ -205,6 +208,23 @@ const useHabitsStore = create<IHabitsStore>((set, get) => ({
       })
       const { fetchStats } = get()
       await fetchStats()
+
+      const { habits } = get()
+      const habit = habits.find((h) => h.id === id)
+      if (habit) {
+        habit.statsTotalCompletions++
+        if (isYesterday(habit.lastCompletedAt || new Date())) {
+          habit.statsCurrentStreak++
+          if (habit.statsCurrentStreak > habit.statsLongestStreak) {
+            habit.statsLongestStreak = habit.statsCurrentStreak
+          }
+        }
+        habit.lastCompletedAt = new Date()
+
+        set({
+          habits: habits.map((h) => (h.id === id ? habit : h)),
+        })
+      }
     } catch (err) {
       showErrorNotification({
         description: `Something went wrong. Please try again (${err})`,

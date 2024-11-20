@@ -6,7 +6,6 @@ import HabitCreateView from '@/modules/habit/habit-create.tsx'
 import useHabitsStore from '@/modules/habit/store.ts'
 import { HabitStatus, IHabit, IHabitDailyStats } from '@/modules/habit/types.ts'
 import { addDays, format, isSameDay, subDays } from 'date-fns'
-import { getDateNameFirstLetter } from '@/lib/date.ts'
 import DailyActivitiesView from '@/modules/habit/daily-activities-view.tsx'
 import HabitInfoView from '@/modules/habit/habit-info.tsx'
 
@@ -105,9 +104,9 @@ const HabitStatsView = (props: IHabitStatsViewProps) => {
         } else if (index === dates.length - 2) {
           styles = 'border border-primary'
         } else if (!isScheduled) {
-          styles = 'border border-dashed border-muted-foreground'
+          styles = 'border border-muted-foreground/30'
         } else {
-          styles = 'border border-dashed border-red-400'
+          styles = 'border border-red-300'
         }
 
         return (
@@ -116,15 +115,11 @@ const HabitStatsView = (props: IHabitStatsViewProps) => {
             className='flex flex-col gap-1 w-full'
           >
             <p
-              className={`self-center ${isScheduled ? '' : 'text-muted-foreground line-through'}`}
-            >
-              {getDateNameFirstLetter(date)}
-            </p>
-            <div
-              className={`flex aspect-square rounded-full items-center justify-center ${styles}`}
+              className={`self-center ${isScheduled ? '' : 'text-muted-foreground/30'}`}
             >
               {format(date, 'dd')}
-            </div>
+            </p>
+            <div className={`flex h-2 rounded-lg ${styles}`}></div>
           </div>
         )
       })}
@@ -155,17 +150,21 @@ const HabitRecordsView = (props: IHabitRecordsViewProps) => {
         <div className='flex flex-col flex-grow'>
           <div className='flex flex-row gap-1'>
             {!isActive && (
-              <p className='text-xs font-medium leading-5 text-red-400'>
+              <p className='text-xs font-medium leading-5 text-red-400/30'>
                 [Inactive]
               </p>
             )}
             <p
-              className={`text-sm font-medium leading-5 ${!isActive ? 'text-muted-foreground' : ''}`}
+              className={`text-sm font-medium leading-5 ${!isActive ? 'text-muted-foreground/30' : ''}`}
             >
               {habit.name}
             </p>
           </div>
-          <p className='text-xs text-muted-foreground'>{habit.goal}</p>
+          <p
+            className={`text-xs ${!isActive ? 'text-muted-foreground/30' : 'text-muted-foreground'}`}
+          >
+            {habit.goal}
+          </p>
         </div>
         <div className='flex flex-row gap-2'>
           <HabitInfoView habit={habit} />
