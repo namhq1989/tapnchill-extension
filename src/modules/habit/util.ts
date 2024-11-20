@@ -23,6 +23,7 @@ const mapHabits = (habits: IHabitApiData[]): IHabit[] => {
       lastCompletedAt: habit.lastCompletedAt
         ? new Date(habit.lastCompletedAt)
         : null,
+      lastActivatedAt: new Date(habit.lastActivatedAt),
     })
   }
   return result
