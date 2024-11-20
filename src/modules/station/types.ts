@@ -5,7 +5,6 @@ export interface IStation {
   name: string
   description: string
   website: string
-  logo: string
   cover: string
   isFavorite: boolean
   genres: string[]
