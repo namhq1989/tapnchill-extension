@@ -72,10 +72,9 @@ const useAppStore = create<IAppStore>((set, get) => ({
     const checksum = await createAnonymousSignUpChecksum(clientId)
 
     const response = await httpPost<IAnonymousSignUpApiResponse>(
-      'api/user/sign-up/anonymous',
+      'api/user/sign-in/extension',
       {
         clientId,
-        source: 'extension',
         checksum,
       } as IAnonymousSignUpApiRequest,
     )

@@ -47,7 +47,7 @@ const StatsSummaryView = (props: IStatsSummaryViewProps) => {
 
   const isAllCompleted = (date: Date): boolean => {
     const stat = stats.find((stat) => isSameDay(new Date(stat.date), date))
-    return stat ? stat.completedCount >= stat.scheduledCount : false
+    return stat ? stat.isCompleted : false
   }
 
   return (

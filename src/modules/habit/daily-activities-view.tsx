@@ -42,6 +42,10 @@ const DailyActivitiesView = (props: IDailyActivitiesViewProps) => {
       return habit
     }
 
+    if (isBefore(habit.lastActivatedAt, date)) {
+      return habit
+    }
+
     return null
   })
 
@@ -82,13 +86,13 @@ const DailyActivitiesView = (props: IDailyActivitiesViewProps) => {
                   <div className='flex flex-row justify-between items-center'>
                     <p className='text-sm'>Total activities</p>
                     <p className='text-sm font-bold'>
-                      {dateStats.scheduledCount}
+                      {dateStats.scheduledIds.length}
                     </p>
                   </div>
                   <div className='flex flex-row justify-between items-center'>
                     <p className='text-sm'>Completed activities</p>
                     <p className='text-sm font-bold'>
-                      {dateStats.completedCount}
+                      {dateStats.completedIds.length}
                     </p>
                   </div>
                 </div>

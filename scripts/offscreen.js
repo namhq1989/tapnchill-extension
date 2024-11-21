@@ -19,7 +19,15 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
     resumeStation()
   } else if (request.type === 'offscreen-change-station-volume') {
     setStationVolume(request.volume)
+  } else if (request.type === 'offscreen-sign-in-with-google') {
+    handleGoogleSignIn((data) => {
+      console.log('Data from handleGoogleSignIn:', data)
+
+      // Send the user data back to the background script
+      sendResponse(data)
+    })
   }
+  return true
 })
 
 //
@@ -142,4 +150,46 @@ const setStationVolume = (volume) => {
   if (!stationInstance.audio) return
 
   stationInstance.audio.volume(volume / 100)
+}
+
+//
+// SIGN IN WITH GOOGLE
+//
+
+const _URL = 'https://bapbi-442401.web.app/signin.html'
+console.log('Loading iframe with URL:', _URL)
+// let iframe
+
+const handleGoogleSignIn = (callback) => {
+  let iframe = document.createElement('iframe')
+  iframe.src = _URL
+  iframe.style.display = 'none'
+
+  iframe.onload = () => {
+    console.log('Iframe loaded successfully')
+
+    // Add the message listener
+    window.addEventListener('message', function handleIframeMessage(event) {
+      if (event.origin !== new URL(_URL).origin) {
+        console.warn('Message received from unauthorized origin:', event.origin)
+        return
+      }
+
+      console.log('Message received from iframe:', event.data)
+
+      try {
+        const data = JSON.parse(event.data)
+        callback(data) // Send the data to the callback
+        window.removeEventListener('message', handleIframeMessage)
+        iframe.remove() // Clean up the iframe
+      } catch (error) {
+        console.error('Failed to parse message data:', error)
+      }
+    })
+
+    // Send the initialization message to the iframe
+    iframe.contentWindow.postMessage({ initAuth: true }, new URL(_URL).origin)
+  }
+
+  document.documentElement.appendChild(iframe)
 }
