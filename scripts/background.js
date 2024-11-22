@@ -260,14 +260,47 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
           success: true,
         })
       })
+  } else if (request.type === 'sign-in-with-google') {
+    createOffscreen()
+      .then(() => {
+        chrome.runtime.sendMessage(
+          { ...request, type: 'offscreen-sign-in-with-google' },
+          (response) => {
+            if (response.success) {
+              chrome.storage.local
+                .set({
+                  accessToken: response.accessToken,
+                  userId: response.userId,
+                  provider: response.provider,
+                  isSignedInSuccessfully: true,
+                })
+                .then(() => {
+                  sendResponse({
+                    success: true,
+                    accessToken: response.accessToken,
+                    userId: response.userId,
+                    provider: response.provider,
+                    isSignedInSuccessfully: true,
+                  })
+                })
+            } else {
+              sendResponse(response)
+            }
+          },
+        )
+      })
+      .catch((error) => {
+        console.error('Failed to create offscreen document:', error)
+        sendResponse({ success: false })
+      })
+
+    return true
   } else {
     sendResponse({
       success: false,
       message: 'Unknown action type',
     })
   }
-
-  return true
 })
 
 let offScreenCreating
@@ -288,8 +321,9 @@ const createOffscreen = async () => {
   } else {
     offScreenCreating = chrome.offscreen.createDocument({
       url: offscreenUrl,
-      reasons: ['AUDIO_PLAYBACK'],
-      justification: 'Keep audio playing in the background',
+      reasons: ['AUDIO_PLAYBACK', 'DOM_SCRAPING'],
+      justification:
+        'Keep audio playing in the background and handle Google Sign-In for authentication',
     })
     await offScreenCreating
     offScreenCreating = null

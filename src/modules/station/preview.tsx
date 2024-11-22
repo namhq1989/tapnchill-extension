@@ -10,7 +10,7 @@ import {
 import StationView from '@/modules/station/view.tsx'
 import AmbienceView from '@/modules/ambience/view.tsx'
 import useStationsStore from '@/modules/station/store.ts'
-import LoadingIndicator from '@/loading-indicator.tsx'
+import LoadingIndicator from '@/modules/common/loading-indicator.tsx'
 import { Slider } from '@/components/ui/slider.tsx'
 import StationInformation from '@/modules/station/information.tsx'
 import { Link } from 'react-chrome-extension-router'

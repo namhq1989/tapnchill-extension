@@ -1,5 +1,5 @@
-import BackButton from '@/back-button.tsx'
-import HeaderTitle from '@/header-title.tsx'
+import BackButton from '@/modules/common/back-button.tsx'
+import HeaderTitle from '@/modules/common/header-title.tsx'
 
 const SubscriptionView = () => {
   return (

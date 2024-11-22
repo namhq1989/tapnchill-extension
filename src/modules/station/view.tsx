@@ -12,11 +12,11 @@ import useStationsStore, {
   FILTER_STATIONS_FAVORITES,
 } from '@/modules/station/store.ts'
 import { IStation } from '@/modules/station/types.ts'
-import LoadingIndicator from '@/loading-indicator.tsx'
+import LoadingIndicator from '@/modules/common/loading-indicator.tsx'
 import StationInformation from '@/modules/station/information.tsx'
 import { Separator } from '@/components/ui/separator.tsx'
-import HeaderTitle from '@/header-title.tsx'
-import BackButton from '@/back-button.tsx'
+import HeaderTitle from '@/modules/common/header-title.tsx'
+import BackButton from '@/modules/common/back-button.tsx'
 
 const StationView = () => {
   const {

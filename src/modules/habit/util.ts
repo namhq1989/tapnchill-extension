@@ -35,8 +35,8 @@ const mapStats = (stats: IHabitDailyStatsApiData[]): IHabitDailyStats[] => {
     result.push({
       id: stat.id,
       date: new Date(stat.date),
-      scheduledCount: stat.scheduledCount,
-      completedCount: stat.completedCount,
+      isCompleted: stat.isCompleted,
+      scheduledIds: stat.scheduledIds,
       completedIds: stat.completedIds,
     })
   }

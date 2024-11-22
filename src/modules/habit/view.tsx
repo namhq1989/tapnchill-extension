@@ -1,5 +1,5 @@
-import BackButton from '@/back-button.tsx'
-import HeaderTitle from '@/header-title.tsx'
+import BackButton from '@/modules/common/back-button.tsx'
+import HeaderTitle from '@/modules/common/header-title.tsx'
 import { Plus, Settings } from 'lucide-react'
 import { Link } from 'react-chrome-extension-router'
 import HabitCreateView from '@/modules/habit/habit-create.tsx'
@@ -47,7 +47,7 @@ const StatsSummaryView = (props: IStatsSummaryViewProps) => {
 
   const isAllCompleted = (date: Date): boolean => {
     const stat = stats.find((stat) => isSameDay(new Date(stat.date), date))
-    return stat ? stat.completedCount >= stat.scheduledCount : false
+    return stat ? stat.isCompleted : false
   }
 
   return (

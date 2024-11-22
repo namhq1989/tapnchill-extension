@@ -1,17 +1,14 @@
 import { useEffect } from 'react'
-import useAppStore from '@/store.ts'
+import useAppStore from '@/modules/common/store.ts'
 import useStationsStore from '@/modules/station/store.ts'
 import useAmbiencesStore from '@/modules/ambience/store.ts'
-import { ModeToggle } from '@/components/theme/mode-toggle.tsx'
 import StationPreview from '@/modules/station/preview.tsx'
 import TaskPreview from '@/modules/task/preview.tsx'
 import QuotePreview from '@/modules/quote/preview.tsx'
 import WeatherPreview from '@/modules/weather/preview.tsx'
 import StatisticPreview from '@/modules/statistic/preview.tsx'
-import { Info } from 'lucide-react'
 import { Link } from 'react-chrome-extension-router'
-import InformationView from '@/modules/information/view.tsx'
-import HeaderTitle from '@/header-title.tsx'
+import HeaderTitle from '@/modules/common/header-title.tsx'
 import useTodoTasksStore from '@/modules/task/todo-tasks-store.ts'
 import useGoalsStore from '@/modules/goal/store.ts'
 import { Badge } from '@/components/ui/badge.tsx'
@@ -20,6 +17,7 @@ import useQuoteStore from '@/modules/quote/store.ts'
 import useWeatherStore from '@/modules/weather/store.ts'
 import useHabitsStore from '@/modules/habit/store.ts'
 import SubscriptionView from '@/modules/subscription/view.tsx'
+import AppMenu from '@/modules/common/app-menu.tsx'
 
 const HomeView = () => {
   const { initApp, isInitializing } = useAppStore()
@@ -63,6 +61,8 @@ const HomeView = () => {
     fetchWeather,
     fetchGoals,
     fetchTasks,
+    fetchHabits,
+    fetchStats,
   ])
 
   if (isInitializing) {
@@ -86,10 +86,7 @@ const HomeView = () => {
       <div className='flex flex-col w-[400px] h-[600px] scrollbar-hide'>
         <div className='flex w-full flex-row justify-between p-4 border-b-[1px]'>
           <div className='flex flex-row gap-4 items-center'>
-            <ModeToggle />
-            <Link component={InformationView}>
-              <Info size={20} className='cursor-pointer' />
-            </Link>
+            <AppMenu />
             <Link component={SubscriptionView}>
               <Badge variant='default' className='cursor-pointer'>
                 Go Pro

@@ -1,4 +1,4 @@
-import HeaderTitle from '@/header-title.tsx'
+import HeaderTitle from '@/modules/common/header-title.tsx'
 import TaskPreviewItem from '@/modules/task/task-preview-item.tsx'
 import {
   Select,
@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select.tsx'
-import BackButton from '@/back-button.tsx'
+import BackButton from '@/modules/common/back-button.tsx'
 import useListTasksStore from '@/modules/task/list-tasks-store.ts'
 import { useEffect } from 'react'
 import useTaskManipulationStore from '@/modules/task/task-manipulation-store.ts'

@@ -22,8 +22,8 @@ export enum HabitStatus {
 export interface IHabitDailyStats {
   id: string
   date: Date
-  scheduledCount: number
-  completedCount: number
+  isCompleted: boolean
+  scheduledIds: string[]
   completedIds: string[]
 }
 
@@ -79,8 +79,8 @@ export interface IHabitApiData {
 export interface IHabitDailyStatsApiData {
   id: string
   date: string
-  scheduledCount: number
-  completedCount: number
+  isCompleted: boolean
+  scheduledIds: string[]
   completedIds: string[]
 }
 
