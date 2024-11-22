@@ -9,6 +9,7 @@ import {
 import HomeView from '@/modules/common/home.tsx'
 import { Toaster } from '@/components/ui/toaster.tsx'
 import { ThemeProvider } from '@/components/theme/theme-provider.tsx'
+import useNotificationStore from '@/modules/notification/store.ts'
 
 chrome.storage.local.get((result) => {
   if (result.selectedText) {
@@ -24,6 +25,17 @@ chrome.storage.local.get((result) => {
         selectedText: '',
         pageUrl: '',
         pageTitle: '',
+      })
+      .then()
+  }
+
+  if (result.isSignedInSuccessfully) {
+    useNotificationStore.getState().showNotification({
+      description: 'Signed in successfully',
+    })
+    chrome.storage.local
+      .set({
+        isSignedInSuccessfully: false,
       })
       .then()
   }

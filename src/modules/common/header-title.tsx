@@ -1,4 +1,4 @@
-import WaveForm from '@/wave-form.tsx'
+import WaveForm from '@/modules/common/wave-form.tsx'
 import useStationsStore from '@/modules/station/store.ts'
 
 interface IHeaderTitleProps {

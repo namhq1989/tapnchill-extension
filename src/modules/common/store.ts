@@ -3,7 +3,6 @@ import {
   IAnonymousSignInApiRequest,
   IAnonymousSignInApiResponse,
   IAppStore,
-  IGoogleSignInApiRequest,
   IGoogleSignInApiResponse,
 } from '@/modules/common/types.ts'
 import useHttpStore from '@/modules/http/store.ts'
@@ -14,6 +13,8 @@ const ID_CHARS =
 
 const useAppStore = create<IAppStore>((set, get) => ({
   userId: '',
+  userToken: '',
+  provider: '',
   isInitializing: false,
   initApp: async () => {
     set({ isInitializing: true })
@@ -21,11 +22,11 @@ const useAppStore = create<IAppStore>((set, get) => ({
     return new Promise((resolve) => {
       chrome.storage.local.get(async (result) => {
         const userId: string = result.userId || ''
-        const anonymousUserId: string = result.anonymousUserId || ''
         const accessToken: string = result.accessToken || ''
+        const provider: string = result.provider || ''
 
-        if (!anonymousUserId || !accessToken) {
-          // if user id not found, this means current user is new to the extension
+        if (!userId || !accessToken) {
+          // if user id not found, this means the current user is new to the extension
           // call server api to create a new user
           const { anonymousSignIn } = get()
           await anonymousSignIn()
@@ -34,7 +35,7 @@ const useAppStore = create<IAppStore>((set, get) => ({
           const { setAccessToken } = useHttpStore.getState()
           setAccessToken(accessToken)
 
-          set({ userId: userId })
+          set({ userId, userToken: accessToken, provider })
         }
 
         set({ isInitializing: false })
@@ -84,45 +85,63 @@ const useAppStore = create<IAppStore>((set, get) => ({
     )
 
     if (response && response.accessToken) {
-      set({ userId: response.userId })
+      set({ userId: response.userId, userToken: response.accessToken })
+
+      const { setAccessToken } = useHttpStore.getState()
+      setAccessToken(response.accessToken)
 
       chrome.storage.local
         .set({
-          anonymousUserId: clientId,
           accessToken: response.accessToken,
           userId: response.userId,
+          provider: response.provider,
         })
         .then()
     }
   },
 
-  googleSignIn: async (token) => {
-    const { post: httpPost } = useHttpStore.getState()
-    const { showErrorNotification } = useNotificationStore.getState()
+  isGoogleSigningIn: false,
+  googleSignIn: async () => {
+    set({ isGoogleSigningIn: true })
 
-    try {
-      const response = await httpPost<IGoogleSignInApiResponse>(
-        'api/user/sign-in/google',
-        {
-          token,
-        } as IGoogleSignInApiRequest,
-      )
+    const { userToken } = get()
+    const { showNotification, showErrorNotification } =
+      useNotificationStore.getState()
 
-      if (response && response.accessToken) {
-        set({ userId: response.userId })
+    chrome.runtime.sendMessage(
+      {
+        userToken,
+        type: 'sign-in-with-google',
+      },
+      async (response: IGoogleSignInApiResponse) => {
+        console.log('response', response)
+
+        set({ isGoogleSigningIn: false })
+        if (!response.success) {
+          showErrorNotification({
+            description: response.error,
+          })
+          return
+        }
+
+        set({
+          isGoogleSigningIn: false,
+          userId: response.userId,
+          userToken: response.accessToken,
+          provider: response.provider,
+        })
+
+        showNotification({
+          description: 'Signed in successfully',
+        })
 
         chrome.storage.local
           .set({
-            accessToken: response.accessToken,
-            userId: response.userId,
+            isSignedInSuccessfully: false,
           })
           .then()
-      }
-    } catch (err) {
-      showErrorNotification({
-        description: `Something went wrong. Please try again (${err})`,
-      })
-    }
+      },
+    )
   },
 
   weekdays: [
@@ -155,6 +174,12 @@ const useAppStore = create<IAppStore>((set, get) => ({
       name: 'Sun',
     },
   ],
+
+  signOut: () => {
+    set({
+      provider: 'extension',
+    })
+  },
 }))
 
 export default useAppStore

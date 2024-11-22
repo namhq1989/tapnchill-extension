@@ -264,9 +264,28 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
     createOffscreen()
       .then(() => {
         chrome.runtime.sendMessage(
-          { type: 'offscreen-sign-in-with-google' },
+          { ...request, type: 'offscreen-sign-in-with-google' },
           (response) => {
-            sendResponse(response)
+            if (response.success) {
+              chrome.storage.local
+                .set({
+                  accessToken: response.accessToken,
+                  userId: response.userId,
+                  provider: response.provider,
+                  isSignedInSuccessfully: true,
+                })
+                .then(() => {
+                  sendResponse({
+                    success: true,
+                    accessToken: response.accessToken,
+                    userId: response.userId,
+                    provider: response.provider,
+                    isSignedInSuccessfully: true,
+                  })
+                })
+            } else {
+              sendResponse(response)
+            }
           },
         )
       })
@@ -274,14 +293,14 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
         console.error('Failed to create offscreen document:', error)
         sendResponse({ success: false })
       })
+
+    return true
   } else {
     sendResponse({
       success: false,
       message: 'Unknown action type',
     })
   }
-
-  return true
 })
 
 let offScreenCreating

@@ -17,8 +17,8 @@ const side = 'left'
 const AppMenu = () => {
   const [isOpen, setIsOpen] = useState(false)
   const { setTheme, theme } = useTheme()
-  const { showNotification, showErrorNotification } = useNotificationStore()
-  const { userId, googleSignIn } = useAppStore()
+  const { showNotification } = useNotificationStore()
+  const { provider, isGoogleSigningIn, googleSignIn, signOut } = useAppStore()
 
   return (
     <Sheet key={side} open={isOpen} onOpenChange={setIsOpen}>
@@ -55,31 +55,17 @@ const AppMenu = () => {
             </div>
           </Link>
           <Separator className='w-[90%] mt-4 self-center' />
-          {!userId ? (
+          {provider !== 'google' ? (
             <div className='flex flex-col p-4 w-full gap-4'>
               <div className='flex flex-row items-center justify-between'>
                 <p className='text-sm text-muted-foreground'>Current plan</p>
                 <Badge variant='secondary'>Free</Badge>
               </div>
               <Button
+                disabled={isGoogleSigningIn}
                 variant='secondary'
                 className='w-full h-[32px] rounded-xl'
-                onClick={async () => {
-                  chrome.runtime.sendMessage(
-                    { type: 'sign-in-with-google' },
-                    async (response) => {
-                      if (response?.success) {
-                        await googleSignIn(
-                          response.user.stsTokenManager.accessToken,
-                        )
-                      } else {
-                        showErrorNotification({
-                          description: `Authentication failed!`,
-                        })
-                      }
-                    },
-                  )
-                }}
+                onClick={async () => await googleSignIn()}
               >
                 <ChromeIcon className='mr-2 h-4 w-4' />
                 Sign in with Google
@@ -121,35 +107,15 @@ const AppMenu = () => {
               <p className='text-xs'>v1.0.1</p>
             </div>
           </div>
+          <p
+            className='text-xs underline underline-offset-4 cursor-pointer mt-20 self-center'
+            onClick={() => signOut()}
+          >
+            Sign Out
+          </p>
         </div>
       </SheetContent>
     </Sheet>
-
-    // <Sheet>
-    //   <SheetTrigger>
-    //     <Menu className='cursor-pointer' />
-    //   </SheetTrigger>
-    //   <DropdownMenuContent className='w-[250px]'>
-    //     <DropdownMenuLabel>My Account</DropdownMenuLabel>
-    //     <DropdownMenuSeparator />
-    //     <DropdownMenuItem className='flex flex-row px-4 py-2 items-center justify-between'>
-    //       <div className='flex flex-row gap-2 items-center justify-center'>
-    //         <MoonStar />
-    //         <p className='text-sm'>Dark mode</p>
-    //       </div>
-    //       <Switch />
-    //     </DropdownMenuItem>
-    //     <DropdownMenuItem className='flex flex-row px-4 py-2 items-center justify-between'>
-    //       <div className='flex flex-row gap-2 items-center justify-center'>
-    //         <Info />
-    //         <p className='text-sm'>Information</p>
-    //       </div>
-    //     </DropdownMenuItem>
-    //     <DropdownMenuItem>Billing</DropdownMenuItem>
-    //     <DropdownMenuItem>Team</DropdownMenuItem>
-    //     <DropdownMenuItem>Subscription</DropdownMenuItem>
-    //   </DropdownMenuContent>
-    // </Sheet>
   )
 }
 
