@@ -6,7 +6,7 @@ import {
   getCurrent,
   Router,
 } from 'react-chrome-extension-router'
-import HomeView from '@/home.tsx'
+import HomeView from '@/modules/common/home.tsx'
 import { Toaster } from '@/components/ui/toaster.tsx'
 import { ThemeProvider } from '@/components/theme/theme-provider.tsx'
 

@@ -21,9 +21,6 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
     setStationVolume(request.volume)
   } else if (request.type === 'offscreen-sign-in-with-google') {
     handleGoogleSignIn((data) => {
-      console.log('Data from handleGoogleSignIn:', data)
-
-      // Send the user data back to the background script
       sendResponse(data)
     })
   }

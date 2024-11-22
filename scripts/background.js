@@ -266,9 +266,6 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
         chrome.runtime.sendMessage(
           { type: 'offscreen-sign-in-with-google' },
           (response) => {
-            console.log('xxxx response', response)
-
-            // Relay the response from the offscreen document back to the view
             sendResponse(response)
           },
         )

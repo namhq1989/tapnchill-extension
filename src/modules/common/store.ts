@@ -1,10 +1,13 @@
 import { create } from 'zustand'
 import {
-  IAnonymousSignUpApiRequest,
-  IAnonymousSignUpApiResponse,
+  IAnonymousSignInApiRequest,
+  IAnonymousSignInApiResponse,
   IAppStore,
-} from '@/types.ts'
+  IGoogleSignInApiRequest,
+  IGoogleSignInApiResponse,
+} from '@/modules/common/types.ts'
 import useHttpStore from '@/modules/http/store.ts'
+import useNotificationStore from '@/modules/notification/store.ts'
 
 const ID_CHARS =
   'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
@@ -17,20 +20,21 @@ const useAppStore = create<IAppStore>((set, get) => ({
 
     return new Promise((resolve) => {
       chrome.storage.local.get(async (result) => {
+        const userId: string = result.userId || ''
         const anonymousUserId: string = result.anonymousUserId || ''
         const accessToken: string = result.accessToken || ''
 
         if (!anonymousUserId || !accessToken) {
           // if user id not found, this means current user is new to the extension
           // call server api to create a new user
-          const { anonymousSignUp } = get()
-          await anonymousSignUp()
+          const { anonymousSignIn } = get()
+          await anonymousSignIn()
         } else {
           // if user id found, this means current user is returning to the extension
           const { setAccessToken } = useHttpStore.getState()
           setAccessToken(accessToken)
 
-          set({ userId: anonymousUserId })
+          set({ userId: userId })
         }
 
         set({ isInitializing: false })
@@ -43,7 +47,7 @@ const useAppStore = create<IAppStore>((set, get) => ({
       ID_CHARS.charAt(Math.floor(Math.random() * ID_CHARS.length)),
     ).join('')
   },
-  createAnonymousSignUpChecksum: async (anonymousUserId): Promise<string> => {
+  createAnonymousSignInChecksum: async (anonymousUserId): Promise<string> => {
     const key = await crypto.subtle.importKey(
       'raw',
       new TextEncoder().encode(
@@ -64,30 +68,60 @@ const useAppStore = create<IAppStore>((set, get) => ({
       .map((b) => b.toString(16).padStart(2, '0'))
       .join('')
   },
-  anonymousSignUp: async () => {
+  anonymousSignIn: async () => {
     const { post: httpPost } = useHttpStore.getState()
-    const { generateAnonymousUserId, createAnonymousSignUpChecksum } = get()
+    const { generateAnonymousUserId, createAnonymousSignInChecksum } = get()
 
     const clientId = generateAnonymousUserId(24)
-    const checksum = await createAnonymousSignUpChecksum(clientId)
+    const checksum = await createAnonymousSignInChecksum(clientId)
 
-    const response = await httpPost<IAnonymousSignUpApiResponse>(
+    const response = await httpPost<IAnonymousSignInApiResponse>(
       'api/user/sign-in/extension',
       {
         clientId,
         checksum,
-      } as IAnonymousSignUpApiRequest,
+      } as IAnonymousSignInApiRequest,
     )
 
     if (response && response.accessToken) {
-      set({ userId: clientId })
+      set({ userId: response.userId })
 
       chrome.storage.local
         .set({
           anonymousUserId: clientId,
           accessToken: response.accessToken,
+          userId: response.userId,
         })
         .then()
+    }
+  },
+
+  googleSignIn: async (token) => {
+    const { post: httpPost } = useHttpStore.getState()
+    const { showErrorNotification } = useNotificationStore.getState()
+
+    try {
+      const response = await httpPost<IGoogleSignInApiResponse>(
+        'api/user/sign-in/google',
+        {
+          token,
+        } as IGoogleSignInApiRequest,
+      )
+
+      if (response && response.accessToken) {
+        set({ userId: response.userId })
+
+        chrome.storage.local
+          .set({
+            accessToken: response.accessToken,
+            userId: response.userId,
+          })
+          .then()
+      }
+    } catch (err) {
+      showErrorNotification({
+        description: `Something went wrong. Please try again (${err})`,
+      })
     }
   },
 

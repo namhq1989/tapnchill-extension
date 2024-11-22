@@ -2,8 +2,8 @@ import { IAmbience } from '@/modules/ambience/types.ts'
 import { Slider } from '@/components/ui/slider.tsx'
 import useAmbiencesStore from '@/modules/ambience/store.ts'
 import { useCallback } from 'react'
-import HeaderTitle from '@/header-title.tsx'
-import BackButton from '@/back-button.tsx'
+import HeaderTitle from '@/modules/common/header-title.tsx'
+import BackButton from '@/modules/common/back-button.tsx'
 
 const AmbienceView = () => {
   const { ambiences, changeVolumeValue, toggleAmbience } = useAmbiencesStore()

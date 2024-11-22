@@ -1,4 +1,4 @@
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet.tsx'
 import { useState } from 'react'
 import { File, Info, Menu, MoonStar, StickyNote } from 'lucide-react'
 import { Switch } from '@/components/ui/switch.tsx'
@@ -10,13 +10,15 @@ import { Badge } from '@/components/ui/badge.tsx'
 import { copyToClipboard } from '@/lib/string.ts'
 import useNotificationStore from '@/modules/notification/store.ts'
 import { Button } from '@/components/ui/button.tsx'
+import useAppStore from '@/modules/common/store.ts'
 
 const side = 'left'
 
 const AppMenu = () => {
   const [isOpen, setIsOpen] = useState(false)
   const { setTheme, theme } = useTheme()
-  const { showNotification } = useNotificationStore()
+  const { showNotification, showErrorNotification } = useNotificationStore()
+  const { userId, googleSignIn } = useAppStore()
 
   return (
     <Sheet key={side} open={isOpen} onOpenChange={setIsOpen}>
@@ -53,46 +55,50 @@ const AppMenu = () => {
             </div>
           </Link>
           <Separator className='w-[90%] mt-4 self-center' />
-          <div className='flex flex-col p-4 w-full gap-4'>
-            <div className='flex flex-row items-center justify-between'>
-              <p className='text-sm text-muted-foreground'>Current plan</p>
-              <Badge variant='secondary'>Free</Badge>
+          {!userId ? (
+            <div className='flex flex-col p-4 w-full gap-4'>
+              <div className='flex flex-row items-center justify-between'>
+                <p className='text-sm text-muted-foreground'>Current plan</p>
+                <Badge variant='secondary'>Free</Badge>
+              </div>
+              <Button
+                variant='secondary'
+                className='w-full h-[32px] rounded-xl'
+                onClick={async () => {
+                  chrome.runtime.sendMessage(
+                    { type: 'sign-in-with-google' },
+                    async (response) => {
+                      if (response?.success) {
+                        await googleSignIn(
+                          response.user.stsTokenManager.accessToken,
+                        )
+                      } else {
+                        showErrorNotification({
+                          description: `Authentication failed!`,
+                        })
+                      }
+                    },
+                  )
+                }}
+              >
+                <ChromeIcon className='mr-2 h-4 w-4' />
+                Sign in with Google
+              </Button>
             </div>
-            <Button
-              variant='secondary'
-              className='w-full h-[32px] rounded-xl'
-              onClick={() => {
-                chrome.runtime.sendMessage(
-                  { type: 'sign-in-with-google' },
-                  (response) => {
-                    console.log('response', response)
-                    if (response?.success) {
-                      console.log('User signed in:', response.user)
-                      // Handle signed-in user info, e.g., update UI or store in state
-                    } else {
-                      console.error('Sign-in failed:', response?.error)
-                      // Optionally show an error notification to the user
-                    }
-                  },
-                )
-              }}
-            >
-              <ChromeIcon className='mr-2 h-4 w-4' />
-              Sign in with Google
-            </Button>
-          </div>
-          {/*<div className='flex flex-col p-4 w-full gap-4'>*/}
-          {/*  <div className='flex flex-row items-center justify-between'>*/}
-          {/*    <p className='text-sm'>Current plan</p>*/}
-          {/*    <Badge variant='secondary'>Pro</Badge>*/}
-          {/*  </div>*/}
-          {/*  <div className='flex flex-row items-center justify-between'>*/}
-          {/*    <p className='text-sm'>Renew on: Dec 30, 2024</p>*/}
-          {/*    <p className='text-xs underline underline-offset-4 cursor-pointer'>*/}
-          {/*      Cancel*/}
-          {/*    </p>*/}
-          {/*  </div>*/}
-          {/*</div>*/}
+          ) : (
+            <div className='flex flex-col p-4 w-full gap-4'>
+              <div className='flex flex-row items-center justify-between'>
+                <p className='text-sm'>Current plan</p>
+                <Badge variant='secondary'>Pro</Badge>
+              </div>
+              <div className='flex flex-row items-center justify-between'>
+                <p className='text-sm'>Renew on: Dec 30, 2024</p>
+                <p className='text-xs underline underline-offset-4 cursor-pointer'>
+                  Cancel
+                </p>
+              </div>
+            </div>
+          )}
           <Separator className='w-[90%] mb-4 self-center' />
           <div className='flex flex-col'>
             <div className='flex flex-row items-center justify-between px-4 py-1 w-full'>

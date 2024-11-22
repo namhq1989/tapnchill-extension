@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input.tsx'
 import { Textarea } from '@/components/ui/textarea.tsx'
 import { Button } from '@/components/ui/button.tsx'
 import { CalendarIcon, CircleMinus } from 'lucide-react'
-import HeaderTitle from '@/header-title.tsx'
+import HeaderTitle from '@/modules/common/header-title.tsx'
 import {
   Popover,
   PopoverContent,
@@ -23,7 +23,7 @@ import { cn } from '@/lib/utils.ts'
 import { format } from 'date-fns'
 import { Calendar } from '@/components/ui/calendar.tsx'
 import { TimePicker } from '@/components/ui/time-picker.tsx'
-import BackButton from '@/back-button.tsx'
+import BackButton from '@/modules/common/back-button.tsx'
 import { goBack } from 'react-chrome-extension-router'
 import { ITask } from '@/modules/task/types.ts'
 import useTaskManipulationStore from '@/modules/task/task-manipulation-store.ts'
