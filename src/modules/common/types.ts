@@ -2,6 +2,9 @@ export interface IAppStore {
   userId: string
   userToken: string
   provider: string
+  subscription: IUserSubscriptionPlan
+  fetchSubscription: () => Promise<void>
+
   isInitializing: boolean
   initApp: () => Promise<void>
   generateAnonymousUserId: (length: number) => string
@@ -39,4 +42,9 @@ export interface IGoogleSignInApiResponse {
 export interface IWeekday {
   id: number
   name: string
+}
+
+export interface IUserSubscriptionPlan {
+  id: string
+  expiry: Date | null
 }

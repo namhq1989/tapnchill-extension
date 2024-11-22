@@ -117,6 +117,8 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
       const { listeningTrackingTimeData } = result
       sendResponse({ data: listeningTrackingTimeData || [] })
     })
+
+    return true
   } else if (request.type === 'station-is-playing') {
     setBadge()
 

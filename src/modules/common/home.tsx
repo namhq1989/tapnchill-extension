@@ -18,6 +18,7 @@ import useWeatherStore from '@/modules/weather/store.ts'
 import useHabitsStore from '@/modules/habit/store.ts'
 import SubscriptionView from '@/modules/subscription/view.tsx'
 import AppMenu from '@/modules/common/app-menu.tsx'
+import LoadingIndicator from '@/modules/common/loading-indicator.tsx'
 
 const HomeView = () => {
   const { initApp, isInitializing } = useAppStore()
@@ -67,15 +68,16 @@ const HomeView = () => {
 
   if (isInitializing) {
     return (
-      <div className='flex flex-col w-full h-full justify-center items-center'>
-        <span className='loading loading-spinner text-primary'></span>
+      <div className='flex flex-col gap-8 w-[400px] h-[600px] scrollbar-hide justify-center items-center'>
+        <img src='/icons/icon128.png' alt='logo' width={48} height={48} />
+        <LoadingIndicator />
       </div>
     )
   }
 
   return (
     <>
-      {/*Hidden class for task statuses color*/}
+      {/*Hidden classes for task statuses color*/}
       <div className='hidden'>
         <span className='text-red-600' />
         <span className='text-orange-600' />

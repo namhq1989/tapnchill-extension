@@ -15,6 +15,20 @@ const useAppStore = create<IAppStore>((set, get) => ({
   userId: '',
   userToken: '',
   provider: '',
+
+  subscription: {
+    id: 'free',
+    expiry: null,
+  },
+  fetchSubscription: async () => {
+    set({
+      subscription: {
+        id: 'pro',
+        expiry: new Date(new Date().getTime() + 500000000),
+      },
+    })
+  },
+
   isInitializing: false,
   initApp: async () => {
     set({ isInitializing: true })
