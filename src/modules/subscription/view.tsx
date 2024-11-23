@@ -1,5 +1,6 @@
 import BackButton from '@/modules/common/back-button.tsx'
 import HeaderTitle from '@/modules/common/header-title.tsx'
+import { Button } from '@/components/ui/button.tsx'
 
 const SubscriptionView = () => {
   return (
@@ -15,26 +16,33 @@ const SubscriptionView = () => {
           on certain features, giving you more space to stay productive and
           relaxed.
         </p>
-        <div className='flex flex-row justify-between items-center container-selected px-8 py-4 rounded-xl'>
-          <div className='flex flex-col'>
-            <p className='text-3xl font-bold text-primary'>$3</p>
-            <p className='text-sm text-muted-foreground'>per month</p>
-          </div>
-          <p className='text-sm text-primary font-bold underline underline-offset-4 cursor-pointer'>
-            UPGRADE
-          </p>
-        </div>
-        <div className='flex flex-row justify-between items-center container-selected px-8 py-4 rounded-xl'>
-          <div className='flex flex-col'>
-            <div className='flex flex-row gap-2 items-end'>
-              <p className='text-3xl font-bold text-primary'>$30</p>
-              <p className='text-xl text-primary line-through mb-[2px]'>$36</p>
+        <div className='grid grid-cols-2 gap-2'>
+          <div className='col-span-1 flex flex-col justify-between items-start container-selected px-4 py-4 rounded-xl gap-4'>
+            <div className='flex flex-col'>
+              <p className='text-3xl font-bold text-primary'>$3</p>
+              <p className='text-sm'>per month</p>
             </div>
-            <p className='text-sm text-muted-foreground'>per year</p>
+            {/*<p className='text-sm text-primary font-bold underline underline-offset-4 cursor-pointer'>*/}
+            {/*  UPGRADE*/}
+            {/*</p>*/}
+            <Button className='w-full h-[28px] rounded-xl font-bold'>
+              UPGRADE
+            </Button>
           </div>
-          <p className='text-sm text-primary font-bold underline underline-offset-4 cursor-pointer'>
-            UPGRADE
-          </p>
+          <div className='col-span-1 flex flex-col justify-between items-start container-selected px-4 py-4 rounded-xl gap-4'>
+            <div className='flex flex-col'>
+              <div className='flex flex-row gap-2 items-end'>
+                <p className='text-3xl font-bold text-primary'>$30</p>
+                <p className='text-xl text-primary line-through mb-[2px]'>
+                  $36
+                </p>
+              </div>
+              <p className='text-sm'>per year</p>
+            </div>
+            <Button className='w-full h-[28px] rounded-xl font-bold'>
+              UPGRADE
+            </Button>
+          </div>
         </div>
 
         <div className='flex flex-col mt-8'>

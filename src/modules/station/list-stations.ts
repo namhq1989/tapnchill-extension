@@ -51,7 +51,7 @@ const listStations = (): IStation[] => {
   return [
     createItem(
       'bapbi',
-      'https://stm.bapbi.app/mix',
+      'https://az.bapbi.app/listen/bapbi_mix/radio.mp3',
       'mp3',
       'BapBi Mix',
       'Discover chilling music, long listening music, and relaxing playlists with BapBi 24/7 live streaming station. Tune in and chill out!',

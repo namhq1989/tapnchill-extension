@@ -21,7 +21,7 @@ import AppMenu from '@/modules/common/app-menu.tsx'
 import LoadingIndicator from '@/modules/common/loading-indicator.tsx'
 
 const HomeView = () => {
-  const { initApp, isInitializing } = useAppStore()
+  const { initApp, isInitializing, fetchMe } = useAppStore()
   const { initStations } = useStationsStore()
   const { initAmbiences } = useAmbiencesStore()
   const { fetchQuote } = useQuoteStore()
@@ -49,13 +49,15 @@ const HomeView = () => {
     }
 
     const initialize = async () => {
-      await initApp() // Wait for initApp to complete
+      await initApp()
+      await fetchMe()
       await init()
     }
 
     initialize().then()
   }, [
     initApp,
+    fetchMe,
     initStations,
     initAmbiences,
     fetchQuote,
