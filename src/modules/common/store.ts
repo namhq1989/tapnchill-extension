@@ -3,10 +3,12 @@ import {
   IAnonymousSignInApiRequest,
   IAnonymousSignInApiResponse,
   IAppStore,
+  IGetMeResponse,
   IGoogleSignInApiResponse,
 } from '@/modules/common/types.ts'
 import useHttpStore from '@/modules/http/store.ts'
 import useNotificationStore from '@/modules/notification/store.ts'
+import { mapMe } from '@/modules/common/util.ts'
 
 const ID_CHARS =
   'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
@@ -15,6 +17,23 @@ const useAppStore = create<IAppStore>((set, get) => ({
   userId: '',
   userToken: '',
   provider: '',
+
+  me: null,
+  fetchMe: async () => {
+    const { get: httpGet } = useHttpStore.getState()
+    const { showErrorNotification } = useNotificationStore.getState()
+
+    try {
+      const response = await httpGet<IGetMeResponse>('api/user/me')
+      const me = mapMe(response)
+      set({ me })
+    } catch (err) {
+      showErrorNotification({
+        description: `Something went wrong. Please try again (${err})`,
+      })
+    }
+  },
+
   isInitializing: false,
   initApp: async () => {
     set({ isInitializing: true })

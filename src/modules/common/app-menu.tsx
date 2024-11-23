@@ -11,6 +11,8 @@ import { copyToClipboard } from '@/lib/string.ts'
 import useNotificationStore from '@/modules/notification/store.ts'
 import { Button } from '@/components/ui/button.tsx'
 import useAppStore from '@/modules/common/store.ts'
+import { format } from 'date-fns'
+import SubscriptionView from '@/modules/subscription/view.tsx'
 
 const side = 'left'
 
@@ -18,7 +20,12 @@ const AppMenu = () => {
   const [isOpen, setIsOpen] = useState(false)
   const { setTheme, theme } = useTheme()
   const { showNotification } = useNotificationStore()
-  const { provider, isGoogleSigningIn, googleSignIn, signOut } = useAppStore()
+  const { provider, isGoogleSigningIn, googleSignIn, signOut, me } =
+    useAppStore()
+
+  if (!me) {
+    return <div />
+  }
 
   return (
     <Sheet key={side} open={isOpen} onOpenChange={setIsOpen}>
@@ -55,7 +62,7 @@ const AppMenu = () => {
             </div>
           </Link>
           <Separator className='w-[90%] mt-4 self-center' />
-          {provider !== 'google' ? (
+          {provider === 'extension' ? (
             <div className='flex flex-col p-4 w-full gap-4'>
               <div className='flex flex-row items-center justify-between'>
                 <p className='text-sm text-muted-foreground'>Current plan</p>
@@ -64,7 +71,7 @@ const AppMenu = () => {
               <Button
                 disabled={isGoogleSigningIn}
                 variant='secondary'
-                className='w-full h-[32px] rounded-xl'
+                className='w-full h-[28px] rounded-xl font-bold'
                 onClick={async () => await googleSignIn()}
               >
                 <ChromeIcon className='mr-2 h-4 w-4' />
@@ -75,14 +82,27 @@ const AppMenu = () => {
             <div className='flex flex-col p-4 w-full gap-4'>
               <div className='flex flex-row items-center justify-between'>
                 <p className='text-sm'>Current plan</p>
-                <Badge variant='secondary'>Pro</Badge>
+                <Badge variant='secondary'>
+                  {me.subscription.plan.toUpperCase()}
+                </Badge>
               </div>
-              <div className='flex flex-row items-center justify-between'>
-                <p className='text-sm'>Renew on: Dec 30, 2024</p>
-                <p className='text-xs underline underline-offset-4 cursor-pointer'>
-                  Cancel
-                </p>
-              </div>
+              {me.subscription.plan === 'free' && (
+                <Link component={SubscriptionView}>
+                  <Button className='w-full h-[32px] rounded-xl font-bold'>
+                    UPGRADE
+                  </Button>
+                </Link>
+              )}
+              {me.subscription.expiry && (
+                <div className='flex flex-row items-center justify-between'>
+                  <p className='text-sm'>
+                    Renew on: {format(me.subscription.expiry, 'dd/MM/yyyy')}
+                  </p>
+                  <p className='text-xs underline underline-offset-4 cursor-pointer'>
+                    Cancel
+                  </p>
+                </div>
+              )}
             </div>
           )}
           <Separator className='w-[90%] mb-4 self-center' />
@@ -99,12 +119,12 @@ const AppMenu = () => {
                 }}
               >
                 <File size={12} />
-                <p className='text-xs'>172.0.0.1</p>
+                <p className='text-xs'>{me.ip}</p>
               </div>
             </div>
             <div className='flex flex-row items-center justify-between px-4 py-1 w-full'>
               <p className='text-xs'>Extension version</p>
-              <p className='text-xs'>v1.0.1</p>
+              <p className='text-xs'>v1.0.0</p>
             </div>
           </div>
           <p

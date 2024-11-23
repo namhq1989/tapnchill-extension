@@ -2,6 +2,9 @@ export interface IAppStore {
   userId: string
   userToken: string
   provider: string
+  me: IMe | null
+  fetchMe: () => Promise<void>
+
   isInitializing: boolean
   initApp: () => Promise<void>
   generateAnonymousUserId: (length: number) => string
@@ -14,6 +17,16 @@ export interface IAppStore {
   signOut: () => void
 
   weekdays: IWeekday[]
+}
+
+export interface IMe {
+  ip: string
+  subscription: IUserSubscription
+}
+
+export interface IGetMeResponse {
+  ip: string
+  subscription: IUserSubscriptionApiData
 }
 
 export interface IAnonymousSignInApiRequest {
@@ -39,4 +52,14 @@ export interface IGoogleSignInApiResponse {
 export interface IWeekday {
   id: number
   name: string
+}
+
+export interface IUserSubscription {
+  plan: string
+  expiry: Date | null
+}
+
+export interface IUserSubscriptionApiData {
+  plan: string
+  expiry: string
 }
