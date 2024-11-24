@@ -75,6 +75,9 @@ const useAppStore = create<IAppStore>((set, get) => ({
           set({ userId, userToken: accessToken, provider })
         }
 
+        const { fetchMe } = get()
+        await fetchMe()
+
         set({ isInitializing: false })
         resolve()
       })
