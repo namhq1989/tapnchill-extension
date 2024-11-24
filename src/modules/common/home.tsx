@@ -21,8 +21,7 @@ import AppMenu from '@/modules/common/app-menu.tsx'
 import LoadingIndicator from '@/modules/common/loading-indicator.tsx'
 
 const HomeView = () => {
-  const { initApp, isInitializing, fetchMe, fetchSubscriptionPlans } =
-    useAppStore()
+  const { initApp, isInitializing, fetchSubscriptionPlans, me } = useAppStore()
   const { initStations } = useStationsStore()
   const { initAmbiences } = useAmbiencesStore()
   const { fetchQuote } = useQuoteStore()
@@ -52,14 +51,12 @@ const HomeView = () => {
 
     const initialize = async () => {
       await initApp()
-      await fetchMe()
       await init()
     }
 
     initialize().then()
   }, [
     initApp,
-    fetchMe,
     initStations,
     initAmbiences,
     fetchSubscriptionPlans,
@@ -80,6 +77,20 @@ const HomeView = () => {
     )
   }
 
+  if (!me) {
+    return (
+      <div className='flex flex-col gap-8 w-[400px] h-[600px] scrollbar-hide justify-center items-center p-12'>
+        <p className='text-base text-muted-foreground'>
+          Something went wrong. Please try again or contact{' '}
+          <span className='text-primary underline underline-offset-4'>
+            hi@bapbi.app
+          </span>{' '}
+          for support.
+        </p>
+      </div>
+    )
+  }
+
   return (
     <>
       {/*Hidden classes for task statuses color*/}
@@ -94,11 +105,13 @@ const HomeView = () => {
         <div className='flex w-full flex-row justify-between p-4 border-b-[1px]'>
           <div className='flex flex-row gap-4 items-center'>
             <AppMenu />
-            <Link component={SubscriptionView}>
-              <Badge variant='default' className='cursor-pointer'>
-                Go Pro
-              </Badge>
-            </Link>
+            {me.subscription.plan === 'free' && (
+              <Link component={SubscriptionView}>
+                <Badge variant='default' className='cursor-pointer'>
+                  Go Pro
+                </Badge>
+              </Link>
+            )}
           </div>
           <div className='flex flex-row gap-4 justify-center'>
             <HeaderTitle title='BapBi' />

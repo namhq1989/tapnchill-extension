@@ -82,7 +82,11 @@ const AppMenu = () => {
             <div className='flex flex-col p-4 w-full gap-4'>
               <div className='flex flex-row items-center justify-between'>
                 <p className='text-sm'>Current plan</p>
-                <Badge variant='secondary'>
+                <Badge
+                  variant={
+                    me.subscription.plan === 'free' ? 'secondary' : 'default'
+                  }
+                >
                   {me.subscription.plan.toUpperCase()}
                 </Badge>
               </div>
@@ -95,11 +99,9 @@ const AppMenu = () => {
               )}
               {me.subscription.expiry && (
                 <div className='flex flex-row items-center justify-between'>
-                  <p className='text-sm'>
-                    Renew on: {format(me.subscription.expiry, 'dd/MM/yyyy')}
-                  </p>
-                  <p className='text-xs underline underline-offset-4 cursor-pointer'>
-                    Cancel
+                  <p className='text-sm'>Renew on:</p>
+                  <p className='text-sm font-bold'>
+                    {format(me.subscription.expiry, 'dd/MM/yyyy')}
                   </p>
                 </div>
               )}
