@@ -112,7 +112,7 @@ const AppMenu = () => {
               <div
                 className='flex flex-row gap-1 items-center cursor-pointer'
                 onClick={() => {
-                  copyToClipboard('172.0.0.1')
+                  copyToClipboard(me.ip)
                   showNotification({
                     description: 'Copied to clipboard',
                   })

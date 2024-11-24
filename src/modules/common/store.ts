@@ -4,6 +4,7 @@ import {
   IAnonymousSignInApiResponse,
   IAppStore,
   IGetMeResponse,
+  IGetSubscriptionPlansResponse,
   IGoogleSignInApiResponse,
 } from '@/modules/common/types.ts'
 import useHttpStore from '@/modules/http/store.ts'
@@ -27,6 +28,23 @@ const useAppStore = create<IAppStore>((set, get) => ({
       const response = await httpGet<IGetMeResponse>('api/user/me')
       const me = mapMe(response)
       set({ me })
+    } catch (err) {
+      showErrorNotification({
+        description: `Something went wrong. Please try again (${err})`,
+      })
+    }
+  },
+
+  subscriptionPlans: [],
+  fetchSubscriptionPlans: async () => {
+    const { get: httpGet } = useHttpStore.getState()
+    const { showErrorNotification } = useNotificationStore.getState()
+
+    try {
+      const response = await httpGet<IGetSubscriptionPlansResponse>(
+        'api/user/subscription-plans',
+      )
+      set({ subscriptionPlans: response.plans })
     } catch (err) {
       showErrorNotification({
         description: `Something went wrong. Please try again (${err})`,
