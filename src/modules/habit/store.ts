@@ -123,7 +123,7 @@ const useHabitsStore = create<IHabitsStore>((set, get) => ({
       return true
     } catch (err) {
       showErrorNotification({
-        description: `Something went wrong. Please try again (${err})`,
+        description: (err as Error).message,
       })
 
       return false
@@ -157,7 +157,7 @@ const useHabitsStore = create<IHabitsStore>((set, get) => ({
       return true
     } catch (err) {
       showErrorNotification({
-        description: `Something went wrong. Please try again (${err})`,
+        description: (err as Error).message,
       })
 
       return false
@@ -186,7 +186,7 @@ const useHabitsStore = create<IHabitsStore>((set, get) => ({
       })
     } catch (err) {
       showErrorNotification({
-        description: `Something went wrong. Please try again (${err})`,
+        description: (err as Error).message,
       })
     }
   },
@@ -238,7 +238,7 @@ const useHabitsStore = create<IHabitsStore>((set, get) => ({
       }
     } catch (err) {
       showErrorNotification({
-        description: `Something went wrong. Please try again (${err})`,
+        description: (err as Error).message,
       })
     }
   },

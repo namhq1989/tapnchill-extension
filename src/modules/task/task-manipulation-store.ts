@@ -77,7 +77,7 @@ const useTaskManipulationStore = create<ITaskManipulationStore>(() => ({
       return true
     } catch (err) {
       showErrorNotification({
-        description: `Something went wrong. Please try again (${err})`,
+        description: (err as Error).message,
       })
       return false
     }
@@ -111,7 +111,7 @@ const useTaskManipulationStore = create<ITaskManipulationStore>(() => ({
       return true
     } catch (err) {
       showErrorNotification({
-        description: `Something went wrong. Please try again (${err})`,
+        description: (err as Error).message,
       })
 
       return false
@@ -119,6 +119,7 @@ const useTaskManipulationStore = create<ITaskManipulationStore>(() => ({
   },
   toggleTask: async (task: ITask): Promise<void> => {
     const { patch: httpPatch } = useHttpStore.getState()
+    const { showErrorNotification } = useNotificationStore.getState()
 
     if (task.status === TaskStatus.todo) {
       task.status = TaskStatus.done
@@ -159,7 +160,9 @@ const useTaskManipulationStore = create<ITaskManipulationStore>(() => ({
         })
       }
     } catch (err) {
-      console.log('err', err)
+      showErrorNotification({
+        description: (err as Error).message,
+      })
     }
   },
 }))

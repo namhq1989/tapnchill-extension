@@ -62,7 +62,7 @@ const useGoalsStore = create<IGoalsStore>((set, get) => ({
       return true
     } catch (err) {
       showErrorNotification({
-        description: `Something went wrong. Please try again (${err})`,
+        description: (err as Error).message,
       })
 
       return false
@@ -92,7 +92,7 @@ const useGoalsStore = create<IGoalsStore>((set, get) => ({
       return true
     } catch (err) {
       showErrorNotification({
-        description: `Something went wrong. Please try again (${err})`,
+        description: (err as Error).message,
       })
 
       return false

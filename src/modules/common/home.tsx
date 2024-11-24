@@ -105,12 +105,14 @@ const HomeView = () => {
         <div className='flex w-full flex-row justify-between p-4 border-b-[1px]'>
           <div className='flex flex-row gap-4 items-center'>
             <AppMenu />
-            {me.subscription.plan === 'free' && (
+            {me.subscription.plan === 'free' ? (
               <Link component={SubscriptionView}>
                 <Badge variant='default' className='cursor-pointer'>
                   Go Pro
                 </Badge>
               </Link>
+            ) : (
+              <Badge>Pro</Badge>
             )}
           </div>
           <div className='flex flex-row gap-4 justify-center'>

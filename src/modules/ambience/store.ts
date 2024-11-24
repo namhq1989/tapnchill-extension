@@ -2,8 +2,8 @@ import { create } from 'zustand'
 import { IAmbiencesStore, ISelectedAmbience } from '@/modules/ambience/types.ts'
 import listAmbiences from '@/modules/ambience/list-ambiences.ts'
 import useNotificationStore from '@/modules/notification/store.ts'
+import useAppStore from '@/modules/common/store.ts'
 
-const MAX_ADDED_AMBIENCES = 5
 const { showErrorNotification } = useNotificationStore.getState()
 
 const useAmbiencesStore = create<IAmbiencesStore>((set, get) => ({
@@ -36,9 +36,15 @@ const useAmbiencesStore = create<IAmbiencesStore>((set, get) => ({
     if (!ambience) return
 
     const totalAdded = ambiences.filter((e) => e.isAdded).length
-    if (!ambience.isAdded && totalAdded >= MAX_ADDED_AMBIENCES) {
+
+    const { me } = useAppStore.getState()
+    let maxAddedAmbiences = 2
+    if (me?.subscription.plan === 'pro') {
+      maxAddedAmbiences = 1000
+    }
+    if (!ambience.isAdded && totalAdded >= maxAddedAmbiences) {
       showErrorNotification({
-        description: `You can only add up to ${MAX_ADDED_AMBIENCES} ambiences at a time`,
+        description: `You can only add up to ${maxAddedAmbiences} ambiences at a time`,
       })
 
       return
