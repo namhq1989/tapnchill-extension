@@ -21,7 +21,8 @@ import AppMenu from '@/modules/common/app-menu.tsx'
 import LoadingIndicator from '@/modules/common/loading-indicator.tsx'
 
 const HomeView = () => {
-  const { initApp, isInitializing, fetchMe } = useAppStore()
+  const { initApp, isInitializing, fetchMe, fetchSubscriptionPlans } =
+    useAppStore()
   const { initStations } = useStationsStore()
   const { initAmbiences } = useAmbiencesStore()
   const { fetchQuote } = useQuoteStore()
@@ -36,6 +37,7 @@ const HomeView = () => {
       initAmbiences()
 
       await Promise.all([
+        fetchSubscriptionPlans(),
         fetchQuote(),
         fetchWeather(),
         fetchGoals(),
@@ -60,6 +62,7 @@ const HomeView = () => {
     fetchMe,
     initStations,
     initAmbiences,
+    fetchSubscriptionPlans,
     fetchQuote,
     fetchWeather,
     fetchGoals,

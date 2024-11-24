@@ -1,8 +1,11 @@
 import BackButton from '@/modules/common/back-button.tsx'
 import HeaderTitle from '@/modules/common/header-title.tsx'
 import { Button } from '@/components/ui/button.tsx'
+import useAppStore from '@/modules/common/store.ts'
 
 const SubscriptionView = () => {
+  const { subscriptionPlans } = useAppStore()
+
   return (
     <div className='flex flex-col w-[400px] min-h-[600px] scrollbar-hide'>
       <div className='flex w-full flex-row justify-between p-4 border-b-[1px]'>
@@ -16,34 +19,50 @@ const SubscriptionView = () => {
           on certain features, giving you more space to stay productive and
           relaxed.
         </p>
-        <div className='grid grid-cols-2 gap-2'>
-          <div className='col-span-1 flex flex-col justify-between items-start container-selected px-4 py-4 rounded-xl gap-4'>
-            <div className='flex flex-col'>
-              <p className='text-3xl font-bold text-primary'>$3</p>
-              <p className='text-sm'>per month</p>
-            </div>
-            {/*<p className='text-sm text-primary font-bold underline underline-offset-4 cursor-pointer'>*/}
-            {/*  UPGRADE*/}
-            {/*</p>*/}
-            <Button className='w-full h-[28px] rounded-xl font-bold'>
-              UPGRADE
-            </Button>
+        {!subscriptionPlans.length ? (
+          <div className='flex flex-col w-full h-[100px] justify-center items-center'>
+            Something went wrong. Please try again!
           </div>
-          <div className='col-span-1 flex flex-col justify-between items-start container-selected px-4 py-4 rounded-xl gap-4'>
-            <div className='flex flex-col'>
-              <div className='flex flex-row gap-2 items-end'>
-                <p className='text-3xl font-bold text-primary'>$30</p>
-                <p className='text-xl text-primary line-through mb-[2px]'>
-                  $36
+        ) : (
+          <div className='grid grid-cols-2 gap-2'>
+            {subscriptionPlans.map((plan) => {
+              const url = `${import.meta.env.VITE_LANDING_PAGE_URL}/?c=${plan.token}`
+
+              let pricingDiv = (
+                <p className='text-3xl font-bold text-primary'>
+                  ${plan.amount}
                 </p>
-              </div>
-              <p className='text-sm'>per year</p>
-            </div>
-            <Button className='w-full h-[28px] rounded-xl font-bold'>
-              UPGRADE
-            </Button>
+              )
+
+              if (plan.discountId) {
+                pricingDiv = (
+                  <div className='flex flex-row gap-2 items-end'>
+                    <p className='text-3xl font-bold text-primary'>
+                      ${plan.afterDiscountAmount}
+                    </p>
+                    <p className='text-xl text-primary line-through mb-[2px]'>
+                      ${plan.amount}
+                    </p>
+                  </div>
+                )
+              }
+
+              return (
+                <div className='col-span-1 flex flex-col justify-between items-start container-selected px-4 py-4 rounded-xl gap-4'>
+                  <div className='flex flex-col'>
+                    {pricingDiv}
+                    <p className='text-sm'>per {plan.periodText}</p>
+                  </div>
+                  <a href={url} target='_blank'>
+                    <Button className='w-full h-[28px] rounded-xl font-bold'>
+                      UPGRADE
+                    </Button>
+                  </a>
+                </div>
+              )
+            })}
           </div>
-        </div>
+        )}
 
         <div className='flex flex-col mt-8'>
           <h3 className='scroll-m-20 text-xl font-semibold tracking-tight mb-2'>

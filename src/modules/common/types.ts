@@ -5,6 +5,9 @@ export interface IAppStore {
   me: IMe | null
   fetchMe: () => Promise<void>
 
+  subscriptionPlans: ISubscriptionPlan[]
+  fetchSubscriptionPlans: () => Promise<void>
+
   isInitializing: boolean
   initApp: () => Promise<void>
   generateAnonymousUserId: (length: number) => string
@@ -62,4 +65,17 @@ export interface IUserSubscription {
 export interface IUserSubscriptionApiData {
   plan: string
   expiry: string
+}
+
+export interface ISubscriptionPlan {
+  periodText: string
+  priceId: string
+  amount: number
+  discountId: string
+  afterDiscountAmount: number
+  token: string
+}
+
+export interface IGetSubscriptionPlansResponse {
+  plans: ISubscriptionPlan[]
 }
