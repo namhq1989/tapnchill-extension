@@ -54,6 +54,7 @@ export interface ITaskManipulationStore {
     goalId: string,
   ) => Promise<boolean>
   updateTask: (task: ITask) => Promise<boolean>
+  deleteTask: (task: ITask) => Promise<boolean>
   toggleTask: (task: ITask) => Promise<void>
 }
 
@@ -89,6 +90,10 @@ export interface IUpdateTaskApiRequest {
 }
 
 export interface IUpdateTaskApiResponse {
+  id: string
+}
+
+export interface IDeleteTaskApiResponse {
   id: string
 }
 

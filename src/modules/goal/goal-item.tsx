@@ -1,14 +1,25 @@
-import { Goal, Settings } from 'lucide-react'
+import { Goal, Settings, Trash2 } from 'lucide-react'
 import { IGoal } from '@/modules/goal/types.ts'
 import { Link } from 'react-chrome-extension-router'
 import GoalCreateView from '@/modules/goal/goal-create.tsx'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog.tsx'
 
 interface IGoalItemViewProps {
   goal: IGoal
+  onDelete: () => void
 }
 
 const GoalItemView = (props: IGoalItemViewProps) => {
-  const { goal } = props
+  const { goal, onDelete } = props
 
   let completedWidthPercent = 0
   let totalWidthPercent = 1
@@ -34,7 +45,8 @@ const GoalItemView = (props: IGoalItemViewProps) => {
             <Goal size={20} strokeWidth={1} />
             <p className='text-base'>{goal.name}</p>
           </div>
-          <div className='flex flex-row gap-2'>
+          <div className='flex flex-row gap-4'>
+            <DeleteGoalAlert onConfirm={() => onDelete()} />
             <Link component={GoalCreateView} props={{ goal }}>
               <Settings size={16} strokeWidth={1} className='cursor-pointer' />
             </Link>
@@ -69,6 +81,38 @@ const GoalItemView = (props: IGoalItemViewProps) => {
         </div>
       </div>
     </div>
+  )
+}
+
+interface IDeleteGoalAlertProps {
+  onConfirm: () => void
+}
+
+const DeleteGoalAlert = (props: IDeleteGoalAlertProps) => {
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Trash2 size={16} strokeWidth={1} className='cursor-pointer' />
+      </AlertDialogTrigger>
+      <AlertDialogContent className='w-[90%] rounded-xl'>
+        <AlertDialogHeader>
+          <AlertDialogDescription>
+            Are you sure you want to delete this goal? This action cannot be
+            undone
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={() => {
+              props.onConfirm()
+            }}
+          >
+            Delete
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }
 
