@@ -117,6 +117,50 @@ const useTaskManipulationStore = create<ITaskManipulationStore>(() => ({
       return false
     }
   },
+  deleteTask: async (task: ITask): Promise<boolean> => {
+    const { delete: httpDelete } = useHttpStore.getState()
+    const { showNotification, showErrorNotification } =
+      useNotificationStore.getState()
+
+    try {
+      await httpDelete<IUpdateTaskApiResponse>(`api/task/${task.id}`, {})
+
+      showNotification({
+        description: 'Task deleted successfully',
+      })
+
+      const { tasks: todoTasks } = useTodoTasksStore.getState()
+      useTodoTasksStore.setState({
+        tasks: todoTasks.filter((t) => t.id !== task.id),
+      })
+
+      const { tasks: listTasks } = useListTasksStore.getState()
+      useListTasksStore.setState({
+        tasks: listTasks.filter((t) => t.id !== task.id),
+      })
+
+      const { goals } = useGoalsStore.getState()
+      const goal = goals.find((g) => g.id === task.goalId)
+      if (goal) {
+        goal.stats.totalTask -= 1
+        if (task.status === TaskStatus.done) {
+          goal.stats.totalDoneTask -= 1
+        }
+
+        useGoalsStore.setState({
+          goals: goals.map((g) => (g.id === goal.id ? goal : g)),
+        })
+      }
+
+      return true
+    } catch (err) {
+      showErrorNotification({
+        description: (err as Error).message,
+      })
+
+      return false
+    }
+  },
   toggleTask: async (task: ITask): Promise<void> => {
     const { patch: httpPatch } = useHttpStore.getState()
     const { showErrorNotification } = useNotificationStore.getState()

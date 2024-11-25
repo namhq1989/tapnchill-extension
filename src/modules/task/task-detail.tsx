@@ -6,7 +6,24 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet.tsx'
-import { ChevronRight, Circle, CircleCheckBig, Edit, Goal } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
+import {
+  ChevronRight,
+  Circle,
+  CircleCheckBig,
+  Edit,
+  Goal,
+  Trash2,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button.tsx'
 import EditTaskView from '@/modules/task/task-edit.tsx'
 import { useState } from 'react'
@@ -22,7 +39,7 @@ export interface ITaskDetailProps {
 
 const TaskDetailView = (props: ITaskDetailProps) => {
   const [isOpen, setIsOpen] = useState(false)
-  const { toggleTask } = useTaskManipulationStore()
+  const { toggleTask, deleteTask } = useTaskManipulationStore()
   const { task } = props
 
   const isCompleted = task.status === TaskStatus.done
@@ -96,11 +113,55 @@ const TaskDetailView = (props: ITaskDetailProps) => {
                   <Edit /> Edit
                 </Button>
               </Link>
+
+              <DeleteTaskAlert
+                onConfirm={async () => {
+                  await deleteTask(task)
+                }}
+              />
             </div>
           </SheetContent>
         )}
       </Sheet>
     </div>
+  )
+}
+
+interface IDeleteTaskAlertProps {
+  onConfirm: () => void
+}
+
+const DeleteTaskAlert = (props: IDeleteTaskAlertProps) => {
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button
+          variant='destructive'
+          className='w-full mt-4'
+          onClick={() => {}}
+        >
+          <Trash2 /> Delete
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent className='w-[90%] rounded-xl'>
+        <AlertDialogHeader>
+          <AlertDialogDescription>
+            Are you sure you want to delete this task? This action cannot be
+            undone
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={() => {
+              props.onConfirm()
+            }}
+          >
+            Delete
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }
 

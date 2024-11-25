@@ -8,14 +8,14 @@ import {
 const useNotificationStore = create<INotificationStore>(() => ({
   showNotification: (notification: INotification) => {
     toast({
-      title: notification.title ?? 'Tap & Chill',
+      title: notification.title ?? 'BapBi',
       description: notification.description,
       duration: notification.duration || 3000,
     })
   },
   showErrorNotification: (notification: INotification) => {
     toast({
-      title: notification.title ?? 'Tap & Chill',
+      title: notification.title ?? 'BapBi',
       description: notification.description,
       duration: notification.duration || 5000,
       variant: 'destructive',

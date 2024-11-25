@@ -7,7 +7,7 @@ import { Link } from 'react-chrome-extension-router'
 import GoalCreateView from '@/modules/goal/goal-create.tsx'
 
 const GoalView = () => {
-  const { goals } = useGoalsStore()
+  const { goals, deleteGoal } = useGoalsStore()
 
   return (
     <div className='flex flex-col w-[400px] min-h-[600px] scrollbar-hide'>
@@ -19,7 +19,15 @@ const GoalView = () => {
         <div className='flex flex-col w-full gap-4'>
           <div className='flex flex-col gap-4'>
             {goals.map((g) => {
-              return <GoalItem key={`detail-goal-${g.id}`} goal={g} />
+              return (
+                <GoalItem
+                  key={`detail-goal-${g.id}`}
+                  goal={g}
+                  onDelete={async () => {
+                    await deleteGoal(g)
+                  }}
+                />
+              )
             })}
           </div>
         </div>

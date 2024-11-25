@@ -99,6 +99,13 @@ const TaskView = () => {
           </Link>
         </div>
         <div className='flex flex-col gap-2'>
+          {tasks.length === 0 && (
+            <div className='flex flex-col gap-2 items-center py-4 mb-4'>
+              <p className='text-sm text-muted-foreground'>
+                You don't have any TODO tasks yet!
+              </p>
+            </div>
+          )}
           {tasks.map((task) => (
             <TaskPreviewItem
               key={`detail-task-${task.id}`}

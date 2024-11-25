@@ -18,6 +18,7 @@ export interface IGoalsStore {
   fetchGoals: () => Promise<void>
   createGoal: (name: string, description: string) => Promise<boolean>
   updateGoal: (goal: IGoal) => Promise<boolean>
+  deleteGoal: (goal: IGoal) => Promise<boolean>
 }
 
 export interface IGetGoalsApiRequest {

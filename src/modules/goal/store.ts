@@ -10,6 +10,7 @@ import {
 } from '@/modules/goal/types.ts'
 import useHttpStore from '@/modules/http/store.ts'
 import useNotificationStore from '@/modules/notification/store.ts'
+import { IUpdateTaskApiResponse } from '@/modules/task/types.ts'
 
 const useGoalsStore = create<IGoalsStore>((set, get) => ({
   hasFetched: false,
@@ -87,6 +88,33 @@ const useGoalsStore = create<IGoalsStore>((set, get) => ({
       const { goals } = get()
       set({
         goals: goals.map((g) => (g.id === goal.id ? goal : g)),
+      })
+
+      return true
+    } catch (err) {
+      showErrorNotification({
+        description: (err as Error).message,
+      })
+
+      return false
+    }
+  },
+
+  deleteGoal: async (goal: IGoal): Promise<boolean> => {
+    const { delete: httpDelete } = useHttpStore.getState()
+    const { showNotification, showErrorNotification } =
+      useNotificationStore.getState()
+
+    try {
+      await httpDelete<IUpdateTaskApiResponse>(`api/task/goal/${goal.id}`, {})
+
+      showNotification({
+        description: 'Goal deleted successfully',
+      })
+
+      const { goals } = useGoalsStore.getState()
+      set({
+        goals: goals.filter((g) => g.id !== goal.id),
       })
 
       return true
