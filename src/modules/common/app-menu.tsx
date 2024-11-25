@@ -1,6 +1,14 @@
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet.tsx'
 import { useState } from 'react'
-import { File, Info, Menu, MoonStar, StickyNote } from 'lucide-react'
+import {
+  CircleCheckBig,
+  File,
+  Info,
+  ListChecks,
+  Menu,
+  MoonStar,
+  StickyNote,
+} from 'lucide-react'
 import { Switch } from '@/components/ui/switch.tsx'
 import { Link } from 'react-chrome-extension-router'
 import InformationView from '@/modules/information/view.tsx'
@@ -13,6 +21,8 @@ import { Button } from '@/components/ui/button.tsx'
 import useAppStore from '@/modules/common/store.ts'
 import { format } from 'date-fns'
 import SubscriptionView from '@/modules/subscription/view.tsx'
+import HabitView from '@/modules/habit/view.tsx'
+import TaskView from '@/modules/task/view.tsx'
 
 const side = 'left'
 
@@ -20,8 +30,7 @@ const AppMenu = () => {
   const [isOpen, setIsOpen] = useState(false)
   const { setTheme, theme } = useTheme()
   const { showNotification } = useNotificationStore()
-  const { provider, isGoogleSigningIn, googleSignIn, signOut, me } =
-    useAppStore()
+  const { provider, isGoogleSigningIn, googleSignIn, me } = useAppStore()
 
   if (!me) {
     return <div />
@@ -32,8 +41,8 @@ const AppMenu = () => {
       <SheetTrigger>
         <Menu className='cursor-pointer' />
       </SheetTrigger>
-      <SheetContent side={side} className='p-0'>
-        <div className='flex flex-col gap-1 p-2 mt-20'>
+      <SheetContent side={side} className='p-0 scrollbar-hide overflow-auto'>
+        <div className='flex flex-col gap-1 p-2 mt-16'>
           <div className='flex flex-row items-center justify-between cursor-pointer rounded-xl hover:container-selected p-4'>
             <div className='flex flex-row gap-4 items-center justify-center'>
               <MoonStar size={20} className='text-muted-foreground' />
@@ -46,6 +55,24 @@ const AppMenu = () => {
               }}
             />
           </div>
+          <Link
+            component={HabitView}
+            className='flex flex-row items-center justify-between cursor-pointer rounded-xl hover:container-selected p-4'
+          >
+            <div className='flex flex-row gap-4 items-center justify-center'>
+              <ListChecks size={20} className='text-muted-foreground' />
+              <p className='text-sm text-foreground'>Daily activity</p>
+            </div>
+          </Link>
+          <Link
+            component={TaskView}
+            className='flex flex-row items-center justify-between cursor-pointer rounded-xl hover:container-selected p-4'
+          >
+            <div className='flex flex-row gap-4 items-center justify-center'>
+              <CircleCheckBig size={20} className='text-muted-foreground' />
+              <p className='text-sm text-foreground'>Task</p>
+            </div>
+          </Link>
           <div className='flex flex-row items-center justify-between cursor-pointer rounded-xl hover:container-selected p-4'>
             <div className='flex flex-row gap-4 items-center justify-center'>
               <StickyNote size={20} className='text-muted-foreground' />
@@ -129,12 +156,12 @@ const AppMenu = () => {
               <p className='text-xs'>v1.0.0</p>
             </div>
           </div>
-          <p
-            className='text-xs underline underline-offset-4 cursor-pointer mt-20 self-center'
-            onClick={() => signOut()}
-          >
-            Sign Out
-          </p>
+          {/*<p*/}
+          {/*  className='text-xs underline underline-offset-4 cursor-pointer mt-20 self-center'*/}
+          {/*  onClick={() => signOut()}*/}
+          {/*>*/}
+          {/*  Sign Out*/}
+          {/*</p>*/}
         </div>
       </SheetContent>
     </Sheet>

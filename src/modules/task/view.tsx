@@ -59,7 +59,7 @@ const TaskView = () => {
         <BackButton />
         <HeaderTitle title='Tasks' />
       </div>
-      <div className='flex flex-col p-4 gap-4 scrollbar-hide'>
+      <div className='flex flex-col p-4 gap-4'>
         <GoalPreview />
         <div className='flex flex-row gap-4 justify-between items-center mt-8'>
           <div className='flex flex-row gap-4'>

@@ -1,5 +1,4 @@
 import { setState } from '@/modules/station/store.ts'
-import useNoteStore from '@/modules/note/store.ts'
 import { useEffect } from 'react'
 import {
   getComponentStack,
@@ -10,16 +9,16 @@ import HomeView from '@/modules/common/home.tsx'
 import { Toaster } from '@/components/ui/toaster.tsx'
 import { ThemeProvider } from '@/components/theme/theme-provider.tsx'
 import useNotificationStore from '@/modules/notification/store.ts'
+import useNoteStore from '@/modules/note/store.ts'
 
 chrome.storage.local.get((result) => {
   if (result.selectedText) {
+    console.log('selectedText', result.selectedText)
+    console.log('pageUrl', result.pageUrl)
+    console.log('pageTitle', result.pageTitle)
     useNoteStore
       .getState()
-      .openCreateNoteDialog(
-        result.selectedText,
-        result.pageUrl,
-        result.pageTitle,
-      )
+      .openCreateNoteView(result.selectedText, result.pageUrl, result.pageTitle)
     chrome.storage.local
       .set({
         selectedText: '',

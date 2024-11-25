@@ -1,21 +1,35 @@
 import { create } from 'zustand'
-import { INoteStore } from '@/modules/note/types.ts'
+import { INote, INoteData, INoteStore } from '@/modules/note/types.ts'
+import { goTo } from 'react-chrome-extension-router'
+import NoteCreateView from '@/modules/note/note-create.tsx'
 
-const useNoteStore = create<INoteStore>((set) => ({
-  isCreateNoteDialogOpen: false,
-  openCreateNoteDialog: (
+const useNoteStore = create<INoteStore>(() => ({
+  notes: [],
+  notesHasFetched: false,
+
+  openCreateNoteView: (
     selectedText: string,
     pageUrl: string,
+    pageTitle: string,
+  ) => {
+    goTo(NoteCreateView, { selectedText, pageTitle, pageUrl })
+  },
+
+  createNote(
     title: string,
-  ) => set({ isCreateNoteDialogOpen: true, selectedText, pageUrl, title }),
-  closeCreateNoteDialog: () =>
-    set({ isCreateNoteDialogOpen: false, selectedText: '' }),
-  selectedText: '',
-  setSelectedText: (selectedText: string) => set({ selectedText }),
-  pageUrl: '',
-  setPageUrl: (url: string) => set({ pageUrl: url }),
-  title: '',
-  setTitle: (title: string) => set({ title }),
+    description: string,
+    data: INoteData | null,
+  ): Promise<boolean> {
+    return Promise.resolve(true)
+  },
+
+  updateNote(note: INote): Promise<boolean> {
+    return Promise.resolve(true)
+  },
+
+  deleteNote(note: INote): Promise<boolean> {
+    return Promise.resolve(true)
+  },
 }))
 
 export default useNoteStore

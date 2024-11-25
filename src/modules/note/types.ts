@@ -1,15 +1,32 @@
 export interface INoteStore {
-  isCreateNoteDialogOpen: boolean
-  openCreateNoteDialog: (
+  notes: []
+  notesHasFetched: boolean
+
+  openCreateNoteView: (
     selectedText: string,
     pageUrl: string,
-    title: string,
+    pageTitle: string,
   ) => void
-  closeCreateNoteDialog: () => void
-  selectedText: string
-  setSelectedText: (selectedText: string) => void
-  pageUrl: string
-  setPageUrl: (url: string) => void
+
+  createNote(
+    title: string,
+    description: string,
+    data: INoteData | null,
+  ): Promise<boolean>
+  updateNote(note: INote): Promise<boolean>
+  deleteNote(note: INote): Promise<boolean>
+}
+
+export interface INote {
+  id: string
   title: string
-  setTitle: (title: string) => void
+  description: string
+  data: INoteData | null
+  createdAt: Date
+}
+
+export interface INoteData {
+  text: string
+  pageUrl: string
+  pageTitle: string
 }
