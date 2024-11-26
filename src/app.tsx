@@ -12,18 +12,22 @@ import useNotificationStore from '@/modules/notification/store.ts'
 import useNoteStore from '@/modules/note/store.ts'
 
 chrome.storage.local.get((result) => {
-  if (result.selectedText) {
-    console.log('selectedText', result.selectedText)
-    console.log('pageUrl', result.pageUrl)
-    console.log('pageTitle', result.pageTitle)
+  if (result.notePageUrl) {
+    console.log('notePageText', result.notePageText)
+    console.log('notePageUrl', result.notePageUrl)
+    console.log('notePageTitle', result.notePageTitle)
     useNoteStore
       .getState()
-      .openCreateNoteView(result.selectedText, result.pageUrl, result.pageTitle)
+      .openCreateNoteView(
+        result.notePageText,
+        result.notePageUrl,
+        result.notePageTitle,
+      )
     chrome.storage.local
       .set({
-        selectedText: '',
-        pageUrl: '',
-        pageTitle: '',
+        notePageText: '',
+        notePageUrl: '',
+        notePageTitle: '',
       })
       .then()
   }

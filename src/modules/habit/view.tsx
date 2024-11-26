@@ -18,16 +18,16 @@ const HabitView = () => {
         <BackButton />
         <HeaderTitle title='Daily activities' />
       </div>
-      <div className='flex flex-col p-4 gap-4 scrollbar-hide'>
+      <div className='flex flex-col p-4 gap-8 scrollbar-hide'>
         <StatsSummaryView stats={stats} />
-        <Link
-          component={HabitCreateView}
-          className='flex flex-row my-4 gap-2 justify-center items-center cursor-pointer'
-        >
-          <Plus />
-          <p className='text-sm font-bold'>New Activity</p>
-        </Link>
+
         <div className='flex flex-col gap-2'>
+          <div className='flex flex-row items-center justify-between'>
+            <h2 className='text-base font-bold tracking-wide'>Activities</h2>
+            <Link component={HabitCreateView} className='cursor-pointer'>
+              <Plus />
+            </Link>
+          </div>
           {habits.map((habit) => (
             <HabitRecordsView key={habit.id} habit={habit} stats={stats} />
           ))}

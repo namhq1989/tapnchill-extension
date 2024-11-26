@@ -112,7 +112,7 @@ const useGoalsStore = create<IGoalsStore>((set, get) => ({
         description: 'Goal deleted successfully',
       })
 
-      const { goals } = useGoalsStore.getState()
+      const { goals } = get()
       set({
         goals: goals.filter((g) => g.id !== goal.id),
       })

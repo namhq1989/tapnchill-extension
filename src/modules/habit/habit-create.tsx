@@ -115,7 +115,7 @@ const HabitCreateView = (props: IHabitCreateViewProps) => {
         <BackButton />
         <HeaderTitle title={isUpdating ? 'Edit Activity' : 'New Activity'} />
       </div>
-      <div className='flex flex-col p-4 gap-4 scrollbar-hide'>
+      <div className='flex flex-col p-4 gap-4'>
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}

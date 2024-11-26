@@ -23,6 +23,7 @@ import { format } from 'date-fns'
 import SubscriptionView from '@/modules/subscription/view.tsx'
 import HabitView from '@/modules/habit/view.tsx'
 import TaskView from '@/modules/task/view.tsx'
+import NoteView from '@/modules/note/view.tsx'
 
 const side = 'left'
 
@@ -73,12 +74,15 @@ const AppMenu = () => {
               <p className='text-sm text-foreground'>Task</p>
             </div>
           </Link>
-          <div className='flex flex-row items-center justify-between cursor-pointer rounded-xl hover:container-selected p-4'>
+          <Link
+            component={NoteView}
+            className='flex flex-row items-center justify-between cursor-pointer rounded-xl hover:container-selected p-4'
+          >
             <div className='flex flex-row gap-4 items-center justify-center'>
               <StickyNote size={20} className='text-muted-foreground' />
               <p className='text-sm text-foreground'>Notes</p>
             </div>
-          </div>
+          </Link>
           <Link
             component={InformationView}
             className='flex flex-row items-center justify-between cursor-pointer rounded-xl hover:container-selected p-4'

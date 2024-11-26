@@ -355,11 +355,12 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId === 'take-note' && info.selectionText) {
     chrome.storage.local
       .set({
-        selectedText: info.selectionText,
-        pageUrl: info.pageUrl,
-        pageTitle: tab.title,
+        notePageText: info.selectionText,
+        notePageUrl: info.pageUrl,
+        notePageTitle: tab.title,
       })
-      .then()
-    chrome.action.openPopup().then()
+      .then(() => {
+        chrome.action.openPopup().then()
+      })
   }
 })
