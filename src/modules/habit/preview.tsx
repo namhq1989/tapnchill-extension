@@ -15,8 +15,8 @@ const HabitPreview = () => {
         <h2 className='text-base font-bold tracking-wide'>
           {getTodayShortName()} Activities{' '}
           {todayStat &&
-            todayStat.scheduledCount > 0 &&
-            `(${todayStat.completedCount}/${todayStat.scheduledCount})`}
+            todayStat.scheduledIds.length > 0 &&
+            `(${todayStat.completedIds.length}/${todayStat.scheduledIds.length})`}
         </h2>
         <div className='flex flex-row gap-4'>
           <Link component={HabitView}>

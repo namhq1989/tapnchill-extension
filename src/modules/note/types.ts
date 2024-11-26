@@ -1,6 +1,7 @@
 export interface INoteStore {
   notes: INote[]
-  notesHasFetched: boolean
+  page: number
+  pageSize: number
 
   openCreateNoteView: (
     pageText: string,
@@ -8,6 +9,10 @@ export interface INoteStore {
     pageTitle: string,
   ) => void
 
+  getMostRecentNote(db: IDBDatabase): Promise<INote | null>
+
+  syncNotes(): Promise<void>
+  fetchNotes(): Promise<void>
   createNote(
     title: string,
     description: string,
@@ -26,10 +31,28 @@ export interface INote {
   updatedAt: Date
 }
 
+export interface INoteApiData {
+  id: string
+  title: string
+  description: string
+  data: INoteData | null
+  createdAt: string
+  updatedAt: string
+}
+
 export interface INoteData {
   pageText: string
   pageUrl: string
   pageTitle: string
+}
+
+export interface ISyncNotesApiRequest {
+  lastUpdatedAt: string
+}
+
+export interface ISyncNotesApiResponse {
+  notes: INoteApiData[]
+  limit: number
 }
 
 export interface ICreateNoteApiRequest {
