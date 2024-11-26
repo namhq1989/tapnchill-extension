@@ -17,6 +17,9 @@ const GoalView = () => {
       </div>
       <div className='flex flex-col p-4 gap-4 scrollbar-hide'>
         <div className='flex flex-col w-full gap-4'>
+          <Link component={GoalCreateView} className='cursor-pointer self-end'>
+            <Plus />
+          </Link>
           <div className='flex flex-col gap-4'>
             {goals.map((g) => {
               return (
@@ -31,14 +34,6 @@ const GoalView = () => {
             })}
           </div>
         </div>
-
-        <Link
-          component={GoalCreateView}
-          className='flex flex-row my-4 gap-2 justify-center items-center cursor-pointer'
-        >
-          <Plus />
-          <p className='text-sm font-bold'>New Goal</p>
-        </Link>
       </div>
     </div>
   )
