@@ -1,8 +1,8 @@
 import BackButton from '@/modules/common/back-button.tsx'
 import HeaderTitle from '@/modules/common/header-title.tsx'
 import { Button } from '@/components/ui/button.tsx'
-import { Link } from 'react-chrome-extension-router'
-import { Edit, Trash2 } from 'lucide-react'
+import { goBack, Link } from 'react-chrome-extension-router'
+import { Edit, ExternalLink, Trash2 } from 'lucide-react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,55 +14,60 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog.tsx'
 import NoteCreateView from '@/modules/note/note-create.tsx'
+import { INote } from '@/modules/note/types.ts'
+import { format } from 'date-fns'
+import useNoteStore from '@/modules/note/store.ts'
+import { getDomain } from '@/lib/string.ts'
 
-const NoteDetailView = () => {
+export interface INoteDetailViewProps {
+  note: INote
+}
+
+const NoteDetailView = (props: INoteDetailViewProps) => {
+  const { note } = props
+  const { deleteNote } = useNoteStore()
+
   return (
     <div className='flex flex-col w-[400px] min-h-[600px] scrollbar-hide'>
       <div className='flex w-full flex-row justify-between p-4 border-b-[1px]'>
         <BackButton />
         <HeaderTitle title='Note information' />
       </div>
-      <div className='flex flex-col p-4 gap-4'>
-        <p className='text-sm'>12/05/2024</p>
-        <p className='text-3xl font-bold'>Note title</p>
-        <div className='flex flex-col gap-2 pl-4 border-l-4'>
-          <h4
-            className='scroll-m-20 text-base tracking-tight truncate max-w-xs'
-            title='page title'
-          >
-            Page title
-          </h4>
-          <div className='text-sm border-l-2 p-4 italic whitespace-pre-line container-selected rounded-xl'>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Id tempor
-            vitae eros vel inceptos tortor facilisi arcu cum venenatis nisl ...
-          </div>
-        </div>
-        <p className='text-sm'>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Faucibus
-          parturient platea ridiculus velit ac magna habitasse in diam
-          porttitor. Suspendisse litora convallis elementum fringilla a turpis
-          netus lobortis suspendisse odio. Placerat lacus ridiculus gravida
-          nulla blandit magnis egestas congue orci nulla. Metus cubilia non
-          dolor dui interdum eu natoque pharetra id platea. Metus nostra
-          inceptos taciti mollis vivamus consequat proin malesuada pellentesque
-          senectus. Aenean nulla integer bibendum ligula erat posuere accumsan
-          adipiscing neque volutpat. Taciti aptent eu habitant feugiat consequat
-          tincidunt curabitur ad fringilla magnis. Per eros sed auctor morbi eu
-          cras mauris ligula fusce facilisi. Ac eget lectus odio urna sem dui
-          eleifend mus urna eleifend. Suscipit lorem interdum at nam feugiat
-          condimentum magnis blandit molestie odio. Rhoncus ligula tempus
-          dignissim laoreet pulvinar elementum leo cras adipiscing himenaeos.
-          Aenean magnis cras mus hendrerit elementum penatibus viverra nisl nam
-          platea. Mi congue porttitor torquent cubilia suscipit per donec
-          interdum cubilia maecenas.
+      <div className='flex flex-col p-4 gap-2'>
+        <p className='text-sm font-bold'>
+          {format(note.updatedAt, 'dd/MM/yyyy')}
         </p>
-        <Link component={NoteCreateView}>
-          <Button variant='secondary' className='w-full mt-4'>
+        <p className='text-2xl font-bold'>{note.title}</p>
+        {note.data && note.data.pageUrl && (
+          <div className='flex flex-col gap-2'>
+            <a
+              className='flex flex-row gap-2 w-full items-center cursor-pointer'
+              href={note.data.pageUrl}
+              target='_blank'
+            >
+              <ExternalLink strokeWidth={1} size={16} />
+              <p className='text-sm'>{getDomain(note.data.pageUrl)}</p>
+            </a>
+            {note.data.pageText && (
+              <div className='text-sm border-l-2 p-4 italic whitespace-pre-line container-selected rounded-xl'>
+                {note.data.pageText}
+              </div>
+            )}
+          </div>
+        )}
+        <p className='text-sm mt-4'>{note.description}</p>
+        <Link component={NoteCreateView} props={{ note }}>
+          <Button variant='secondary' className='w-full mt-8'>
             <Edit /> Edit
           </Button>
         </Link>
 
-        <DeleteNoteAlert onConfirm={async () => {}} />
+        <DeleteNoteAlert
+          onConfirm={async () => {
+            await deleteNote(note)
+            goBack()
+          }}
+        />
       </div>
     </div>
   )
