@@ -4,7 +4,7 @@ const copyToClipboard = (text: string) => {
 
 const DOMAIN_MAX_LENGTH = 30
 
-const getDomain = (url: string): string => {
+const getDomainForDisplaying = (url: string): string => {
   try {
     const parsedUrl = new URL(url)
     const domain = parsedUrl.hostname
@@ -17,4 +17,15 @@ const getDomain = (url: string): string => {
   }
 }
 
-export { copyToClipboard, getDomain }
+const getDomain = (url: string): string => {
+  try {
+    const parsedUrl = new URL(url)
+    const hostname = parsedUrl.hostname
+    return hostname.startsWith('www.') ? hostname.slice(4) : hostname
+  } catch (error) {
+    console.error('Invalid URL:', error)
+    return ''
+  }
+}
+
+export { copyToClipboard, getDomainForDisplaying, getDomain }

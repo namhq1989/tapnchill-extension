@@ -1,4 +1,5 @@
 import ky, { KyInstance } from 'ky'
+import useAppStore from '@/modules/common/store.ts'
 
 interface INotSuccessResponse {
   code: string
@@ -17,9 +18,9 @@ const http: KyInstance = ky.create({
   hooks: {
     beforeRequest: [
       (request) => {
-        const storedToken = localStorage.getItem('token')
-        if (storedToken) {
-          request.headers.set('Authorization', `Bearer ${storedToken}`)
+        const { userToken } = useAppStore.getState()
+        if (userToken) {
+          request.headers.set('Authorization', `Bearer ${userToken}`)
         }
       },
     ],

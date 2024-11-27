@@ -17,7 +17,7 @@ import NoteCreateView from '@/modules/note/note-create.tsx'
 import { INote } from '@/modules/note/types.ts'
 import { format } from 'date-fns'
 import useNoteStore from '@/modules/note/store.ts'
-import { getDomain } from '@/lib/string.ts'
+import { getDomainForDisplaying } from '@/lib/string.ts'
 
 export interface INoteDetailViewProps {
   note: INote
@@ -28,7 +28,7 @@ const NoteDetailView = (props: INoteDetailViewProps) => {
   const { deleteNote } = useNoteStore()
 
   return (
-    <div className='flex flex-col w-[400px] min-h-[600px] scrollbar-hide'>
+    <div className='flex flex-col w-[800px] min-h-[600px] scrollbar-hide'>
       <div className='flex w-full flex-row justify-between p-4 border-b-[1px]'>
         <BackButton />
         <HeaderTitle title='Note information' />
@@ -46,7 +46,9 @@ const NoteDetailView = (props: INoteDetailViewProps) => {
               target='_blank'
             >
               <ExternalLink strokeWidth={1} size={16} />
-              <p className='text-sm'>{getDomain(note.data.pageUrl)}</p>
+              <p className='text-sm'>
+                {getDomainForDisplaying(note.data.pageUrl)}
+              </p>
             </a>
             {note.data.pageText && (
               <div className='text-sm border-l-2 p-4 italic whitespace-pre-line container-selected rounded-xl'>
