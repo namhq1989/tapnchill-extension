@@ -3,11 +3,8 @@ export interface INoteStore {
   page: number
   pageSize: number
 
-  openCreateNoteView: (
-    pageText: string,
-    pageUrl: string,
-    pageTitle: string,
-  ) => void
+  isInitializing: boolean
+  initApp: () => Promise<void>
 
   syncNotes(): Promise<void>
   fetchNotes(): Promise<void>

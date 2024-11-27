@@ -10,8 +10,6 @@ import {
   IUpdateNoteApiRequest,
   IUpdateNoteApiResponse,
 } from '@/modules/note/types.ts'
-import { goTo } from 'react-chrome-extension-router'
-import NoteCreateView from '@/modules/note/note-create.tsx'
 import useHttpStore from '@/modules/http/store.ts'
 import useNotificationStore from '@/modules/notification/store.ts'
 import { mapNotes } from '@/modules/note/util.ts'
@@ -23,12 +21,15 @@ const useNoteStore = create<INoteStore>((set, get) => ({
   page: 0,
   pageSize: 20,
 
-  openCreateNoteView: (
-    pageText: string,
-    pageUrl: string,
-    pageTitle: string,
-  ) => {
-    goTo(NoteCreateView, { pageText, pageTitle, pageUrl })
+  isInitializing: false,
+  initApp: async () => {
+    set({ isInitializing: true })
+    chrome.storage.local.get(async (result) => {
+      const accessToken: string = result.accessToken || ''
+      const { setAccessToken } = useHttpStore.getState()
+      setAccessToken(accessToken)
+      set({ isInitializing: false })
+    })
   },
 
   syncNotes: async () => {
@@ -72,8 +73,9 @@ const useNoteStore = create<INoteStore>((set, get) => ({
         if (!response.notes.length) {
           await new Promise<void>((resolve, reject) => {
             chrome.runtime.sendMessage(
-              { type: 'update-last-synced-at', lastSyncedAt: now },
+              { type: 'update-notes-last-sync-at', lastSyncedAt: now },
               (response) => {
+                console.log('response', response)
                 if (chrome.runtime.lastError) {
                   return reject(
                     new Error('Failed to update sync timestamp in background.'),

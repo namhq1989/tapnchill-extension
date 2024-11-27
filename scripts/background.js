@@ -343,24 +343,7 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
       .then(() => sendResponse({ success: true }))
       .catch((error) => sendResponse({ success: false, error: error.message }))
     return true
-  }
-  // else if (request.type === 'count-notes-in-domain') {
-  //   countNotesInDomain(request.domain)
-  //     .then((count) => sendResponse({ success: true, count }))
-  //     .catch((error) => sendResponse({ success: false, error: error.message }))
-  //   return true
-  // } else if (request.type === 'show-notes-panel') {
-  //   chrome.sidePanel.open({ tabId: request.tabId }).then(() => {
-  //     chrome.sidePanel
-  //       .setOptions({
-  //         tabId: request.tabId,
-  //         path: 'panel.html',
-  //         enabled: true,
-  //       })
-  //       .then()
-  //   })
-  // }
-  else {
+  } else {
     sendResponse({
       success: false,
       message: 'Unknown action type',
@@ -394,79 +377,3 @@ const createOffscreen = async () => {
     offScreenCreating = null
   }
 }
-
-//
-// MENU CONTEXT
-// //
-//
-// chrome.runtime.onInstalled.addListener(() => {
-//   const parentId = 'bapbi'
-//   chrome.contextMenus.create({
-//     id: parentId,
-//     title: 'BapBi',
-//     contexts: ['all'],
-//   })
-//   chrome.contextMenus.create({
-//     id: 'take-note',
-//     title: 'Take Note',
-//     parentId: parentId,
-//     contexts: ['all'],
-//   })
-// })
-//
-// chrome.contextMenus.onClicked.addListener((info, tab) => {
-//   if (info.menuItemId === 'take-note' && info.selectionText) {
-//     chrome.storage.local
-//       .set({
-//         notePageText: info.selectionText,
-//         notePageUrl: info.pageUrl,
-//         notePageTitle: tab.title,
-//       })
-//       .then(() => {
-//         chrome.action.openPopup().then()
-//       })
-//   }
-// })
-//
-// //
-// // NOTES DETECTIONS
-// //
-//
-// chrome.tabs.onActivated.addListener(async () => {
-//   const tabs = await chrome.tabs.query({ active: true, currentWindow: true })
-//   const activeTab = tabs[0]
-//   if (!activeTab || !activeTab.url) {
-//     console.log('No active tab or invalid URL.')
-//     return
-//   }
-//
-//   const domain = getDomain(activeTab.url)
-//   if (!domain) {
-//     return
-//   }
-//
-//   const notes = await getNotesInDomain(domain)
-//   if (notes && notes.length > 0) {
-//     chrome.tabs
-//       .sendMessage(activeTab.id, {
-//         type: 'show-notes-badges',
-//         tabId: activeTab.id,
-//         notes,
-//       })
-//       .then()
-//   }
-// })
-//
-// //
-// // UTILITIES
-// //
-//
-// const getDomain = (url) => {
-//   try {
-//     const { hostname } = new URL(url)
-//     return hostname.replace(/^www\./, '') // Remove "www."
-//   } catch (err) {
-//     console.error('Invalid URL:', url)
-//     return null
-//   }
-// }

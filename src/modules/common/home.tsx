@@ -119,7 +119,7 @@ const HomeView = () => {
             <HeaderTitle title='BapBi' />
           </div>
         </div>
-        <div className='flex flex-col p-4 gap-x-4 gap-y-8 scrollbar-hide'>
+        <div className='flex flex-col p-4 gap-x-4 gap-y-8'>
           <StationPreview />
           <HabitPreview />
           <TaskPreview />

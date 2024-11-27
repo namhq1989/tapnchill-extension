@@ -23,7 +23,6 @@ import { format } from 'date-fns'
 import SubscriptionView from '@/modules/subscription/view.tsx'
 import HabitView from '@/modules/habit/view.tsx'
 import TaskView from '@/modules/task/view.tsx'
-import NoteView from '@/modules/note/view.tsx'
 
 const side = 'left'
 
@@ -44,15 +43,24 @@ const AppMenu = () => {
       </SheetTrigger>
       <SheetContent side={side} className='p-0 scrollbar-hide overflow-auto'>
         <div className='flex flex-col gap-1 p-2 mt-16'>
-          <Link
-            component={NoteView}
+          <div
             className='flex flex-row items-center justify-between cursor-pointer rounded-xl hover:container-selected p-4'
+            onClick={() => {
+              chrome.windows.getCurrent({ populate: true }, (window) => {
+                const windowId = window.id || 0
+                chrome.sidePanel.open({ windowId }).then(() => {
+                  chrome.extension
+                    .getViews({ type: 'popup' })
+                    .forEach((v) => v.close())
+                })
+              })
+            }}
           >
             <div className='flex flex-row gap-4 items-center justify-center'>
               <StickyNote size={20} className='text-muted-foreground' />
               <p className='text-sm text-foreground'>Notes</p>
             </div>
-          </Link>
+          </div>
           <Link
             component={HabitView}
             className='flex flex-row items-center justify-between cursor-pointer rounded-xl hover:container-selected p-4'

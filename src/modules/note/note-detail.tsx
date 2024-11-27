@@ -1,8 +1,8 @@
 import BackButton from '@/modules/common/back-button.tsx'
 import HeaderTitle from '@/modules/common/header-title.tsx'
 import { Button } from '@/components/ui/button.tsx'
-import { goBack, Link } from 'react-chrome-extension-router'
-import { Edit, ExternalLink, Trash2 } from 'lucide-react'
+import { goBack } from 'react-chrome-extension-router'
+import { ExternalLink, Trash2 } from 'lucide-react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,7 +13,6 @@ import {
   AlertDialogHeader,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog.tsx'
-import NoteCreateView from '@/modules/note/note-create.tsx'
 import { INote } from '@/modules/note/types.ts'
 import { format } from 'date-fns'
 import useNoteStore from '@/modules/note/store.ts'
@@ -58,11 +57,11 @@ const NoteDetailView = (props: INoteDetailViewProps) => {
           </div>
         )}
         <p className='text-sm mt-4'>{note.description}</p>
-        <Link component={NoteCreateView} props={{ note }}>
-          <Button variant='secondary' className='w-full mt-8'>
-            <Edit /> Edit
-          </Button>
-        </Link>
+        {/*<Link component={NoteCreateView} props={{ note }}>*/}
+        {/*  <Button variant='secondary' className='w-full mt-8'>*/}
+        {/*    <Edit /> Edit*/}
+        {/*  </Button>*/}
+        {/*</Link>*/}
 
         <DeleteNoteAlert
           onConfirm={async () => {
