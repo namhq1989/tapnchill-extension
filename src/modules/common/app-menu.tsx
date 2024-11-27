@@ -44,18 +44,15 @@ const AppMenu = () => {
       </SheetTrigger>
       <SheetContent side={side} className='p-0 scrollbar-hide overflow-auto'>
         <div className='flex flex-col gap-1 p-2 mt-16'>
-          <div className='flex flex-row items-center justify-between cursor-pointer rounded-xl hover:container-selected p-4'>
+          <Link
+            component={NoteView}
+            className='flex flex-row items-center justify-between cursor-pointer rounded-xl hover:container-selected p-4'
+          >
             <div className='flex flex-row gap-4 items-center justify-center'>
-              <MoonStar size={20} className='text-muted-foreground' />
-              <p className='text-sm text-foreground'>Dark mode</p>
+              <StickyNote size={20} className='text-muted-foreground' />
+              <p className='text-sm text-foreground'>Notes</p>
             </div>
-            <Switch
-              defaultChecked={theme === 'dark'}
-              onCheckedChange={(checked) => {
-                setTheme(checked ? 'dark' : 'light')
-              }}
-            />
-          </div>
+          </Link>
           <Link
             component={HabitView}
             className='flex flex-row items-center justify-between cursor-pointer rounded-xl hover:container-selected p-4'
@@ -75,15 +72,6 @@ const AppMenu = () => {
             </div>
           </Link>
           <Link
-            component={NoteView}
-            className='flex flex-row items-center justify-between cursor-pointer rounded-xl hover:container-selected p-4'
-          >
-            <div className='flex flex-row gap-4 items-center justify-center'>
-              <StickyNote size={20} className='text-muted-foreground' />
-              <p className='text-sm text-foreground'>Notes</p>
-            </div>
-          </Link>
-          <Link
             component={InformationView}
             className='flex flex-row items-center justify-between cursor-pointer rounded-xl hover:container-selected p-4'
           >
@@ -92,6 +80,18 @@ const AppMenu = () => {
               <p className='text-sm text-foreground'>Information</p>
             </div>
           </Link>
+          <div className='flex flex-row items-center justify-between cursor-pointer rounded-xl hover:container-selected p-4'>
+            <div className='flex flex-row gap-4 items-center justify-center'>
+              <MoonStar size={20} className='text-muted-foreground' />
+              <p className='text-sm text-foreground'>Dark mode</p>
+            </div>
+            <Switch
+              defaultChecked={theme === 'dark'}
+              onCheckedChange={(checked) => {
+                setTheme(checked ? 'dark' : 'light')
+              }}
+            />
+          </div>
           <Separator className='w-[90%] mt-4 self-center' />
           {provider === 'extension' ? (
             <div className='flex flex-col p-4 w-full gap-4'>

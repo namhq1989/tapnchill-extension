@@ -6,7 +6,6 @@ import {
   INote,
   INoteData,
   INoteStore,
-  ISyncNotesApiRequest,
   ISyncNotesApiResponse,
   IUpdateNoteApiRequest,
   IUpdateNoteApiResponse,
@@ -16,68 +15,8 @@ import NoteCreateView from '@/modules/note/note-create.tsx'
 import useHttpStore from '@/modules/http/store.ts'
 import useNotificationStore from '@/modules/notification/store.ts'
 import { mapNotes } from '@/modules/note/util.ts'
-import { getDomain } from '@/lib/string.ts'
 
-const INDEXEDDB_NAME = 'notes'
 const SYNC_NOTES_INTERVAL = 3600000 // 1 hour
-
-const openIndexedDB = async (): Promise<IDBDatabase> => {
-  const dbName = 'NotesDB'
-  const dbVersion = 2
-
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(dbName, dbVersion)
-
-    request.onupgradeneeded = (event) => {
-      const db = request.result
-      const { oldVersion } = event
-
-      if (oldVersion < 1) {
-        const store = db.createObjectStore(INDEXEDDB_NAME, { keyPath: 'id' })
-        store.createIndex('updatedAtIndex', 'updatedAt', { unique: false })
-      } else if (oldVersion < 2) {
-        const store = request.transaction?.objectStore(INDEXEDDB_NAME)
-        if (store && !store.indexNames.contains('pageDomainIndex')) {
-          store.createIndex('pageDomainIndex', 'data.pageDomain', {
-            unique: false,
-          })
-        }
-      }
-    }
-
-    request.onsuccess = () => resolve(request.result)
-    request.onerror = () => reject(new Error('Failed to open IndexedDB'))
-  })
-}
-
-const persistNotesInOrder = async (notes: INote[], db: IDBDatabase) => {
-  if (!notes || notes.length === 0) {
-    console.log('No notes to persist.')
-    return
-  }
-
-  const sortedNotes = notes.sort(
-    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
-  )
-
-  const tx = db.transaction(INDEXEDDB_NAME, 'readwrite')
-  const store = tx.objectStore(INDEXEDDB_NAME)
-
-  for (const note of sortedNotes) {
-    store.put(note)
-  }
-
-  await new Promise<void>((resolve, reject) => {
-    tx.oncomplete = () => {
-      // console.log(
-      //   'Notes successfully persisted in IndexedDB in updatedAt DESC order.',
-      // )
-      resolve()
-    }
-    tx.onerror = () =>
-      reject(new Error('Failed to persist notes in IndexedDB.'))
-  })
-}
 
 const useNoteStore = create<INoteStore>((set, get) => ({
   notes: [],
@@ -92,70 +31,115 @@ const useNoteStore = create<INoteStore>((set, get) => ({
     goTo(NoteCreateView, { pageText, pageTitle, pageUrl })
   },
 
-  getMostRecentNote: async (db: IDBDatabase) => {
-    const { showErrorNotification } = useNotificationStore.getState()
-
-    try {
-      const tx = db.transaction('notes', 'readonly')
-      const store = tx.objectStore('notes')
-
-      const index = store.index('updatedAtIndex')
-      const request = index.openCursor(null, 'prev')
-
-      return new Promise((resolve, reject) => {
-        request.onsuccess = (event) => {
-          const cursor = (event.target as IDBRequest<IDBCursorWithValue>).result
-          if (cursor) {
-            resolve(cursor.value)
-          } else {
-            resolve(null)
-          }
-        }
-        request.onerror = () =>
-          reject(new Error('Failed to fetch the most recent note'))
-      })
-    } catch (err) {
-      showErrorNotification({
-        description: (err as Error).message,
-      })
-    }
-    return null
-  },
   syncNotes: async () => {
     const { showErrorNotification } = useNotificationStore.getState()
 
     try {
-      const db = await openIndexedDB()
-      const { getMostRecentNote } = get()
-      const data = await getMostRecentNote(db)
+      // Step 1: Get last sync timestamp from the background
+      const lastSyncedAt = await new Promise<number>((resolve, reject) => {
+        chrome.runtime.sendMessage(
+          { type: 'get-notes-last-sync-at' },
+          (response) => {
+            if (chrome.runtime.lastError) {
+              return reject(new Error('Failed to communicate with background.'))
+            }
+            if (response && response.success) {
+              resolve(response.lastSyncedAt)
+            } else {
+              reject(new Error(response?.error || 'Unknown error occurred.'))
+            }
+          },
+        )
+      })
 
-      if (
-        data &&
-        new Date().getTime() - data.updatedAt.getTime() < SYNC_NOTES_INTERVAL
-      ) {
+      // Step 2: Check if the sync interval has passed
+      const now = Date.now()
+      if (now - lastSyncedAt < SYNC_NOTES_INTERVAL) {
+        console.log('Sync skipped due to interval threshold.')
         return
       }
 
-      let hasMoreData = true
-      let currentUpdatedAt = data ? data.updatedAt.toISOString() : ''
+      let currentUpdatedAt = ''
 
       const { get: httpGet } = useHttpStore.getState()
 
-      while (hasMoreData) {
+      while (true) {
         const response = await httpGet<ISyncNotesApiResponse>('api/note/sync', {
           lastUpdatedAt: currentUpdatedAt,
-        } as ISyncNotesApiRequest)
-        if (!response.notes.length) return
+        })
+
+        // Exit loop if no notes are returned
+        if (!response.notes.length) {
+          await new Promise<void>((resolve, reject) => {
+            chrome.runtime.sendMessage(
+              { type: 'update-last-synced-at', lastSyncedAt: now },
+              (response) => {
+                if (chrome.runtime.lastError) {
+                  return reject(
+                    new Error('Failed to update sync timestamp in background.'),
+                  )
+                }
+                if (response && response.success) {
+                  resolve()
+                } else {
+                  reject(
+                    new Error(response?.error || 'Unknown error occurred.'),
+                  )
+                }
+              },
+            )
+          })
+          break
+        }
 
         const notes = mapNotes(response.notes)
-        await persistNotesInOrder(notes, db)
 
+        // Step 4: Persist notes in the background
+        await new Promise<void>((resolve, reject) => {
+          chrome.runtime.sendMessage(
+            { type: 'persist-notes-with-order-in-indexeddb', payload: notes },
+            (response) => {
+              if (chrome.runtime.lastError) {
+                return reject(
+                  new Error('Failed to persist notes in background.'),
+                )
+              }
+              if (response && response.success) {
+                resolve()
+              } else {
+                reject(new Error(response?.error || 'Unknown error occurred.'))
+              }
+            },
+          )
+        })
+
+        // Step 5: Update the current timestamp for the next batch
+        currentUpdatedAt = notes[notes.length - 1].updatedAt.toISOString()
+
+        // Exit if less than the limit, indicating no more data
         if (notes.length < response.limit) {
-          hasMoreData = false
-        } else {
-          currentUpdatedAt = notes[notes.length - 1].updatedAt.toISOString()
+          break
         }
       }
+
+      // Step 6: Update lastSyncedAt after completing all batches
+      await new Promise<void>((resolve, reject) => {
+        chrome.runtime.sendMessage(
+          { type: 'update-notes-last-sync-at', lastSyncedAt: now },
+          (response) => {
+            if (chrome.runtime.lastError) {
+              return reject(
+                new Error('Failed to update sync timestamp in background.'),
+              )
+            }
+            if (response && response.success) {
+              resolve()
+            } else {
+              reject(new Error(response?.error || 'Unknown error occurred.'))
+            }
+          },
+        )
+      })
     } catch (err) {
       showErrorNotification({
         description: (err as Error).message,
@@ -168,32 +152,20 @@ const useNoteStore = create<INoteStore>((set, get) => ({
     const { page, pageSize, notes } = get()
 
     try {
-      const db = await openIndexedDB()
-      const tx = db.transaction(INDEXEDDB_NAME, 'readonly')
-      const store = tx.objectStore(INDEXEDDB_NAME)
-      const index = store.index('updatedAtIndex')
-
-      const start = page * pageSize
-      const end = start + pageSize
-
-      let currentIndex = 0
-      const fetchedNotes: INote[] = []
-
-      const request = index.openCursor(null, 'prev')
-      await new Promise<void>((resolve, reject) => {
-        request.onsuccess = (event) => {
-          const cursor = (event.target as IDBRequest<IDBCursorWithValue>).result
-          if (cursor && currentIndex < end) {
-            if (currentIndex >= start) {
-              fetchedNotes.push(cursor.value) // Add note within range
+      const fetchedNotes = await new Promise<INote[]>((resolve, reject) => {
+        chrome.runtime.sendMessage(
+          { type: 'fetch-notes-in-indexeddb', page, pageSize },
+          (response) => {
+            if (chrome.runtime.lastError) {
+              return reject(new Error('Failed to communicate with background.'))
             }
-            currentIndex++
-            cursor.continue()
-          } else {
-            resolve()
-          }
-        }
-        request.onerror = () => reject(new Error('Failed to fetch notes'))
+            if (response && response.success) {
+              resolve(response.notes)
+            } else {
+              reject(new Error(response?.error || 'Unknown error occurred.'))
+            }
+          },
+        )
       })
 
       set({
@@ -236,20 +208,26 @@ const useNoteStore = create<INoteStore>((set, get) => ({
         updatedAt: new Date(),
       }
 
-      // const { notes } = get()
-      // notes.unshift(newNote)
-      // set({ notes })
+      chrome.runtime.sendMessage(
+        {
+          type: 'create-note-in-indexeddb',
+          payload: newNote,
+        },
+        async (response) => {
+          if (chrome.runtime.lastError) {
+            console.error(
+              'Error sending message to background:',
+              chrome.runtime.lastError.message,
+            )
+          } else if (!response.success) {
+            console.error('Error creating note in IndexedDB:', response.error)
+          }
 
-      const db = await openIndexedDB() // Open IndexedDB
-      const tx = db.transaction(INDEXEDDB_NAME, 'readwrite')
-      const store = tx.objectStore(INDEXEDDB_NAME)
-
-      await new Promise<void>((resolve, reject) => {
-        const request = store.add(newNote)
-        request.onsuccess = () => resolve()
-        request.onerror = () =>
-          reject(new Error('Failed to create note in IndexedDB.'))
-      })
+          const { notes } = get()
+          notes.unshift(newNote)
+          set({ notes })
+        },
+      )
 
       return true
     } catch (err) {
@@ -277,21 +255,22 @@ const useNoteStore = create<INoteStore>((set, get) => ({
         description: 'Note updated successfully',
       })
 
-      // const { notes } = get()
-      // set({
-      //   notes: notes.map((n) => (n.id === note.id ? note : n)),
-      // })
-
-      const db = await openIndexedDB()
-      const tx = db.transaction('notes', 'readwrite')
-      const store = tx.objectStore('notes')
-
-      await new Promise<void>((resolve, reject) => {
-        const request = store.put(note)
-        request.onsuccess = () => resolve()
-        request.onerror = () =>
-          reject(new Error('Failed to update note in IndexedDB.'))
-      })
+      chrome.runtime.sendMessage(
+        {
+          type: 'update-note-in-indexeddb',
+          payload: note,
+        },
+        (response) => {
+          if (chrome.runtime.lastError) {
+            console.error(
+              'Error sending message to background:',
+              chrome.runtime.lastError.message,
+            )
+          } else if (!response.success) {
+            console.error('Error creating note in IndexedDB:', response.error)
+          }
+        },
+      )
 
       return true
     } catch (err) {
@@ -320,16 +299,22 @@ const useNoteStore = create<INoteStore>((set, get) => ({
         notes: notes.filter((n) => n.id !== note.id),
       })
 
-      const db = await openIndexedDB()
-      const tx = db.transaction('notes', 'readwrite')
-      const store = tx.objectStore('notes')
-
-      await new Promise<void>((resolve, reject) => {
-        const request = store.delete(note.id) // Delete the note
-        request.onsuccess = () => resolve()
-        request.onerror = () =>
-          reject(new Error('Failed to delete note in IndexedDB.'))
-      })
+      chrome.runtime.sendMessage(
+        {
+          type: 'delete-note-in-indexeddb',
+          payload: note,
+        },
+        (response) => {
+          if (chrome.runtime.lastError) {
+            console.error(
+              'Error sending message to background:',
+              chrome.runtime.lastError.message,
+            )
+          } else if (!response.success) {
+            console.error('Error creating note in IndexedDB:', response.error)
+          }
+        },
+      )
 
       return true
     } catch (err) {
@@ -339,29 +324,6 @@ const useNoteStore = create<INoteStore>((set, get) => ({
 
       return false
     }
-  },
-
-  countCurrentPageNotes: async (url): Promise<number> => {
-    console.log('url', url)
-
-    const domain = getDomain(url)
-    if (!domain) {
-      return 0
-    }
-
-    const db = await openIndexedDB()
-
-    const tx = db.transaction('notes', 'readonly')
-    const store = tx.objectStore('notes')
-    const index = store.index('pageDomainIndex')
-
-    const request = index.count(domain)
-
-    return new Promise((resolve, reject) => {
-      request.onsuccess = () => resolve(request.result)
-      request.onerror = () =>
-        reject(new Error('Failed to count notes for the pageDomain'))
-    })
   },
 }))
 

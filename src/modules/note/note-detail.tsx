@@ -28,7 +28,7 @@ const NoteDetailView = (props: INoteDetailViewProps) => {
   const { deleteNote } = useNoteStore()
 
   return (
-    <div className='flex flex-col w-[400px] min-h-[600px] scrollbar-hide'>
+    <div className='flex flex-col w-[800px] min-h-[600px] scrollbar-hide'>
       <div className='flex w-full flex-row justify-between p-4 border-b-[1px]'>
         <BackButton />
         <HeaderTitle title='Note information' />

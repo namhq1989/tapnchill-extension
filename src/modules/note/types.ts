@@ -9,8 +9,6 @@ export interface INoteStore {
     pageTitle: string,
   ) => void
 
-  getMostRecentNote(db: IDBDatabase): Promise<INote | null>
-
   syncNotes(): Promise<void>
   fetchNotes(): Promise<void>
   createNote(
@@ -20,8 +18,6 @@ export interface INoteStore {
   ): Promise<boolean>
   updateNote(note: INote): Promise<boolean>
   deleteNote(note: INote): Promise<boolean>
-
-  countCurrentPageNotes(url: string): Promise<number>
 }
 
 export interface INote {

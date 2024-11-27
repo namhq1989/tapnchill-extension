@@ -58,10 +58,16 @@ chrome.runtime.onMessage.addListener(async (request, _, sendResponse) => {
     })
   } else if (request.type === 'count-page-total-notes') {
     console.log('count-page-total-notes', request.url)
-    const total = await useNoteStore
+    useNoteStore
       .getState()
       .countCurrentPageNotes(request.url)
-    sendResponse({ total })
+      .then((total) => {
+        sendResponse({ total })
+      })
+      .catch((error) => {
+        console.error('Error counting notes:', error)
+        sendResponse({ total: 0 })
+      })
 
     return true
   }
