@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/form.tsx'
 import { Input } from '@/components/ui/input.tsx'
 import { useEffect } from 'react'
+import { getDomain } from '@/lib/string.ts'
 
 const SELECTED_TEXT_MAX_LENGTH = 150
 
@@ -79,6 +80,7 @@ const NoteCreateView = (props: INoteCreateViewProps) => {
               pageText,
               pageTitle,
               pageUrl,
+              pageDomain: getDomain(pageUrl),
             }
           : null,
       )

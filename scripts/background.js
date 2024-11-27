@@ -364,3 +364,26 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
       })
   }
 })
+
+//
+// NOTES DETECTIONS
+//
+
+chrome.tabs.onActivated.addListener(async () => {
+  const tabs = await chrome.tabs.query({ active: true, currentWindow: true })
+  const activeTab = tabs[0]
+  if (!activeTab || !activeTab.url) {
+    console.log('No active tab or invalid URL.')
+    return
+  }
+
+  // count total notes
+  chrome.runtime.sendMessage(
+    { type: 'count-page-total-notes', url: activeTab.url },
+    (total) => {
+      console.log('total notes', total)
+    },
+  )
+
+  return true
+})

@@ -16,26 +16,32 @@ import NoteCreateView from '@/modules/note/note-create.tsx'
 import useHttpStore from '@/modules/http/store.ts'
 import useNotificationStore from '@/modules/notification/store.ts'
 import { mapNotes } from '@/modules/note/util.ts'
+import { getDomain } from '@/lib/string.ts'
 
 const INDEXEDDB_NAME = 'notes'
 const SYNC_NOTES_INTERVAL = 3600000 // 1 hour
 
 const openIndexedDB = async (): Promise<IDBDatabase> => {
   const dbName = 'NotesDB'
-  const dbVersion = 1
+  const dbVersion = 2
 
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(dbName, dbVersion)
 
-    request.onupgradeneeded = () => {
+    request.onupgradeneeded = (event) => {
       const db = request.result
+      const { oldVersion } = event
 
-      // Create the 'notes' object store if it doesn't exist
-      if (!db.objectStoreNames.contains(INDEXEDDB_NAME)) {
+      if (oldVersion < 1) {
         const store = db.createObjectStore(INDEXEDDB_NAME, { keyPath: 'id' })
-
-        // Create an index for 'updatedAt' to enable sorting by this field
         store.createIndex('updatedAtIndex', 'updatedAt', { unique: false })
+      } else if (oldVersion < 2) {
+        const store = request.transaction?.objectStore(INDEXEDDB_NAME)
+        if (store && !store.indexNames.contains('pageDomainIndex')) {
+          store.createIndex('pageDomainIndex', 'data.pageDomain', {
+            unique: false,
+          })
+        }
       }
     }
 
@@ -333,6 +339,29 @@ const useNoteStore = create<INoteStore>((set, get) => ({
 
       return false
     }
+  },
+
+  countCurrentPageNotes: async (url): Promise<number> => {
+    console.log('url', url)
+
+    const domain = getDomain(url)
+    if (!domain) {
+      return 0
+    }
+
+    const db = await openIndexedDB()
+
+    const tx = db.transaction('notes', 'readonly')
+    const store = tx.objectStore('notes')
+    const index = store.index('pageDomainIndex')
+
+    const request = index.count(domain)
+
+    return new Promise((resolve, reject) => {
+      request.onsuccess = () => resolve(request.result)
+      request.onerror = () =>
+        reject(new Error('Failed to count notes for the pageDomain'))
+    })
   },
 }))
 

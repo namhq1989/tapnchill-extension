@@ -8,7 +8,7 @@ import useNoteStore from '@/modules/note/store.ts'
 import { useEffect } from 'react'
 import { INote } from '@/modules/note/types.ts'
 import { format } from 'date-fns'
-import { getDomain } from '@/lib/string.ts'
+import { getDomainForDisplaying } from '@/lib/string.ts'
 
 const NoteView = () => {
   const { notes, syncNotes, fetchNotes } = useNoteStore()
@@ -78,7 +78,7 @@ const NoteItem = (props: INoteItemProps) => {
           target='_blank'
         >
           <ExternalLink strokeWidth={1} size={16} />
-          <p className='text-sm'>{getDomain(note.data.pageUrl)}</p>
+          <p className='text-sm'>{getDomainForDisplaying(note.data.pageUrl)}</p>
         </a>
       )}
     </div>

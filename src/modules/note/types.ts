@@ -20,6 +20,8 @@ export interface INoteStore {
   ): Promise<boolean>
   updateNote(note: INote): Promise<boolean>
   deleteNote(note: INote): Promise<boolean>
+
+  countCurrentPageNotes(url: string): Promise<number>
 }
 
 export interface INote {
@@ -44,6 +46,7 @@ export interface INoteData {
   pageText: string
   pageUrl: string
   pageTitle: string
+  pageDomain?: string
 }
 
 export interface ISyncNotesApiRequest {

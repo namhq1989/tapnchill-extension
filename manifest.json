@@ -11,6 +11,7 @@
     "service_worker": "scripts/background.js"
   },
   "permissions": [
+    "tabs",
     "offscreen",
     "storage",
     "contextMenus"

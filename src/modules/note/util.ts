@@ -1,4 +1,5 @@
 import { INote, INoteApiData } from '@/modules/note/types.ts'
+import { getDomain } from '@/lib/string.ts'
 
 const mapNotes = (notes: INoteApiData[]): INote[] => {
   const result: INote[] = []
@@ -7,7 +8,12 @@ const mapNotes = (notes: INoteApiData[]): INote[] => {
       id: note.id,
       title: note.title,
       description: note.description,
-      data: note.data,
+      data: note.data
+        ? {
+            ...note.data,
+            pageDomain: getDomain(note.data.pageUrl),
+          }
+        : null,
       createdAt: new Date(note.createdAt),
       updatedAt: new Date(note.updatedAt),
     })

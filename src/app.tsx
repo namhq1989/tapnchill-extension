@@ -44,7 +44,7 @@ chrome.storage.local.get((result) => {
   }
 })
 
-chrome.runtime.onMessage.addListener((request) => {
+chrome.runtime.onMessage.addListener(async (request, _, sendResponse) => {
   if (request.type === 'station-is-playing') {
     setState({
       isPlaying: true,
@@ -52,9 +52,18 @@ chrome.runtime.onMessage.addListener((request) => {
       startTime: new Date(),
     })
   } else if (request.type === 'station-is-stopped') {
+    // TODO: count total playing ambience
     setState({
       isPlaying: false,
     })
+  } else if (request.type === 'count-page-total-notes') {
+    console.log('count-page-total-notes', request.url)
+    const total = await useNoteStore
+      .getState()
+      .countCurrentPageNotes(request.url)
+    sendResponse({ total })
+
+    return true
   }
 })
 
