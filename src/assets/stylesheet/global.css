@@ -151,3 +151,15 @@ body {
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }
+
+.bn-container[data-font-app] .bn-editor * {
+  font-family: 'Montserrat', sans-serif;
+}
+
+.bn-container[data-theming][data-color-scheme='light'] {
+  --bn-colors-editor-background: hsl(var(--muted));
+}
+
+.bn-container[data-theming][data-color-scheme='dark'] {
+  --bn-colors-editor-background: hsl(var(--muted));
+}
