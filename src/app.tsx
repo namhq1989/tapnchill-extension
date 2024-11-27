@@ -9,29 +9,9 @@ import HomeView from '@/modules/common/home.tsx'
 import { Toaster } from '@/components/ui/toaster.tsx'
 import { ThemeProvider } from '@/components/theme/theme-provider.tsx'
 import useNotificationStore from '@/modules/notification/store.ts'
-import useNoteStore from '@/modules/note/store.ts'
+import useAmbiencesStore from '@/modules/ambience/store.ts'
 
 chrome.storage.local.get((result) => {
-  if (result.notePageUrl) {
-    console.log('notePageText', result.notePageText)
-    console.log('notePageUrl', result.notePageUrl)
-    console.log('notePageTitle', result.notePageTitle)
-    useNoteStore
-      .getState()
-      .openCreateNoteView(
-        result.notePageText,
-        result.notePageUrl,
-        result.notePageTitle,
-      )
-    chrome.storage.local
-      .set({
-        notePageText: '',
-        notePageUrl: '',
-        notePageTitle: '',
-      })
-      .then()
-  }
-
   if (result.isSignedInSuccessfully) {
     useNotificationStore.getState().showNotification({
       description: 'Signed in successfully',
@@ -44,7 +24,7 @@ chrome.storage.local.get((result) => {
   }
 })
 
-chrome.runtime.onMessage.addListener(async (request, _, sendResponse) => {
+chrome.runtime.onMessage.addListener(async (request) => {
   if (request.type === 'station-is-playing') {
     setState({
       isPlaying: true,
@@ -52,24 +32,10 @@ chrome.runtime.onMessage.addListener(async (request, _, sendResponse) => {
       startTime: new Date(),
     })
   } else if (request.type === 'station-is-stopped') {
-    // TODO: count total playing ambience
+    const { ambiences } = useAmbiencesStore.getState()
     setState({
-      isPlaying: false,
+      isPlaying: ambiences.length > 0,
     })
-  } else if (request.type === 'count-page-total-notes') {
-    console.log('count-page-total-notes', request.url)
-    useNoteStore
-      .getState()
-      .countCurrentPageNotes(request.url)
-      .then((total) => {
-        sendResponse({ total })
-      })
-      .catch((error) => {
-        console.error('Error counting notes:', error)
-        sendResponse({ total: 0 })
-      })
-
-    return true
   }
 })
 

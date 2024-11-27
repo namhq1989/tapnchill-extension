@@ -1,13 +1,14 @@
-import { Textarea } from '@/components/ui/textarea.tsx'
+import { useTheme } from '@/components/theme/theme-provider.tsx'
+import { useCreateBlockNote } from '@blocknote/react'
+import { BlockNoteView } from '@blocknote/mantine'
+import '@blocknote/mantine/style.css'
 import BackButton from '@/modules/common/back-button.tsx'
-import HeaderTitle from '@/modules/common/header-title.tsx'
-import { Button } from '@/components/ui/button.tsx'
 import { z } from 'zod'
 import { INote } from '@/modules/note/types.ts'
+import useNoteStore from '@/modules/note/store.ts'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { goBack } from 'react-chrome-extension-router'
-import useNoteStore from '@/modules/note/store.ts'
+import { useEffect } from 'react'
 import {
   Form,
   FormControl,
@@ -17,17 +18,11 @@ import {
   FormMessage,
 } from '@/components/ui/form.tsx'
 import { Input } from '@/components/ui/input.tsx'
-import { useEffect } from 'react'
-import { getDomain } from '@/lib/string.ts'
+import { Save } from 'lucide-react'
 
-const SELECTED_TEXT_MAX_LENGTH = 150
-
-export interface INoteCreateViewProps {
-  note: INote | undefined
-  pageText: string
-  pageTitle: string
-  pageUrl: string
-}
+const defaultContent = Array(20).fill({
+  type: 'paragraph',
+})
 
 const FormSchema = z.object({
   title: z
@@ -38,72 +33,58 @@ const FormSchema = z.object({
     .max(50, {
       message: 'Note title must not be longer than 50 characters',
     }),
-  description: z.string().max(300, {
-    message: 'Note description must not be longer than 300 characters',
-  }),
 })
 
+export interface INoteCreateViewProps {
+  note: INote | undefined
+}
+
 const NoteCreateView = (props: INoteCreateViewProps) => {
-  const { note, pageText, pageTitle, pageUrl } = props
+  const { note } = props
   const { createNote, updateNote } = useNoteStore()
+  const { theme } = useTheme()
 
   const isUpdating = note !== undefined
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      title: '',
-      description: '',
+      title: 'Untitled',
     },
   })
 
   useEffect(() => {
     if (isUpdating && note) {
       form.setValue('title', note.title || '')
-      form.setValue('description', note.description || '')
     }
   }, [isUpdating, note, form])
 
-  const onSubmit = async (data: z.infer<typeof FormSchema>) => {
-    let isSuccess = false
+  const editor = useCreateBlockNote({
+    initialContent: note ? JSON.parse(note.description) : defaultContent,
+  })
 
+  const onSubmit = async (data: z.infer<typeof FormSchema>) => {
     if (isUpdating) {
       note.title = data.title
-      note.description = data.description
-      isSuccess = await updateNote(note)
+      note.description = JSON.stringify(editor.document)
+      await updateNote(note)
     } else {
-      isSuccess = await createNote(
-        data.title,
-        data.description,
-        pageUrl
-          ? {
-              pageText,
-              pageTitle,
-              pageUrl,
-              pageDomain: getDomain(pageUrl),
-            }
-          : null,
-      )
-    }
-
-    if (isSuccess) {
-      form.reset()
-      goBack()
+      await createNote(data.title, JSON.stringify(editor.document), null)
     }
   }
 
   return (
-    <div className='flex flex-col w-[400px] min-h-[600px] scrollbar-hide'>
-      <div className='flex w-full flex-row justify-between p-4 border-b-[1px]'>
+    <div className='flex flex-col scrollbar-hide'>
+      <div className='flex w-full flex-row justify-between p-4 pr-6 border-b-[1px]'>
         <BackButton />
-        <HeaderTitle title='New Note' />
+        <Save
+          className='cursor-pointer text-primary'
+          onClick={() => onSubmit(form.getValues())}
+        />
       </div>
       <div className='flex flex-col p-4 gap-4'>
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className='flex flex-col w-full gap-8'
-          >
+          <form className='flex flex-col w-full gap-8'>
             <FormField
               control={form.control}
               name='title'
@@ -121,44 +102,12 @@ const NoteCreateView = (props: INoteCreateViewProps) => {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name='description'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      className='focus-visible:ring-transparent resize-none'
-                      placeholder='Input a description'
-                      rows={8}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+            <BlockNoteView
+              data-font-app
+              data-theming
+              editor={editor}
+              theme={theme === 'dark' ? 'dark' : 'light'}
             />
-            {pageUrl && (
-              <div className='flex flex-col gap-2 pl-4 border-l-4'>
-                {pageTitle && (
-                  <h4
-                    className='scroll-m-20 text-base tracking-tight truncate max-w-xs'
-                    title={pageTitle}
-                  >
-                    {pageTitle}
-                  </h4>
-                )}
-                {pageText && (
-                  <div className='text-sm border-l-2 p-4 italic whitespace-pre-line container-selected rounded-xl'>
-                    {pageText.length > SELECTED_TEXT_MAX_LENGTH
-                      ? pageText.slice(0, SELECTED_TEXT_MAX_LENGTH) + '...'
-                      : pageText}
-                  </div>
-                )}
-              </div>
-            )}
-            <Button>{isUpdating ? 'Update note' : 'Add note'}</Button>
           </form>
         </Form>
       </div>
