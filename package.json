@@ -1,11 +1,12 @@
 {
-  "name": "tapnchill-extension",
+  "name": "bapbi-extension",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build-production": "tsc -b && rm -rf dist && vite build --mode production",
     "lint": "eslint .",
     "preview": "vite preview"
   },

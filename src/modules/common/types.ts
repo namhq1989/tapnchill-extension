@@ -2,9 +2,11 @@ export interface IAppStore {
   userId: string
   userToken: string
   provider: string
+
   me: IMe | null
   fetchMe: () => Promise<void>
 
+  isSubscriptionEnabled: boolean
   subscriptionPlans: ISubscriptionPlan[]
   fetchSubscriptionPlans: () => Promise<void>
 
@@ -77,5 +79,6 @@ export interface ISubscriptionPlan {
 }
 
 export interface IGetSubscriptionPlansResponse {
+  isEnabled: boolean
   plans: ISubscriptionPlan[]
 }

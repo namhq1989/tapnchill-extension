@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button.tsx'
 import useAppStore from '@/modules/common/store.ts'
 
 const SubscriptionView = () => {
-  const { subscriptionPlans } = useAppStore()
+  const { isSubscriptionEnabled, subscriptionPlans } = useAppStore()
 
   return (
     <div className='flex flex-col w-[400px] min-h-[600px] scrollbar-hide'>
@@ -34,7 +34,7 @@ const SubscriptionView = () => {
                 </p>
               )
 
-              if (plan.discountId) {
+              if (plan.amount !== plan.afterDiscountAmount) {
                 pricingDiv = (
                   <div className='flex flex-row gap-2 items-end'>
                     <p className='text-3xl font-bold text-primary'>
@@ -53,11 +53,15 @@ const SubscriptionView = () => {
                     {pricingDiv}
                     <p className='text-sm'>per {plan.periodText}</p>
                   </div>
-                  <a href={url} target='_blank'>
-                    <Button className='w-full h-[28px] rounded-xl font-bold'>
+
+                  <Button
+                    className='w-full h-[28px] rounded-xl font-bold'
+                    disabled={!isSubscriptionEnabled}
+                  >
+                    <a href={url} target='_blank'>
                       UPGRADE
-                    </Button>
-                  </a>
+                    </a>
+                  </Button>
                 </div>
               )
             })}
@@ -104,13 +108,24 @@ const SubscriptionView = () => {
           </div>
           <div className='flex px-0 py-4 border-b-2 border-b-muted'>
             <div className='flex w-[40%] items-start'>
+              <p className='text-xs'>Note</p>
+            </div>
+            <div className='flex w-[30%] items-start'>
+              <p className='text-xs'>Max 20 notes</p>
+            </div>
+            <div className='flex w-[30%] items-start'>
+              <p className='text-xs'>Max 1000 notes</p>
+            </div>
+          </div>
+          <div className='flex px-0 py-4 border-b-2 border-b-muted'>
+            <div className='flex w-[40%] items-start'>
               <p className='text-xs'>Habit Tracking</p>
             </div>
             <div className='flex w-[30%] items-start'>
               <p className='text-xs'>Max 5 habits</p>
             </div>
             <div className='flex w-[30%] items-start'>
-              <p className='text-xs'>Max 20 habits</p>
+              <p className='text-xs'>Max 30 habits</p>
             </div>
           </div>
           <div className='flex px-0 py-4 border-b-2 border-b-muted'>
