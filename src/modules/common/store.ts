@@ -35,6 +35,7 @@ const useAppStore = create<IAppStore>((set, get) => ({
     }
   },
 
+  isSubscriptionEnabled: false,
   subscriptionPlans: [],
   fetchSubscriptionPlans: async () => {
     const { get: httpGet } = useHttpStore.getState()
@@ -44,7 +45,10 @@ const useAppStore = create<IAppStore>((set, get) => ({
       const response = await httpGet<IGetSubscriptionPlansResponse>(
         'api/user/subscription-plans',
       )
-      set({ subscriptionPlans: response.plans })
+      set({
+        isSubscriptionEnabled: response.isEnabled,
+        subscriptionPlans: response.plans,
+      })
     } catch (err) {
       showErrorNotification({
         description: `Something went wrong. Please try again (${err})`,

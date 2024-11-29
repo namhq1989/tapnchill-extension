@@ -21,7 +21,13 @@ import AppMenu from '@/modules/common/app-menu.tsx'
 import LoadingIndicator from '@/modules/common/loading-indicator.tsx'
 
 const HomeView = () => {
-  const { initApp, isInitializing, fetchSubscriptionPlans, me } = useAppStore()
+  const {
+    initApp,
+    isInitializing,
+    fetchSubscriptionPlans,
+    isSubscriptionEnabled,
+    me,
+  } = useAppStore()
   const { initStations } = useStationsStore()
   const { initAmbiences } = useAmbiencesStore()
   const { fetchQuote } = useQuoteStore()
@@ -106,11 +112,13 @@ const HomeView = () => {
           <div className='flex flex-row gap-4 items-center'>
             <AppMenu />
             {me.subscription.plan === 'free' ? (
-              <Link component={SubscriptionView}>
-                <Badge variant='default' className='cursor-pointer'>
-                  Go Pro
-                </Badge>
-              </Link>
+              isSubscriptionEnabled && (
+                <Link component={SubscriptionView}>
+                  <Badge variant='default' className='cursor-pointer'>
+                    Go Pro
+                  </Badge>
+                </Link>
+              )
             ) : (
               <Badge>Pro</Badge>
             )}

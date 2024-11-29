@@ -30,7 +30,13 @@ const AppMenu = () => {
   const [isOpen, setIsOpen] = useState(false)
   const { setTheme, theme } = useTheme()
   const { showNotification } = useNotificationStore()
-  const { provider, isGoogleSigningIn, googleSignIn, me } = useAppStore()
+  const {
+    provider,
+    isGoogleSigningIn,
+    googleSignIn,
+    isSubscriptionEnabled,
+    me,
+  } = useAppStore()
 
   if (!me) {
     return <div />
@@ -129,7 +135,7 @@ const AppMenu = () => {
                   {me.subscription.plan.toUpperCase()}
                 </Badge>
               </div>
-              {me.subscription.plan === 'free' && (
+              {me.subscription.plan === 'free' && isSubscriptionEnabled && (
                 <Link component={SubscriptionView}>
                   <Button className='w-full h-[32px] rounded-xl font-bold'>
                     UPGRADE
@@ -167,6 +173,16 @@ const AppMenu = () => {
               <p className='text-xs'>Extension version</p>
               <p className='text-xs'>v1.0.0</p>
             </div>
+          </div>
+          <div className='flex flex-col mt-8 items-center justify-center'>
+            <a
+              href='https://chromewebstore.google.com/detail/ahpbddfeddnminklkodiapofdddmcmlb'
+              target='_blank'
+            >
+              <p className='text-sm text-primary underline underline-offset-4'>
+                View on Chrome Store
+              </p>
+            </a>
           </div>
           {/*<p*/}
           {/*  className='text-xs underline underline-offset-4 cursor-pointer mt-20 self-center'*/}
