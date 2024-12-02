@@ -85,9 +85,7 @@ const DailyActivitiesView = (props: IDailyActivitiesViewProps) => {
                 <div className='flex flex-col gap-2 mb-4 px-4'>
                   <div className='flex flex-row justify-between items-center'>
                     <p className='text-sm'>Total activities</p>
-                    <p className='text-sm font-bold'>
-                      {dateStats.scheduledIds.length}
-                    </p>
+                    <p className='text-sm font-bold'>{filteredHabits.length}</p>
                   </div>
                   <div className='flex flex-row justify-between items-center'>
                     <p className='text-sm'>Completed activities</p>

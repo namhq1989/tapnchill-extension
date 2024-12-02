@@ -33,6 +33,7 @@ import BackButton from '@/modules/common/back-button.tsx'
 import useTaskManipulationStore from '@/modules/task/task-manipulation-store.ts'
 import { TimePicker } from '@/components/ui/time-picker.tsx'
 import useGoalsStore from '@/modules/goal/store.ts'
+import { goBack } from 'react-chrome-extension-router'
 
 const FormSchema = z.object({
   name: z
@@ -74,6 +75,7 @@ const CreateTaskView = () => {
     )
     if (isSuccess) {
       form.reset()
+      goBack()
     }
   }
 
