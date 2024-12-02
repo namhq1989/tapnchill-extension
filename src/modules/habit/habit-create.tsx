@@ -84,28 +84,28 @@ const HabitCreateView = (props: IHabitCreateViewProps) => {
   }, [isUpdating, habit, form])
 
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
+    let isSuccess = false
+
     if (isUpdating) {
       habit.name = data.name
       habit.goal = data.goal
       habit.daysOfWeek = data.daysOfWeek
       habit.icon = data.icon
       habit.sortOrder = data.sortOrder
-      const isSuccess = await updateHabit(habit)
-      if (isSuccess) {
-        form.reset()
-        goBack()
-      }
+      isSuccess = await updateHabit(habit)
     } else {
-      const isSuccess = await createHabit(
+      isSuccess = await createHabit(
         data.name,
         data.goal,
         data.daysOfWeek,
         data.icon,
         data.sortOrder,
       )
-      if (isSuccess) {
-        form.reset()
-      }
+    }
+
+    if (isSuccess) {
+      form.reset()
+      goBack()
     }
   }
 

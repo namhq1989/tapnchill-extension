@@ -63,19 +63,19 @@ const GoalCreateView = (props: IGoalCreateViewProps) => {
   }, [isUpdating, goal, form])
 
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
+    let isSuccess = false
+
     if (isUpdating) {
       goal.name = data.name
       goal.description = data.description
-      const isSuccess = await updateGoal(goal)
-      if (isSuccess) {
-        form.reset()
-        goBack()
-      }
+      isSuccess = await updateGoal(goal)
     } else {
-      const isSuccess = await createGoal(data.name, data.description)
-      if (isSuccess) {
-        form.reset()
-      }
+      isSuccess = await createGoal(data.name, data.description)
+    }
+
+    if (isSuccess) {
+      form.reset()
+      goBack()
     }
   }
 

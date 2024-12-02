@@ -181,6 +181,7 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
         console.error('Failed to create offscreen document:', error)
         sendResponse({ success: false })
       })
+    return true
   } else if (request.type === 'pause-ambience') {
     createOffscreen()
       .then(() => {
@@ -196,6 +197,7 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
         console.error('Failed to create offscreen document:', error)
         sendResponse({ success: false })
       })
+    return true
   } else if (request.type === 'change-ambience-volume') {
     chrome.runtime
       .sendMessage({ ...request, type: 'offscreen-change-ambience-volume' })
@@ -219,6 +221,7 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
         console.error('Failed to create offscreen document:', error)
         sendResponse({ success: false })
       })
+    return true
   } else if (request.type === 'pause-station') {
     createOffscreen()
       .then(() => {
@@ -234,6 +237,7 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
         console.error('Failed to create offscreen document:', error)
         sendResponse({ success: false })
       })
+    return true
   } else if (request.type === 'resume-station') {
     createOffscreen()
       .then(() => {
@@ -264,6 +268,7 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
         console.error('Failed to create offscreen document:', error)
         sendResponse({ success: false })
       })
+    return true
   } else if (request.type === 'change-station-volume') {
     chrome.runtime
       .sendMessage({ ...request, type: 'offscreen-change-station-volume' })

@@ -115,8 +115,7 @@ const AppMenu = () => {
               </div>
               <Button
                 disabled={isGoogleSigningIn}
-                variant='secondary'
-                className='w-full h-[28px] rounded-xl font-bold'
+                className='w-full h-[32px] rounded-xl'
                 onClick={async () => await googleSignIn()}
               >
                 <ChromeIcon className='mr-2 h-4 w-4' />
@@ -174,7 +173,7 @@ const AppMenu = () => {
               <p className='text-xs'>v1.0.0</p>
             </div>
           </div>
-          <div className='flex flex-col mt-8 items-center justify-center'>
+          <div className='flex flex-col my-8 items-center justify-center'>
             <a
               href='https://chromewebstore.google.com/detail/ahpbddfeddnminklkodiapofdddmcmlb'
               target='_blank'
