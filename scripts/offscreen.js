@@ -228,7 +228,7 @@ const handleGoogleSignIn = (userToken, callback) => {
 const postGoogleSignInToken = async (userToken, googleToken) => {
   try {
     const response = await fetch(
-      'http://localhost:3070/api/user/sign-in/google',
+      'https://svc.bapbi.app/api/user/sign-in/google',
       {
         method: 'POST',
         headers: {
