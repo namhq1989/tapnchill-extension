@@ -10,6 +10,9 @@ export interface IAppStore {
   subscriptionPlans: ISubscriptionPlan[]
   fetchSubscriptionPlans: () => Promise<void>
 
+  isGeneratingSubscriptionCheckoutURL: boolean
+  generateSubscriptionCheckoutURL: (subscriptionId: string) => Promise<string>
+
   isInitializing: boolean
   initApp: () => Promise<void>
   generateAnonymousUserId: (length: number) => string
@@ -70,15 +73,20 @@ export interface IUserSubscriptionApiData {
 }
 
 export interface ISubscriptionPlan {
-  periodText: string
-  priceId: string
+  id: string
   amount: number
-  discountId: string
   afterDiscountAmount: number
-  token: string
 }
 
 export interface IGetSubscriptionPlansResponse {
   isEnabled: boolean
   plans: ISubscriptionPlan[]
+}
+
+export interface IGenerateSubscriptionCheckoutURLApiRequest {
+  subscriptionId: string
+}
+
+export interface IGenerateSubscriptionCheckoutURLApiResponse {
+  checkoutUrl: string
 }

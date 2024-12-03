@@ -2,9 +2,20 @@ import BackButton from '@/modules/common/back-button.tsx'
 import HeaderTitle from '@/modules/common/header-title.tsx'
 import { Button } from '@/components/ui/button.tsx'
 import useAppStore from '@/modules/common/store.ts'
+import ChromeIcon from '@/modules/common/chrome-icon.tsx'
 
 const SubscriptionView = () => {
-  const { isSubscriptionEnabled, subscriptionPlans } = useAppStore()
+  const {
+    isSubscriptionEnabled,
+    subscriptionPlans,
+    isGeneratingSubscriptionCheckoutURL,
+    generateSubscriptionCheckoutURL,
+    isGoogleSigningIn,
+    googleSignIn,
+    provider,
+  } = useAppStore()
+
+  const isUserNotSignedInYet = !provider || provider === 'extension'
 
   return (
     <div className='flex flex-col w-[400px] min-h-[600px] scrollbar-hide'>
@@ -26,8 +37,6 @@ const SubscriptionView = () => {
         ) : (
           <div className='grid grid-cols-2 gap-2'>
             {subscriptionPlans.map((plan) => {
-              const url = `${import.meta.env.VITE_LANDING_PAGE_URL}/?c=${plan.token}`
-
               let pricingDiv = (
                 <p className='text-3xl font-bold text-primary'>
                   ${plan.amount}
@@ -51,20 +60,43 @@ const SubscriptionView = () => {
                 <div className='col-span-1 flex flex-col justify-between items-start container-selected px-4 py-4 rounded-xl gap-4'>
                   <div className='flex flex-col'>
                     {pricingDiv}
-                    <p className='text-sm'>per {plan.periodText}</p>
+                    <p className='text-sm'>per {plan.id}</p>
                   </div>
 
                   <Button
                     className='w-full h-[28px] rounded-xl font-bold'
-                    disabled={!isSubscriptionEnabled}
+                    disabled={
+                      isUserNotSignedInYet ||
+                      !isSubscriptionEnabled ||
+                      isGeneratingSubscriptionCheckoutURL
+                    }
+                    onClick={async () => {
+                      const url = await generateSubscriptionCheckoutURL(plan.id)
+                      window.open(
+                        `${import.meta.env.VITE_LANDING_PAGE_URL}?c=${url}`,
+                        '_blank',
+                      )
+                    }}
                   >
-                    <a href={url} target='_blank'>
-                      UPGRADE
-                    </a>
+                    UPGRADE
                   </Button>
                 </div>
               )
             })}
+          </div>
+        )}
+
+        {isUserNotSignedInYet && (
+          <div className='flex flex-col gap-2 mt-4'>
+            <p className='text-sm'>Please sign in first</p>
+            <Button
+              disabled={isGoogleSigningIn}
+              className='w-full h-[32px] rounded-xl'
+              onClick={async () => await googleSignIn()}
+            >
+              <ChromeIcon className='mr-2 h-4 w-4' />
+              Sign in with Google
+            </Button>
           </div>
         )}
 
