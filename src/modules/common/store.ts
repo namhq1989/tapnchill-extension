@@ -3,6 +3,8 @@ import {
   IAnonymousSignInApiRequest,
   IAnonymousSignInApiResponse,
   IAppStore,
+  IGenerateSubscriptionCheckoutURLApiRequest,
+  IGenerateSubscriptionCheckoutURLApiResponse,
   IGetMeResponse,
   IGetSubscriptionPlansResponse,
   IGoogleSignInApiResponse,
@@ -53,6 +55,36 @@ const useAppStore = create<IAppStore>((set, get) => ({
       showErrorNotification({
         description: `Something went wrong. Please try again (${err})`,
       })
+    }
+  },
+
+  isGeneratingSubscriptionCheckoutURL: false,
+  generateSubscriptionCheckoutURL: async (subscriptionId: string) => {
+    set({ isGeneratingSubscriptionCheckoutURL: true })
+
+    const { post: httpPost } = useHttpStore.getState()
+    const { showErrorNotification } = useNotificationStore.getState()
+
+    try {
+      const response =
+        await httpPost<IGenerateSubscriptionCheckoutURLApiResponse>(
+          'api/user/subscription-plans/checkout-url',
+          {
+            subscriptionId,
+          } as IGenerateSubscriptionCheckoutURLApiRequest,
+        )
+      set({
+        isGeneratingSubscriptionCheckoutURL: false,
+      })
+      return response.checkoutUrl
+    } catch (err) {
+      set({
+        isGeneratingSubscriptionCheckoutURL: false,
+      })
+      showErrorNotification({
+        description: `Something went wrong. Please try again (${err})`,
+      })
+      return ''
     }
   },
 
@@ -158,8 +190,6 @@ const useAppStore = create<IAppStore>((set, get) => ({
         type: 'sign-in-with-google',
       },
       async (response: IGoogleSignInApiResponse) => {
-        console.log('response', response)
-
         set({ isGoogleSigningIn: false })
         if (!response.success) {
           showErrorNotification({
