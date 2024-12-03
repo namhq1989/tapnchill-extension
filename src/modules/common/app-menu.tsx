@@ -107,7 +107,7 @@ const AppMenu = () => {
             />
           </div>
           <Separator className='w-[90%] mt-4 self-center' />
-          {provider === 'extension' ? (
+          {!provider || provider === 'extension' ? (
             <div className='flex flex-col p-4 w-full gap-4'>
               <div className='flex flex-row items-center justify-between'>
                 <p className='text-sm text-muted-foreground'>Current plan</p>
