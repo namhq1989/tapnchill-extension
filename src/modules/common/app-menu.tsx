@@ -1,14 +1,6 @@
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet.tsx'
 import { useState } from 'react'
-import {
-  CircleCheckBig,
-  File,
-  Info,
-  ListChecks,
-  Menu,
-  MoonStar,
-  StickyNote,
-} from 'lucide-react'
+import { File, Menu } from 'lucide-react'
 import { Switch } from '@/components/ui/switch.tsx'
 import { Link } from 'react-chrome-extension-router'
 import InformationView from '@/modules/information/view.tsx'
@@ -65,8 +57,12 @@ const AppMenu = () => {
             }}
           >
             <div className='flex flex-row gap-4 items-center justify-center'>
-              <StickyNote size={20} className='text-muted-foreground' />
-              <p className='text-sm text-foreground'>Notes</p>
+              <img
+                src='https://i.bapbi.app/notes.png'
+                alt='notes'
+                className='w-5 h-5 bg-cover'
+              />
+              <p className='text-sm text-foreground'>Note</p>
             </div>
           </div>
           <Link
@@ -74,8 +70,12 @@ const AppMenu = () => {
             className='flex flex-row items-center justify-between cursor-pointer rounded-xl hover:container-selected p-4'
           >
             <div className='flex flex-row gap-4 items-center justify-center'>
-              <ListChecks size={20} className='text-muted-foreground' />
-              <p className='text-sm text-foreground'>Daily activity</p>
+              <img
+                src='https://i.bapbi.app/habit.png'
+                alt='habit'
+                className='w-5 h-5 bg-cover'
+              />
+              <p className='text-sm text-foreground'>Habit</p>
             </div>
           </Link>
           <Link
@@ -83,7 +83,11 @@ const AppMenu = () => {
             className='flex flex-row items-center justify-between cursor-pointer rounded-xl hover:container-selected p-4'
           >
             <div className='flex flex-row gap-4 items-center justify-center'>
-              <CircleCheckBig size={20} className='text-muted-foreground' />
+              <img
+                src='https://i.bapbi.app/task.png?v=2'
+                alt='task'
+                className='w-5 h-5 bg-cover'
+              />
               <p className='text-sm text-foreground'>Task</p>
             </div>
           </Link>
@@ -92,13 +96,21 @@ const AppMenu = () => {
             className='flex flex-row items-center justify-between cursor-pointer rounded-xl hover:container-selected p-4'
           >
             <div className='flex flex-row gap-4 items-center justify-center'>
-              <Info size={20} className='text-muted-foreground' />
+              <img
+                src='https://i.bapbi.app/info.png'
+                alt='info'
+                className='w-5 h-5 bg-cover'
+              />
               <p className='text-sm text-foreground'>Information</p>
             </div>
           </Link>
           <div className='flex flex-row items-center justify-between cursor-pointer rounded-xl hover:container-selected p-4'>
             <div className='flex flex-row gap-4 items-center justify-center'>
-              <MoonStar size={20} className='text-muted-foreground' />
+              <img
+                src='https://i.bapbi.app/theme-mode.png?v=2'
+                alt='theme-mode'
+                className='w-5 h-5 bg-cover'
+              />
               <p className='text-sm text-foreground'>Dark mode</p>
             </div>
             <Switch

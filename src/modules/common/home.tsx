@@ -19,6 +19,7 @@ import useHabitsStore from '@/modules/habit/store.ts'
 import SubscriptionView from '@/modules/subscription/view.tsx'
 import AppMenu from '@/modules/common/app-menu.tsx'
 import LoadingIndicator from '@/modules/common/loading-indicator.tsx'
+import QuickMenu from '@/modules/common/quick-menu.tsx'
 
 const HomeView = () => {
   const {
@@ -127,7 +128,8 @@ const HomeView = () => {
             <HeaderTitle title='BapBi' />
           </div>
         </div>
-        <div className='flex flex-col p-4 gap-x-4 gap-y-8'>
+        <div className='flex flex-col py-4'>
+          <QuickMenu />
           <StationPreview />
           <HabitPreview />
           <TaskPreview />

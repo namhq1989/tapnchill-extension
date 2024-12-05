@@ -11,7 +11,7 @@ const TaskPreview = () => {
   const { toggleTask } = useTaskManipulationStore()
 
   return (
-    <div className='flex flex-col w-full gap-2'>
+    <div className='flex flex-col w-full gap-2 p-4'>
       <div className='flex flex-row justify-between items-center'>
         <h2 className='text-base font-bold tracking-wide'>TO-DO Tasks</h2>
         <div className='flex flex-row gap-4'>
