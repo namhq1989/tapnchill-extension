@@ -57,7 +57,10 @@ const SubscriptionView = () => {
               }
 
               return (
-                <div className='col-span-1 flex flex-col justify-between items-start container-selected px-4 py-4 rounded-xl gap-4'>
+                <div
+                  key={`plan-${plan.id}`}
+                  className='col-span-1 flex flex-col justify-between items-start container-selected px-4 py-4 rounded-xl gap-4'
+                >
                   <div className='flex flex-col'>
                     {pricingDiv}
                     <p className='text-sm'>per {plan.id}</p>

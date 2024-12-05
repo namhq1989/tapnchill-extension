@@ -289,6 +289,7 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
                   accessToken: response.accessToken,
                   userId: response.userId,
                   provider: response.provider,
+                  email: response.email,
                   isSignedInSuccessfully: true,
                 })
                 .then(() => {
@@ -297,6 +298,7 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
                     accessToken: response.accessToken,
                     userId: response.userId,
                     provider: response.provider,
+                    email: response.email,
                     isSignedInSuccessfully: true,
                   })
                 })

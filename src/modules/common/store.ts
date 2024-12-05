@@ -20,6 +20,7 @@ const useAppStore = create<IAppStore>((set, get) => ({
   userId: '',
   userToken: '',
   provider: '',
+  email: '',
 
   me: null,
   fetchMe: async () => {
@@ -97,6 +98,7 @@ const useAppStore = create<IAppStore>((set, get) => ({
         const userId: string = result.userId || ''
         const accessToken: string = result.accessToken || ''
         const provider: string = result.provider || ''
+        const email: string = result.email || ''
 
         if (!userId || !accessToken) {
           // if user id not found, this means the current user is new to the extension
@@ -108,7 +110,7 @@ const useAppStore = create<IAppStore>((set, get) => ({
           const { setAccessToken } = useHttpStore.getState()
           setAccessToken(accessToken)
 
-          set({ userId, userToken: accessToken, provider })
+          set({ userId, userToken: accessToken, provider, email })
         }
 
         const { fetchMe } = get()
@@ -203,6 +205,7 @@ const useAppStore = create<IAppStore>((set, get) => ({
           userId: response.userId,
           userToken: response.accessToken,
           provider: response.provider,
+          email: response.email,
         })
 
         showNotification({

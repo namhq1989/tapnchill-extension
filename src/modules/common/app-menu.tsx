@@ -33,6 +33,7 @@ const AppMenu = () => {
   const { showNotification } = useNotificationStore()
   const {
     provider,
+    email,
     isGoogleSigningIn,
     googleSignIn,
     isSubscriptionEnabled,
@@ -125,6 +126,12 @@ const AppMenu = () => {
             </div>
           ) : (
             <div className='flex flex-col p-4 w-full gap-4'>
+              <p
+                className='text-sm truncate'
+                title={email || 'Your account email'}
+              >
+                {email || 'N/A'}
+              </p>
               <div className='flex flex-row items-center justify-between'>
                 <p className='text-sm'>Current plan</p>
                 <Badge
