@@ -384,3 +384,27 @@ const createOffscreen = async () => {
     offScreenCreating = null
   }
 }
+
+//
+// SITES BLOCKER
+//
+
+chrome.declarativeNetRequest
+  .updateDynamicRules({
+    addRules: [
+      {
+        id: 1,
+        priority: 1,
+        action: {
+          type: 'redirect',
+          redirect: { extensionPath: '/blocked.html' },
+        },
+        condition: {
+          urlFilter: 'facebook.com',
+          resourceTypes: ['main_frame'],
+        },
+      },
+    ],
+    removeRuleIds: [1], // Clean up previous rule if exists
+  })
+  .then()
