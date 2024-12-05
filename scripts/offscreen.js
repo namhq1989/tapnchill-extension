@@ -204,6 +204,7 @@ const handleGoogleSignIn = (userToken, callback) => {
               accessToken: apiResponse.data.data.accessToken,
               userId: apiResponse.data.data.userId,
               provider: apiResponse.data.data.provider,
+              email: apiResponse.data.data.email,
             })
           } else {
             console.error('Sign-in failed:', data.error)

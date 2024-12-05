@@ -2,6 +2,7 @@ export interface IAppStore {
   userId: string
   userToken: string
   provider: string
+  email: string
 
   me: IMe | null
   fetchMe: () => Promise<void>
@@ -55,6 +56,7 @@ export interface IGoogleSignInApiResponse {
   userId: string
   accessToken: string
   provider: string
+  email: string
 }
 
 export interface IWeekday {
