@@ -9,6 +9,7 @@ import HomeView from '@/modules/common/home.tsx'
 import { Toaster } from '@/components/ui/toaster.tsx'
 import { ThemeProvider } from '@/components/theme/theme-provider.tsx'
 import useNotificationStore from '@/modules/notification/store.ts'
+import useFocusProgressingStore from '@/modules/focus/progressing-store.ts'
 
 chrome.storage.local.get((result) => {
   if (result.isSignedInSuccessfully) {
@@ -20,6 +21,22 @@ chrome.storage.local.get((result) => {
         isSignedInSuccessfully: false,
       })
       .then()
+  }
+
+  if (result.focusProgress) {
+    const { initialCountdown, countdown, isRunning, lastUpdated } =
+      result.focusProgress
+    const now = Date.now()
+    const elapsed = Math.floor((now - lastUpdated) / 1000)
+    const remainingTime = Math.max(countdown - elapsed, 0)
+
+    useFocusProgressingStore.setState({
+      initialCountdown: initialCountdown || 1500, // Default to 25 mins if not set
+      countdown: remainingTime,
+      isRunning: remainingTime > 0 && isRunning, // Only run if time remains
+      progress: ((initialCountdown - remainingTime) / initialCountdown) * 100,
+      // progress: 0,
+    })
   }
 })
 

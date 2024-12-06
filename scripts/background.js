@@ -20,6 +20,15 @@ chrome.runtime.onStartup.addListener(function () {
       lastTrackingTime: '',
     })
     .then()
+
+  chrome.declarativeNetRequest.updateDynamicRules(
+    {
+      removeRuleIds: Array.from({ length: 100 }, (_, i) => i + 1), // Remove all existing rules
+    },
+    () => {
+      console.log('Blocking rules cleared.')
+    },
+  )
 })
 
 let trackListeningTimeJobIntervalId
@@ -386,25 +395,36 @@ const createOffscreen = async () => {
 }
 
 //
-// SITES BLOCKER
+// FOCUS
 //
 
-chrome.declarativeNetRequest
-  .updateDynamicRules({
-    addRules: [
-      {
-        id: 1,
-        priority: 1,
-        action: {
-          type: 'redirect',
-          redirect: { extensionPath: '/blocked.html' },
-        },
-        condition: {
-          urlFilter: 'facebook.com',
-          resourceTypes: ['main_frame'],
-        },
-      },
-    ],
-    removeRuleIds: [1], // Clean up previous rule if exists
-  })
-  .then()
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name === 'focusCountdown') {
+    console.log('Focus session ended!')
+
+    // Notify the user
+    chrome.notifications
+      .create({
+        type: 'basic',
+        iconUrl: '/icons/icon128.png',
+        title: 'Focus Session Complete',
+        message: 'Great job! Your focus session has ended.',
+        priority: 2,
+      })
+      .then()
+
+    chrome.storage.local.get('focusProgress', (result) => {
+      if (result.focusProgress) {
+        const updatedProgress = {
+          ...result.focusProgress,
+          isRunning: false,
+          countdown: 0,
+        }
+
+        chrome.storage.local.set({ focusProgress: updatedProgress }, () => {
+          console.log('Focus state reset in local storage.')
+        })
+      }
+    })
+  }
+})

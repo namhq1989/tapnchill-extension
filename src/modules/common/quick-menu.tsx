@@ -6,6 +6,7 @@ import {
 import TaskView from '@/modules/task/view.tsx'
 import { Link } from 'react-chrome-extension-router'
 import HabitView from '@/modules/habit/view.tsx'
+import FocusUIView from '@/modules/focus/view.tsx'
 
 const QuickMenu = () => {
   return (
@@ -20,7 +21,7 @@ const QuickMenu = () => {
       <CarouselContent>
         <CarouselItem className='basis-1/5 flex items-center justify-center ml-4'>
           <Link
-            component={TaskView}
+            component={FocusUIView}
             className='flex flex-col gap-2 p-4 items-center justify-center'
           >
             <img
