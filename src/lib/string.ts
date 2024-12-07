@@ -28,4 +28,30 @@ const getDomain = (url: string): string => {
   }
 }
 
-export { copyToClipboard, getDomainForDisplaying, getDomain }
+const validateAndExtractHostname = (input: string): string | null => {
+  try {
+    // Ensure input is treated as a URL
+    const url = new URL(input.startsWith('http') ? input : `https://${input}`)
+    const hostname = url.hostname
+
+    // Regular expression to validate a proper domain name
+    const domainRegex = /^(?!:\/\/)([a-zA-Z0-9-_]+\.)+[a-zA-Z]{2,}$/
+
+    if (!domainRegex.test(hostname)) {
+      console.error('Invalid domain format:', input)
+      return null
+    }
+
+    return hostname
+  } catch (error) {
+    console.error('Invalid website address:', input, error)
+    return null
+  }
+}
+
+export {
+  copyToClipboard,
+  getDomainForDisplaying,
+  getDomain,
+  validateAndExtractHostname,
+}

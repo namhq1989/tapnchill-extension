@@ -19,6 +19,10 @@ import useHabitsStore from '@/modules/habit/store.ts'
 import SubscriptionView from '@/modules/subscription/view.tsx'
 import AppMenu from '@/modules/common/app-menu.tsx'
 import LoadingIndicator from '@/modules/common/loading-indicator.tsx'
+import QuickMenu from '@/modules/common/quick-menu.tsx'
+import Pulse from '@/modules/common/pulse.tsx'
+import useFocusProgressingStore from '@/modules/focus/progressing-store.ts'
+import { FocusStatus } from '@/modules/focus/types.ts'
 
 const HomeView = () => {
   const {
@@ -30,6 +34,7 @@ const HomeView = () => {
   } = useAppStore()
   const { initStations } = useStationsStore()
   const { initAmbiences } = useAmbiencesStore()
+  const { status } = useFocusProgressingStore()
   const { fetchQuote } = useQuoteStore()
   const { fetchWeather } = useWeatherStore()
   const { fetchGoals } = useGoalsStore()
@@ -109,8 +114,9 @@ const HomeView = () => {
 
       <div className='flex flex-col w-[400px] h-[600px] scrollbar-hide'>
         <div className='flex w-full flex-row justify-between p-4 border-b-[1px]'>
-          <div className='flex flex-row gap-4 items-center'>
+          <div className='flex flex-row gap-6 items-center'>
             <AppMenu />
+            {status === FocusStatus.running && <Pulse />}
             {me.subscription.plan === 'free' ? (
               isSubscriptionEnabled && (
                 <Link component={SubscriptionView}>
@@ -127,7 +133,8 @@ const HomeView = () => {
             <HeaderTitle title='BapBi' />
           </div>
         </div>
-        <div className='flex flex-col p-4 gap-x-4 gap-y-8'>
+        <div className='flex flex-col py-4'>
+          <QuickMenu />
           <StationPreview />
           <HabitPreview />
           <TaskPreview />

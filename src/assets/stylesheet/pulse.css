@@ -1,0 +1,61 @@
+.pulse{
+    /*position: absolute;*/
+    /*top: 50%;*/
+    /*left: 50%;*/
+    transform: translate(0%,0%);
+    width: 16px;
+    height: 16px;
+    background-color: #facc15;
+    color: white;
+    text-align: center;
+    line-height: 100px;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    border-radius: 50%;
+    font-size: 1.3rem;
+    &:hover{
+        cursor: pointer;
+    }
+    &::after,&::before{
+        content: "";
+        display: block;
+        position: absolute;
+        top:0;
+        left:0;
+        width: 16px;
+        height: 16px;
+        background: #facc15;
+        border-radius: 50%;
+        z-index: -1;
+        animation: grow 1s ease-in-out infinite;
+    }
+    &::after{
+        background: #facc15;
+        &::before{
+            content: "";
+            display: block;
+            position: absolute;
+            top:0;
+            left:0;
+            width: 50px;
+            height: 50px;
+            background: #facc15;
+            border-radius: 50%;
+            z-index: -1;
+            animation: grow 1s ease-in-out infinite;
+        }
+    }
+    &::before{
+        background: #facc15;
+        animation-delay: -1s;
+    }
+}
+@keyframes grow{
+    0%{
+        transform: scale(1,1);
+        opacity: 1;
+    }
+    100%{
+        transform: scale(2,2);
+        opacity: 0;
+    }
+}

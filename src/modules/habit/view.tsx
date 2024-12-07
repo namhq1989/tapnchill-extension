@@ -18,7 +18,7 @@ const HabitView = () => {
         <BackButton />
         <HeaderTitle title='Daily activities' />
       </div>
-      <div className='flex flex-col p-4 gap-8 scrollbar-hide'>
+      <div className='flex flex-col p-4 gap-8'>
         <StatsSummaryView stats={stats} />
 
         <div className='flex flex-col gap-2'>

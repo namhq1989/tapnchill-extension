@@ -26,7 +26,7 @@ const StatisticPreview = () => {
   if (!listeningTrackingTime.length) return null
 
   return (
-    <div className='flex flex-col w-full my-4'>
+    <div className='flex flex-col w-full my-4 p-4'>
       <h2 className='text-base font-bold tracking-wide'>Tuning In</h2>
       <h2 className='text-sm text-muted-foreground tracking-wide'>
         Your Last 7 Days of Listening
