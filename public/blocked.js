@@ -14,7 +14,7 @@ document.getElementById('site-name').textContent = getSiteName()
 
 // Back button functionality
 function goBack() {
-  history.back()
+  history.go(-2)
 }
 
 document.getElementById('back-button').addEventListener('click', goBack)

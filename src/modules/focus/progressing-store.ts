@@ -1,16 +1,15 @@
-import { FocusView, IFocusProgressingStore } from '@/modules/focus/types.ts'
+import {
+  FocusStatus,
+  FocusView,
+  IFocusProgressingStore,
+} from '@/modules/focus/types.ts'
 import { create } from 'zustand'
 import useFocusUIStore from '@/modules/focus/ui-store.ts'
-import {
-  stopBlocking,
-  updateBlockingRules,
-} from '@/modules/focus/sites-blocking.ts'
-import useFocusSetupStore from '@/modules/focus/setup-store.ts'
 
 const persistProgressState = (state: {
   initialCountdown: number
   countdown: number
-  isRunning: boolean
+  status: FocusStatus
   lastUpdated: number
 }) => {
   chrome.storage.local.set({ focusProgress: state }, () => {
@@ -21,7 +20,7 @@ const persistProgressState = (state: {
 const useFocusProgressingStore = create<IFocusProgressingStore>((set, get) => ({
   initialCountdown: 1500, // Default 25 minutes in seconds
   countdown: 1500, // Initialize countdown to match initialCountdown
-  isRunning: false,
+  status: FocusStatus.paused,
   progress: 0,
 
   // Persist initialCountdown and countdown
@@ -30,19 +29,19 @@ const useFocusProgressingStore = create<IFocusProgressingStore>((set, get) => ({
       initialCountdown: value,
       countdown: value,
       progress: 0,
-      isRunning: true,
+      status: FocusStatus.running,
     }))
 
     persistProgressState({
       initialCountdown: value,
       countdown: value,
-      isRunning: get().isRunning,
+      status: get().status,
       lastUpdated: Date.now(),
     })
   },
 
   setCountdown: (value: number) => {
-    const { isRunning, initialCountdown } = get()
+    const { status, initialCountdown } = get()
     const progress = ((initialCountdown - value) / initialCountdown) * 100
 
     set(() => ({
@@ -53,7 +52,7 @@ const useFocusProgressingStore = create<IFocusProgressingStore>((set, get) => ({
     persistProgressState({
       initialCountdown, // Persist the current initialCountdown value
       countdown: value,
-      isRunning,
+      status,
       lastUpdated: Date.now(),
     })
   },
@@ -61,7 +60,12 @@ const useFocusProgressingStore = create<IFocusProgressingStore>((set, get) => ({
   toggleRunning: () => {
     const currentState = get()
 
-    if (!currentState.isRunning) {
+    let newStatus = FocusStatus.paused
+    if (currentState.status === FocusStatus.paused) {
+      newStatus = FocusStatus.running
+    }
+
+    if (newStatus === FocusStatus.running) {
       const countdownInMinutes = currentState.countdown / 60
 
       chrome.alarms
@@ -70,27 +74,18 @@ const useFocusProgressingStore = create<IFocusProgressingStore>((set, get) => ({
         })
         .then()
       console.log(`Alarm created: ${countdownInMinutes} minutes remaining`)
-
-      const { blockedSites } = useFocusSetupStore.getState()
-      if (blockedSites.length) {
-        updateBlockingRules(blockedSites)
-      }
     } else {
       chrome.alarms.clear('focusCountdown', () => {
         console.log('Alarm cleared')
       })
-
-      stopBlocking()
     }
 
-    set((state) => ({
-      isRunning: !state.isRunning,
-    }))
+    set({ status: newStatus })
 
     persistProgressState({
       initialCountdown: currentState.initialCountdown,
       countdown: currentState.countdown,
-      isRunning: !currentState.isRunning,
+      status: newStatus,
       lastUpdated: Date.now(),
     })
   },
@@ -105,18 +100,16 @@ const useFocusProgressingStore = create<IFocusProgressingStore>((set, get) => ({
     set(() => ({
       initialCountdown,
       countdown: initialCountdown,
-      isRunning: false,
+      status: FocusStatus.paused,
       progress: 0,
     }))
 
     persistProgressState({
       initialCountdown,
       countdown: initialCountdown,
-      isRunning: false,
+      status: FocusStatus.paused,
       lastUpdated: Date.now(),
     })
-
-    stopBlocking()
   },
 
   stopFocus: () => {

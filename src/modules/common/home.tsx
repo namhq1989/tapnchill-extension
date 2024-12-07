@@ -22,6 +22,7 @@ import LoadingIndicator from '@/modules/common/loading-indicator.tsx'
 import QuickMenu from '@/modules/common/quick-menu.tsx'
 import Pulse from '@/modules/common/pulse.tsx'
 import useFocusProgressingStore from '@/modules/focus/progressing-store.ts'
+import { FocusStatus } from '@/modules/focus/types.ts'
 
 const HomeView = () => {
   const {
@@ -33,7 +34,7 @@ const HomeView = () => {
   } = useAppStore()
   const { initStations } = useStationsStore()
   const { initAmbiences } = useAmbiencesStore()
-  const { isRunning } = useFocusProgressingStore()
+  const { status } = useFocusProgressingStore()
   const { fetchQuote } = useQuoteStore()
   const { fetchWeather } = useWeatherStore()
   const { fetchGoals } = useGoalsStore()
@@ -115,7 +116,7 @@ const HomeView = () => {
         <div className='flex w-full flex-row justify-between p-4 border-b-[1px]'>
           <div className='flex flex-row gap-6 items-center'>
             <AppMenu />
-            {isRunning && <Pulse />}
+            {status === FocusStatus.running && <Pulse />}
             {me.subscription.plan === 'free' ? (
               isSubscriptionEnabled && (
                 <Link component={SubscriptionView}>

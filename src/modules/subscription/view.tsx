@@ -134,7 +134,7 @@ const SubscriptionView = () => {
               <p className='text-xs'>Ambiences</p>
             </div>
             <div className='flex w-[30%] items-start'>
-              <p className='text-xs'>Play up to 1</p>
+              <p className='text-xs'>Play up to 2</p>
             </div>
             <div className='flex flex-col w-[30%] items-start gap-1'>
               <p className='text-xs'>Play unlimited</p>
@@ -174,6 +174,17 @@ const SubscriptionView = () => {
             <div className='flex flex-col w-[30%] items-start gap-1'>
               <p className='text-xs'>Max 20 goals</p>
               <p className='text-xs'>Max 50 tasks per goal</p>
+            </div>
+          </div>
+          <div className='flex px-0 py-4 border-b-2 border-b-muted'>
+            <div className='flex w-[40%] items-start'>
+              <p className='text-xs'>Focus</p>
+            </div>
+            <div className='flex w-[30%] items-start'>
+              <p className='text-xs'>Block up to 5 websites</p>
+            </div>
+            <div className='flex w-[30%] items-start'>
+              <p className='text-xs'>Block up to 100 websites</p>
             </div>
           </div>
           <div className='flex px-0 py-4'>

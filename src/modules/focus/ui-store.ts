@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import {
+  FocusStatus,
   FocusView,
   IBlockedSite,
   IFocusUIStore,
@@ -33,7 +34,7 @@ const getProgressStateFromStorage = (
     state: {
       initialCountdown: number
       countdown: number
-      isRunning: boolean
+      status: FocusStatus
       lastUpdated: number
     } | null,
   ) => void,
@@ -61,28 +62,18 @@ const useFocusUIStore = create<IFocusUIStore>((set) => ({
 
     getProgressStateFromStorage((savedState) => {
       if (savedState) {
-        const { initialCountdown, countdown, isRunning, lastUpdated } =
-          savedState
+        const { initialCountdown, countdown, status, lastUpdated } = savedState
 
-        if (!isRunning) {
-          useFocusProgressingStore.setState({
-            initialCountdown,
-            countdown: initialCountdown,
-            isRunning: false,
-            progress: 0,
-          })
+        let updatedCountdown = countdown
 
-          console.log('Loaded focus progressing from local storage')
-          return
-        }
+        if (status === FocusStatus.running) {
+          const now = Date.now()
+          const elapsed = Math.floor((now - lastUpdated) / 1000)
 
-        const now = Date.now()
-        const elapsed = Math.floor((now - lastUpdated) / 1000) // Elapsed time in seconds
-
-        let updatedCountdown = countdown - elapsed
-
-        if (updatedCountdown < 0) {
-          updatedCountdown = 0
+          updatedCountdown = countdown - elapsed
+          if (updatedCountdown < 0) {
+            updatedCountdown = 0
+          }
         }
 
         const progress =
@@ -91,7 +82,7 @@ const useFocusUIStore = create<IFocusUIStore>((set) => ({
         useFocusProgressingStore.setState({
           initialCountdown,
           countdown: updatedCountdown,
-          isRunning: isRunning && updatedCountdown > 0,
+          status,
           progress,
         })
 

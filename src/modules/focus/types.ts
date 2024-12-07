@@ -8,6 +8,11 @@ export enum FocusView {
   progressing = 'progressing',
 }
 
+export enum FocusStatus {
+  running = 'running',
+  paused = 'paused',
+}
+
 export interface IFocusUIStore {
   isInitializing: boolean
   initFocus: () => void
@@ -24,13 +29,14 @@ export interface IFocusSetupStore {
   addBlockedSite: (site: string) => void
   removeBlockedSite: (site: string) => void
   startFocus: () => void
+  setUserPlan: (plan: string) => void
 }
 
 export interface IFocusProgressingStore {
   initialCountdown: number
   setInitialCountdown: (value: number) => void
   countdown: number
-  isRunning: boolean
+  status: FocusStatus
   progress: number
   setCountdown: (value: number) => void
   toggleRunning: () => void

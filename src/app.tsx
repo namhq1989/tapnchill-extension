@@ -1,4 +1,3 @@
-import { setState } from '@/modules/station/store.ts'
 import { useEffect } from 'react'
 import {
   getComponentStack,
@@ -10,6 +9,8 @@ import { Toaster } from '@/components/ui/toaster.tsx'
 import { ThemeProvider } from '@/components/theme/theme-provider.tsx'
 import useNotificationStore from '@/modules/notification/store.ts'
 import useFocusProgressingStore from '@/modules/focus/progressing-store.ts'
+import { FocusStatus } from '@/modules/focus/types.ts'
+import useStationsStore from '@/modules/station/store.ts'
 
 chrome.storage.local.get((result) => {
   if (result.isSignedInSuccessfully) {
@@ -24,30 +25,37 @@ chrome.storage.local.get((result) => {
   }
 
   if (result.focusProgress) {
-    const { initialCountdown, countdown, isRunning, lastUpdated } =
+    const { initialCountdown, countdown, status, lastUpdated } =
       result.focusProgress
-    const now = Date.now()
-    const elapsed = Math.floor((now - lastUpdated) / 1000)
-    const remainingTime = Math.max(countdown - elapsed, 0)
+
+    let remainingTime = countdown
+    if (status === FocusStatus.running) {
+      const now = Date.now()
+      const elapsed = Math.floor((now - lastUpdated) / 1000)
+      remainingTime = Math.max(countdown - elapsed, 0)
+    }
 
     useFocusProgressingStore.setState({
-      initialCountdown: initialCountdown || 1500, // Default to 25 mins if not set
+      initialCountdown: initialCountdown || 1500,
       countdown: remainingTime,
-      isRunning: remainingTime > 0 && isRunning, // Only run if time remains
+      status,
       progress: ((initialCountdown - remainingTime) / initialCountdown) * 100,
-      // progress: 0,
     })
   }
 })
 
 chrome.runtime.onMessage.addListener(async (request) => {
   if (request.type === 'station-is-playing') {
+    const { setState } = useStationsStore
+
     setState({
       isPlaying: true,
       isSwitchingStation: false,
       startTime: new Date(),
     })
   } else if (request.type === 'station-is-stopped') {
+    const { setState } = useStationsStore
+
     setState({
       isPlaying: false,
     })

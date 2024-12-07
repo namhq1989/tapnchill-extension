@@ -15,17 +15,19 @@ import {
 import { Ban, Pause, Play, RotateCcw } from 'lucide-react'
 import { formatTimeToCountdown } from '@/lib/date.ts'
 import useFocusProgressingStore from '@/modules/focus/progressing-store.ts'
+import { FocusStatus } from '@/modules/focus/types.ts'
 
 const FocusProgressingView = () => {
   const {
     countdown,
-    isRunning,
+    status,
     progress,
     setCountdown,
     toggleRunning,
     resetProgress,
     stopFocus,
   } = useFocusProgressingStore()
+  const isRunning = status === FocusStatus.running
 
   useEffect(() => {
     let timer: NodeJS.Timeout | null = null
@@ -57,17 +59,24 @@ const FocusProgressingView = () => {
       </div>
 
       {/* Content */}
-      <div className='flex flex-col flex-1 items-center justify-center gap-12'>
+      <div className='flex flex-col flex-1 items-center justify-center gap-4'>
         <div className='flex flex-col w-full p-4 gap-4 justify-center items-center'>
-          <div className='text-6xl font-bold'>
+          <div className='text-6xl font-bold tracking-wider'>
             {formatTimeToCountdown(countdown)}
           </div>
-          <div className='w-[90%] h-2 bg-gray-300 rounded-lg overflow-hidden'>
+          <div className='w-[80%] h-2 bg-gray-300 rounded-lg overflow-hidden'>
             <div
               className='h-full bg-primary transition-all duration-500'
               style={{ width: `${progress}%` }}
             ></div>
           </div>
+        </div>
+        <div className='flex w-full flex-shrink-0 p-4 items-center justify-center'>
+          <img
+            src='https://i.bapbi.app/illus-working-late.svg'
+            alt='focus'
+            className='w-[70%] h-auto'
+          />
         </div>
         <div className='flex w-full items-center justify-around gap-4 mt-4 px-8'>
           <Button
@@ -87,16 +96,7 @@ const FocusProgressingView = () => {
           </Button>
           <StopFocus onConfirm={stopFocus} />
         </div>
-        <div className='h-1' />
       </div>
-
-      {/*<div className='w-full flex-shrink-0 p-4'>*/}
-      {/*  <img*/}
-      {/*    src='https://i.bapbi.app/illus-focus.svg'*/}
-      {/*    alt='focus'*/}
-      {/*    className='w-full h-auto'*/}
-      {/*  />*/}
-      {/*</div>*/}
     </div>
   )
 }

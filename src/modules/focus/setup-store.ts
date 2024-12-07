@@ -8,7 +8,9 @@ import { validateAndExtractHostname } from '@/lib/string.ts'
 import useNotificationStore from '@/modules/notification/store.ts'
 import useFocusUIStore from '@/modules/focus/ui-store.ts'
 import useFocusProgressingStore from '@/modules/focus/progressing-store.ts'
-import { updateBlockingRules } from '@/modules/focus/sites-blocking.ts'
+
+const FREE_PLAN_BLOCKED_SITES = 5
+const PRO_PLAN_BLOCKED_SITES = 50
 
 export const MIN_FOCUS_TIME = 1
 export const MAX_FOCUS_TIME = 300
@@ -20,7 +22,15 @@ const persistBlockedSites = (sites: IBlockedSite[]) => {
 }
 
 const useFocusSetupStore = create<IFocusSetupStore>((set, get) => ({
-  maxBlockedSites: 20,
+  setUserPlan: (plan) => {
+    if (plan === 'pro') {
+      set({ maxBlockedSites: PRO_PLAN_BLOCKED_SITES })
+    } else {
+      set({ maxBlockedSites: FREE_PLAN_BLOCKED_SITES })
+    }
+  },
+
+  maxBlockedSites: FREE_PLAN_BLOCKED_SITES,
   setMaxBlockedSites: (value: number) => {
     if (value < 1) {
       return
@@ -74,7 +84,7 @@ const useFocusSetupStore = create<IFocusSetupStore>((set, get) => ({
     // check if the maximum limit is reached
     if (currentSites.length >= maxSites) {
       showErrorNotification({
-        description: 'You can only block a maximum of ${maxSites} sites',
+        description: `Free plan can block up to ${maxSites} sites. Upgrade to Pro for a higher limit!`,
       })
       return
     }
@@ -105,13 +115,9 @@ const useFocusSetupStore = create<IFocusSetupStore>((set, get) => ({
     const { switchView } = useFocusUIStore.getState()
     switchView(FocusView.progressing)
 
-    const { focusTime, blockedSites } = get()
+    const { focusTime } = get()
     const { setInitialCountdown } = useFocusProgressingStore.getState()
     setInitialCountdown(focusTime * 60)
-
-    if (blockedSites.length) {
-      updateBlockingRules(blockedSites)
-    }
 
     chrome.alarms
       .create('focusCountdown', {
