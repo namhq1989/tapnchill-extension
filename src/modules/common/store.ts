@@ -12,6 +12,7 @@ import {
 import useHttpStore from '@/modules/http/store.ts'
 import useNotificationStore from '@/modules/notification/store.ts'
 import { mapMe } from '@/modules/common/util.ts'
+import useFocusSetupStore from '@/modules/focus/setup-store.ts'
 
 const ID_CHARS =
   'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
@@ -31,6 +32,8 @@ const useAppStore = create<IAppStore>((set, get) => ({
       const response = await httpGet<IGetMeResponse>('api/user/me')
       const me = mapMe(response)
       set({ me })
+
+      useFocusSetupStore.getState().setUserPlan(me.subscription.plan)
     } catch (err) {
       showErrorNotification({
         description: `Something went wrong. Please try again (${err})`,

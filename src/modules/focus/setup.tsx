@@ -36,7 +36,7 @@ const FocusSetupView = () => {
         <BackButton />
         <HeaderTitle title='Focus' />
       </div>
-      <div className='flex flex-col p-4 gap-8'>
+      <div className='flex flex-col p-4 gap-4'>
         <div className='flex flex-col gap-2 mt-2'>
           <div className='flex flex-row items-start justify-between'>
             <div>
@@ -69,7 +69,7 @@ const FocusSetupView = () => {
         <Button className='font-bold' onClick={startFocus}>
           Start Session
         </Button>
-        <div className='flex flex-col gap-4'>
+        <div className='flex flex-col gap-4 mt-4'>
           <h2 className='text-sm font-bold tracking-wide'>
             Blocked sites ({blockedSites.length}/{maxBlockedSites})
           </h2>
@@ -96,7 +96,7 @@ const FocusSetupView = () => {
               {blockedSites.map((site, index) => (
                 <div
                   key={index}
-                  className='flex flex-row container-selected rounded-xl p-4 items-center justify-between'
+                  className='flex flex-row container-selected rounded-xl px-4 py-2 items-center justify-between'
                 >
                   <div className='flex flex-row gap-2 items-center justify-center'>
                     <img
