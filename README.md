@@ -1,8 +1,8 @@
 # tapnchill-extension
 
-- Build note:
-  + Change public/offscreen.html to
+### Build notes
 
-```html
-<script src="/offscreen.js"></script>
-```
+- [ ] Modify `public/offscreen.html`: remove `/scripts` in offscreen script
+- [ ] Update `manifest.json`
+- [ ] Update `scripts/offscreen.js`: change API host
+- [ ] Check .env data
