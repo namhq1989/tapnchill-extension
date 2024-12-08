@@ -1,6 +1,5 @@
-const log = (data) => {
-  chrome.runtime.sendMessage({ type: 'offscreen-logs', data }).then()
-}
+// const API_HOST = 'https://svc.bapbi.app'
+const API_HOST = 'http://localhost:3070'
 
 chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
   if (request.type === 'offscreen-play-ambience') {
@@ -228,17 +227,14 @@ const handleGoogleSignIn = (userToken, callback) => {
 
 const postGoogleSignInToken = async (userToken, googleToken) => {
   try {
-    const response = await fetch(
-      'http://localhost:3070/api/user/sign-in/google',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${userToken}`,
-        },
-        body: JSON.stringify({ token: googleToken }),
+    const response = await fetch(`${API_HOST}/api/user/sign-in/google`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${userToken}`,
       },
-    )
+      body: JSON.stringify({ token: googleToken }),
+    })
 
     if (!response.ok) {
       throw new Error(`API responded with status ${response.status}`)
