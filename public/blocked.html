@@ -3,81 +3,106 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BapBi - Website Blocked</title>
+  <title>Blocked by BapBi</title>
   <style>
-      /* General styles */
-      body {
+      /* Base styles */
+      * {
           margin: 0;
+          padding: 0;
+          box-sizing: border-box;
           font-family: Arial, sans-serif;
-          background-color: #f3f4f6;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          height: 100vh;
-          color: #333;
       }
 
-      /* Card container */
-      .card {
-          background: #fff;
-          padding: 2rem;
-          border-radius: 8px;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      body {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 100vh;
+          background-color: #f9fafb; /* Neutral background */
+          color: #111827; /* Neutral dark text */
+      }
+
+      .container {
           text-align: center;
+          padding: 2rem;
+          background: white;
+          border-radius: 12px;
           max-width: 400px;
           width: 100%;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       }
 
-      /* Icon styles */
       .icon {
-          color: #ef4444;
-          margin-bottom: 1rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 100px;
+          height: 100px;
+          margin: 0 auto;
       }
 
       .icon svg {
-          width: 100px; /* Adjusted icon width */
-          height: 100px; /* Adjusted icon height */
+          width: 100%;
+          height: 100%;
+          color: red;
       }
 
-      /* Title and description */
-      .title {
+      h1 {
           font-size: 1.5rem;
           font-weight: bold;
-          margin-bottom: 0.5rem;
+          margin-bottom: 1rem;
       }
 
-      .description {
-          color: #666;
+      p {
           font-size: 1rem;
-          margin-bottom: 1.5rem;
+          margin-bottom: 1rem;
+          line-height: 1.5;
       }
 
-      /* Button styles */
+      .highlight {
+          font-weight: bold;
+          /*color: #facc15; !* Primary color *!*/
+      }
+
+      .remaining-time {
+          font-size: 1.25rem;
+          font-weight: bold;
+          margin: 1rem 0;
+          color: #111827;
+      }
+
+      .illustration {
+          margin: 1.5rem 0;
+      }
+
+      .quote {
+          font-style: italic;
+          color: #6b7280; /* Subtle gray text */
+          margin: 1rem 0;
+      }
+
       .button {
           display: inline-block;
+          margin-top: 1.5rem;
           padding: 0.75rem 1.5rem;
-          background-color: #facc15; /* Yellow background */
-          color: #000; /* Black text */
-          text-decoration: none;
-          border-radius: 12px;
+          background-color: #facc15; /* Primary color */
+          color: #111827; /* Neutral dark text for contrast */
+          border: none;
+          border-radius: 8px;
           font-size: 0.875rem;
           font-weight: bold;
+          text-decoration: none;
           cursor: pointer;
-          border: none; /* Remove any borders */
-          outline: none; /* Prevent focus outline */
+          transition: background-color 0.2s ease;
       }
 
-      .text-primary {
-          color: #facc15;
-      }
-      .font-bold {
-          font-weight: bold;
+      .button:hover {
+          background-color: #eab308; /* Slightly darker yellow on hover */
       }
   </style>
 </head>
 <body>
-<div class="card">
-  <!-- Icon -->
+<div class="container">
   <div class="icon">
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -94,20 +119,42 @@
       />
     </svg>
   </div>
+  <h1 style="margin-top: 1rem;">Blocked by BapBi</h1>
+  <p>The site <span class="highlight" id="blocked-site"></span> is blocked during your Focus session.</p>
 
-  <!-- Title -->
-  <h1 class="title">This Website is Blocked</h1>
+  <!-- Remaining time -->
+  <p class="remaining-time">Remaining Time: Loading...</p>
 
-  <!-- Dynamic Site Name -->
-  <p class="description">
-    You cannot access <span id="site-name" class="font-bold"></span> due to restrictions.
-  </p>
+  <!-- Illustration -->
+  <img src="https://i.bapbi.app/illus-focus.svg" alt="Focus Illustration" class="illustration" width="100%">
 
-  <!-- Back Button -->
-  <button id="back-button" class="button" onclick="goBack()">Back</button>
+  <!-- Encouragement -->
+  <p class="quote">"Focus on your goals. Distractions are temporary, achievements are forever."</p>
+
+  <!-- Tips -->
+  <p>Need help staying productive? Try taking short breaks or planning your next task!</p>
+
+  <button class="button" id="back-button">Back to Work</button>
 </div>
 
-<!-- Link external JavaScript -->
 <script src="blocked.js"></script>
+
+
+<!--<script>-->
+<!--  // Fetch the blocked site from the URL parameters-->
+<!--  const params = new URLSearchParams(window.location.search);-->
+<!--  const site = params.get('site');-->
+
+<!--  // Update the site name in the HTML-->
+<!--  const blockedSiteElement = document.getElementById('blocked-site');-->
+<!--  if (site) {-->
+<!--    blockedSiteElement.textContent = site;-->
+<!--  }-->
+
+<!--  // Back button handler-->
+<!--  document.getElementById('back-button').addEventListener('click', () => {-->
+<!--    window.close(); // Attempt to close the tab-->
+<!--  });-->
+<!--</script>-->
 </body>
 </html>

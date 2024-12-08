@@ -10,10 +10,15 @@ const HabitPreview = () => {
   const { habits, stats, completeHabit } = useHabitsStore()
   const todayStat = stats[0]
   const now = new Date()
+  const nowDay = now.getDay()
 
   // filter habits
   const filteredHabits = habits.filter((habit) => {
     if (isSameDay(habit.createdAt, now)) {
+      return null
+    }
+
+    if (!habit.daysOfWeek.includes(nowDay)) {
       return null
     }
 
