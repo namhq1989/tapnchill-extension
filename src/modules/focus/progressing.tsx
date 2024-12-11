@@ -61,7 +61,7 @@ const FocusProgressingView = () => {
       {/* Content */}
       <div className='flex flex-col flex-1 items-center justify-center gap-4'>
         <div className='flex flex-col w-full p-4 gap-4 justify-center items-center'>
-          <div className='text-6xl font-bold tracking-wider'>
+          <div className='text-6xl font-bold tracking-wider font-mono w-[12ch] text-center'>
             {formatTimeToCountdown(countdown)}
           </div>
           <div className='w-[80%] h-2 bg-gray-300 rounded-lg overflow-hidden'>

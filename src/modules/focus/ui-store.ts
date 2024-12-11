@@ -36,6 +36,7 @@ const getProgressStateFromStorage = (
       countdown: number
       status: FocusStatus
       lastUpdated: number
+      currentCycle: number
     } | null,
   ) => void,
 ) => {
@@ -62,7 +63,13 @@ const useFocusUIStore = create<IFocusUIStore>((set) => ({
 
     getProgressStateFromStorage((savedState) => {
       if (savedState) {
-        const { initialCountdown, countdown, status, lastUpdated } = savedState
+        const {
+          initialCountdown,
+          countdown,
+          status,
+          lastUpdated,
+          currentCycle,
+        } = savedState
 
         let updatedCountdown = countdown
 
@@ -84,6 +91,7 @@ const useFocusUIStore = create<IFocusUIStore>((set) => ({
           countdown: updatedCountdown,
           status,
           progress,
+          currentCycle,
         })
 
         console.log('Loaded focus progressing from local storage')

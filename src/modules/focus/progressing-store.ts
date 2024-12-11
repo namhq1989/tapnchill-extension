@@ -11,9 +11,10 @@ const persistProgressState = (state: {
   countdown: number
   status: FocusStatus
   lastUpdated: number
+  currentCycle: number
 }) => {
   chrome.storage.local.set({ focusProgress: state }, () => {
-    console.log('Progress state persisted:', state)
+    // console.log('Progress state persisted:', state)
   })
 }
 
@@ -22,26 +23,29 @@ const useFocusProgressingStore = create<IFocusProgressingStore>((set, get) => ({
   countdown: 1500, // Initialize countdown to match initialCountdown
   status: FocusStatus.paused,
   progress: 0,
+  currentCycle: 0,
 
   // Persist initialCountdown and countdown
   setInitialCountdown: (value: number) => {
-    set(() => ({
+    set({
       initialCountdown: value,
       countdown: value,
       progress: 0,
       status: FocusStatus.running,
-    }))
+      currentCycle: 0,
+    })
 
     persistProgressState({
       initialCountdown: value,
       countdown: value,
       status: get().status,
       lastUpdated: Date.now(),
+      currentCycle: 0,
     })
   },
 
   setCountdown: (value: number) => {
-    const { status, initialCountdown } = get()
+    const { status, initialCountdown, currentCycle } = get()
     const progress = ((initialCountdown - value) / initialCountdown) * 100
 
     set(() => ({
@@ -54,6 +58,7 @@ const useFocusProgressingStore = create<IFocusProgressingStore>((set, get) => ({
       countdown: value,
       status,
       lastUpdated: Date.now(),
+      currentCycle,
     })
   },
 
@@ -87,6 +92,7 @@ const useFocusProgressingStore = create<IFocusProgressingStore>((set, get) => ({
       countdown: currentState.countdown,
       status: newStatus,
       lastUpdated: Date.now(),
+      currentCycle: currentState.currentCycle,
     })
   },
 
@@ -109,8 +115,11 @@ const useFocusProgressingStore = create<IFocusProgressingStore>((set, get) => ({
       countdown: initialCountdown,
       status: FocusStatus.paused,
       lastUpdated: Date.now(),
+      currentCycle: 0,
     })
   },
+
+  checkProgress: () => {},
 
   stopFocus: () => {
     get().resetProgress()

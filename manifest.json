@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "BapBi",
+  "name": "BapBi (Dev)",
   "description": "An app designed to boost your productivity and bring relaxation to your day!",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "action": {
     "default_popup": "index.html",
     "default_icon": "icons/icon128.png"

@@ -22,7 +22,11 @@ chrome.runtime.onStartup.addListener(function () {
     .then()
 
   chrome.alarms.clear('focusCountdown', () => {
-    console.log('Alarm cleared on reset')
+    console.log('Focus alarm cleared on reset')
+  })
+
+  chrome.alarms.clear('breakCountdown', () => {
+    console.log('Break alarm cleared on reset')
   })
 
   chrome.storage.local.set({ focusProgress: null }, () => {
@@ -447,37 +451,113 @@ chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === 'focusCountdown') {
     console.log('Focus session ended!')
 
-    // Notify the user
-    const { title, message } = getRandomNotification()
+    chrome.storage.local.get((result) => {
+      const { focusProgress, focusSessionSettings } = result
 
-    chrome.notifications
-      .create('focusCountdown', {
-        type: 'basic',
-        iconUrl: '/icons/icon128.png',
-        title,
-        message,
-        priority: 2,
-        buttons: [
-          { title: 'Focus Again' },
-        ],
-      })
-      .then()
+      const currentCycle = focusProgress.currentCycle || 0
+      const numOfCycles = focusSessionSettings.numOfCycles || 0
 
-    chrome.storage.local.get('focusProgress', (result) => {
-      if (result.focusProgress) {
+      console.log(
+        `---- currentCycle: ${currentCycle}, numOfCycles: ${numOfCycles}`,
+      )
+
+      if (currentCycle < numOfCycles) {
+        console.log('---- still in cycles, creating new alarm for break time')
+        // create break time alarm
+        const breakTime = focusSessionSettings.breakTime || 1
+        chrome.alarms
+          .create('breakCountdown', {
+            delayInMinutes: breakTime,
+          })
+          .then(() => {
+            console.log(`Break time alarm set for ${breakTime} minutes`)
+          })
+        chrome.notifications
+          .create({
+            type: 'basic',
+            iconUrl: '/icons/icon128.png',
+            title: 'Time for a Break 🎉',
+            message:
+              'You’ve earned it! Relax for a few minutes before the next session.',
+            priority: 2,
+          })
+          .then()
+      } else {
+        console.log('---- enough cycles, session ended')
+        sendSessionEndedNotification()
+      }
+    })
+  } else if (alarm.name === 'breakCountdown') {
+    chrome.storage.local.get((result) => {
+      const { focusProgress, focusSessionSettings } = result
+
+      const newCycleCount = (focusProgress.currentCycle || 0) + 1
+      const numOfCycles = focusSessionSettings.numOfCycles || 0
+
+      console.log(
+        `---- newCycleCount: ${newCycleCount}, numOfCycles: ${numOfCycles}`,
+      )
+
+      if (newCycleCount < numOfCycles) {
+        console.log(`---- still in cycles, creating new alarm for focus time`)
+
+        // update focus progress
         const updatedProgress = {
-          ...result.focusProgress,
-          status: 'paused',
-          countdown: result.focusProgress.initialCountdown,
+          ...focusProgress,
+          currentCycle: newCycleCount,
         }
-
         chrome.storage.local.set({ focusProgress: updatedProgress }, () => {
-          console.log('Focus state reset in local storage.')
+          console.log('Focus state updated in local storage.')
         })
+
+        // create focus time alarm
+        const focusTime = focusSessionSettings.focusTime || 1
+        chrome.alarms
+          .create('focusCountdown', {
+            delayInMinutes: focusTime,
+          })
+          .then(() => {
+            console.log(`Focus time alarm set for ${focusTime} minutes`)
+          })
+      } else {
+        console.log('---- enough cycles, session ended')
+        sendSessionEndedNotification()
       }
     })
   }
 })
+
+const sendSessionEndedNotification = () => {
+  // notify the user
+  const { title, message } = getRandomFocusSessionEndedNotification()
+
+  chrome.notifications
+    .create('focusCountdown', {
+      type: 'basic',
+      iconUrl: '/icons/icon128.png',
+      title,
+      message,
+      priority: 2,
+      buttons: [
+        { title: 'Focus Again' },
+      ],
+    })
+    .then()
+
+  chrome.storage.local.get('focusProgress', (result) => {
+    if (result.focusProgress) {
+      const updatedProgress = {
+        ...result.focusProgress,
+        status: 'paused',
+        countdown: result.focusProgress.initialCountdown,
+      }
+
+      chrome.storage.local.set({ focusProgress: updatedProgress }, () => {
+        console.log('Focus state reset in local storage.')
+      })
+    }
+  })
+}
 
 chrome.notifications.onButtonClicked.addListener(
   (notificationId, buttonIndex) => {
@@ -512,7 +592,7 @@ chrome.notifications.onButtonClicked.addListener(
   },
 )
 
-const notificationOptions = [
+const focusSessionEndedNotificationOptions = [
   {
     title: 'Focus Achieved!',
     message: "🎉 Way to go! You've completed your focus session.",
@@ -592,7 +672,9 @@ const notificationOptions = [
   },
 ]
 
-const getRandomNotification = () => {
-  const randomIndex = Math.floor(Math.random() * notificationOptions.length)
-  return notificationOptions[randomIndex]
+const getRandomFocusSessionEndedNotification = () => {
+  const randomIndex = Math.floor(
+    Math.random() * focusSessionEndedNotificationOptions.length,
+  )
+  return focusSessionEndedNotificationOptions[randomIndex]
 }
