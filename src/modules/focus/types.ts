@@ -10,6 +10,7 @@ export enum FocusView {
 
 export enum FocusStatus {
   running = 'running',
+  resting = 'resting',
   paused = 'paused',
 }
 
@@ -37,15 +38,24 @@ export interface IFocusSetupStore {
 }
 
 export interface IFocusProgressingStore {
-  initialCountdown: number
-  setInitialCountdown: (value: number) => void
-  countdown: number
-  currentCycle: number
-  status: FocusStatus
+  focusSeconds: number
+  breakSeconds: number
+  numOfCycles: number
+
+  currentCountdownSeconds: number
+  currentCycleCount: number
   progress: number
-  setCountdown: (value: number) => void
-  toggleRunning: () => void
-  resetProgress: () => void
+  status: FocusStatus
+
+  startSession: (
+    focusSeconds: number,
+    breakSeconds: number,
+    numOfCycles: number,
+  ) => void
+  setRunning: () => void
+  setResting: () => void
+
+  setCurrentCountdownSeconds: (seconds: number) => void
   checkProgress: () => void
-  stopFocus: () => void
+  stopSession: () => void
 }

@@ -24,7 +24,7 @@ const FocusProgressingView = () => {
     progress,
     setCountdown,
     toggleRunning,
-    resetProgress,
+    checkProgress,
     stopFocus,
   } = useFocusProgressingStore()
   const isRunning = status === FocusStatus.running
@@ -40,7 +40,7 @@ const FocusProgressingView = () => {
           setCountdown(currentCountdown - 1) // Decrement countdown
         } else {
           clearInterval(timer!) // Stop the timer when countdown reaches zero
-          resetProgress() // Reset the progress
+          checkProgress() // Reset the progress
         }
       }, 1000)
     }
@@ -48,7 +48,7 @@ const FocusProgressingView = () => {
     return () => {
       if (timer) clearInterval(timer) // Clean up interval on component unmount or when isRunning changes
     }
-  }, [isRunning, setCountdown, resetProgress])
+  }, [isRunning, setCountdown, checkProgress])
 
   return (
     <div className='flex flex-col w-[400px] min-h-[600px] scrollbar-hide'>
