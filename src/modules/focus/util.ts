@@ -18,17 +18,23 @@ const getProgressStateFromStorage = (
   })
 }
 
-const persistProgressState = (state: {
-  focusSeconds: number
-  breakSeconds: number
-  numOfCycles: number
-  currentCountdownSeconds: number
-  currentCycleCount: number
-  status: FocusStatus
-  lastUpdated: number
-}) => {
+const persistProgressState = (
+  state: {
+    focusSeconds: number
+    breakSeconds: number
+    numOfCycles: number
+    currentCountdownSeconds: number
+    currentCycleCount: number
+    status: FocusStatus
+    lastUpdated: number
+  },
+  cb?: () => void,
+) => {
   chrome.storage.local.set({ focusProgress: state }, () => {
     // console.log('Progress state persisted:', state)
+    if (cb) {
+      cb()
+    }
   })
 }
 

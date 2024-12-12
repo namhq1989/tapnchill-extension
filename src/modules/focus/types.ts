@@ -58,4 +58,7 @@ export interface IFocusProgressingStore {
   setCurrentCountdownSeconds: (seconds: number) => void
   checkProgress: () => void
   stopSession: () => void
+
+  phaseText: string
+  randomPhaseText: () => void
 }

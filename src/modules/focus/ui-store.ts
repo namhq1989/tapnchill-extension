@@ -7,6 +7,7 @@ import {
 } from '@/modules/focus/types.ts'
 import useFocusSetupStore from '@/modules/focus/setup-store.ts'
 import useFocusProgressingStore from '@/modules/focus/progressing-store.ts'
+import { getProgressStateFromStorage } from '@/modules/focus/util.ts'
 
 const getBlockedSitesFromStorage = (
   callback: (sites: IBlockedSite[]) => void,
@@ -29,22 +30,6 @@ const getCurrentViewFromStorage = (callback: (view: FocusView) => void) => {
   })
 }
 
-const getProgressStateFromStorage = (
-  callback: (
-    state: {
-      initialCountdown: number
-      countdown: number
-      status: FocusStatus
-      lastUpdated: number
-      currentCycle: number
-    } | null,
-  ) => void,
-) => {
-  chrome.storage.local.get(['focusProgress'], (result) => {
-    callback(result.focusProgress || null)
-  })
-}
-
 const useFocusUIStore = create<IFocusUIStore>((set) => ({
   isInitializing: false,
   initFocus: () => {
@@ -64,34 +49,42 @@ const useFocusUIStore = create<IFocusUIStore>((set) => ({
     getProgressStateFromStorage((savedState) => {
       if (savedState) {
         const {
-          initialCountdown,
-          countdown,
+          focusSeconds,
+          breakSeconds,
+          currentCountdownSeconds,
+          currentCycleCount,
+          numOfCycles,
           status,
           lastUpdated,
-          currentCycle,
         } = savedState
 
-        let updatedCountdown = countdown
+        let updatedCountdown = currentCountdownSeconds
 
-        if (status === FocusStatus.running) {
+        if (status !== FocusStatus.paused) {
           const now = Date.now()
           const elapsed = Math.floor((now - lastUpdated) / 1000)
 
-          updatedCountdown = countdown - elapsed
+          updatedCountdown = currentCountdownSeconds - elapsed
           if (updatedCountdown < 0) {
             updatedCountdown = 0
           }
         }
 
-        const progress =
-          ((initialCountdown - updatedCountdown) / initialCountdown) * 100
+        let progress = 0
+        if (status === FocusStatus.running) {
+          progress = ((focusSeconds - updatedCountdown) / focusSeconds) * 100
+        } else {
+          progress = ((breakSeconds - updatedCountdown) / breakSeconds) * 100
+        }
 
         useFocusProgressingStore.setState({
-          initialCountdown,
-          countdown: updatedCountdown,
+          focusSeconds,
+          breakSeconds,
+          numOfCycles,
+          currentCountdownSeconds: updatedCountdown,
           status,
           progress,
-          currentCycle,
+          currentCycleCount,
         })
 
         console.log('Loaded focus progressing from local storage')

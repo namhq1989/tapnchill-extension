@@ -74,8 +74,6 @@ const useFocusSetupStore = create<IFocusSetupStore>((set, get) => ({
     set(() => ({
       focusTime: min,
     }))
-
-    useFocusProgressingStore.getState().setCountdown(min * 60 * 1000)
   },
   setBreakTime: (min: number) => {
     const { showErrorNotification } = useNotificationStore.getState()
@@ -164,19 +162,11 @@ const useFocusSetupStore = create<IFocusSetupStore>((set, get) => ({
       numOfCycles,
     })
 
+    const { startSession } = useFocusProgressingStore.getState()
+    startSession(focusTime * 60, breakTime * 60, numOfCycles)
+
     const { switchView } = useFocusUIStore.getState()
     switchView(FocusView.progressing)
-
-    const { setInitialCountdown } = useFocusProgressingStore.getState()
-    setInitialCountdown(focusTime * 60)
-
-    chrome.alarms
-      .create('focusCountdown', {
-        delayInMinutes: focusTime,
-      })
-      .then(() => {
-        console.log(`Focus session alarm set for ${focusTime} minutes.`)
-      })
   },
 }))
 
