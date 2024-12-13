@@ -27,6 +27,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
+  AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog.tsx'
 import { Button } from '@/components/ui/button.tsx'
@@ -161,6 +162,7 @@ const BackAlert = (props: IBackAlertProps) => {
       </AlertDialogTrigger>
       <AlertDialogContent className='w-[90%] rounded-xl'>
         <AlertDialogHeader>
+          <AlertDialogTitle />
           <AlertDialogDescription>
             You have unsaved changes in your note. Do you want to discard them
             and go back?
@@ -195,6 +197,7 @@ const DeleteNoteAlert = (props: IDeleteNoteAlertProps) => {
       </AlertDialogTrigger>
       <AlertDialogContent className='w-[90%] rounded-xl'>
         <AlertDialogHeader>
+          <AlertDialogTitle />
           <AlertDialogDescription>
             Are you sure you want to delete this note? This action cannot be
             undone

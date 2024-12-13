@@ -7,6 +7,7 @@ import {
   updateNoteInIndexedDB,
   updateNotesLastSyncAt,
 } from './note.js'
+import { startSession, stopSession } from './focus.js'
 
 const LISTENING_TRACKING_INTERVAL = 60000 // 1 minute
 // const LISTENING_TRACKING_INTERVAL = 5000 // 1 minute
@@ -362,6 +363,14 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
       .then(() => sendResponse({ success: true }))
       .catch((error) => sendResponse({ success: false, error: error.message }))
     return true
+  } else if (request.type === 'focus-session-start') {
+    startSession(
+      request.data.focusSeconds,
+      request.data.breakSeconds,
+      request.data.numOfCycles,
+    )
+  } else if (request.type === 'focus-session-stop') {
+    stopSession()
   } else {
     sendResponse({
       success: false,
@@ -372,7 +381,7 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
 
 let offScreenCreating
 
-const createOffscreen = async () => {
+export const createOffscreen = async () => {
   const offscreenUrl = chrome.runtime.getURL('offscreen.html')
   const existingContexts = await chrome.runtime.getContexts({
     contextTypes: ['OFFSCREEN_DOCUMENT'],
@@ -395,286 +404,4 @@ const createOffscreen = async () => {
     await offScreenCreating
     offScreenCreating = null
   }
-}
-
-//
-// FOCUS
-//
-
-let blockedSites = []
-
-const isBlockingEnabled = async () => {
-  const { focusProgress } = await chrome.storage.local.get('focusProgress')
-  if (!focusProgress) return false
-
-  const status = focusProgress && focusProgress.status
-  if (!status || status !== 'running') {
-    return false
-  }
-
-  const { blockedSites: sites } = await chrome.storage.local.get('blockedSites')
-  blockedSites = sites || []
-  return true
-}
-
-const isBlockedDomain = (url) => {
-  try {
-    const parsedUrl = new URL(url)
-    const hostname = parsedUrl.hostname // Extract the hostname (e.g., "facebook.com")
-
-    return blockedSites.some(
-      (domain) =>
-        hostname === domain.hostname ||
-        hostname.endsWith(`.${domain.hostname}`),
-    )
-  } catch (error) {
-    console.error('Invalid URL:', url)
-    return false // If the URL can't be parsed, assume it's not blocked
-  }
-}
-
-chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-  const blockingEnabled = await isBlockingEnabled()
-
-  if (!blockingEnabled) return
-
-  const currentUrl = tab.url
-  if (currentUrl && isBlockedDomain(currentUrl)) {
-    const redirectUrl = `/blocked.html?site=${new URL(currentUrl).hostname.replace('www.', '')}`
-    chrome.tabs
-      .update(tabId, { url: chrome.runtime.getURL(redirectUrl) })
-      .then()
-  }
-})
-//
-// chrome.alarms.onAlarm.addListener((alarm) => {
-//   if (alarm.name === 'focusCountdown') {
-//     console.log('Focus session ended!')
-//
-//     chrome.storage.local.get((result) => {
-//       const { focusProgress, focusSessionSettings } = result
-//
-//       const currentCycle = focusProgress.currentCycle || 0
-//       const numOfCycles = focusSessionSettings.numOfCycles || 0
-//
-//       console.log(
-//         `---- currentCycle: ${currentCycle}, numOfCycles: ${numOfCycles}`,
-//       )
-//
-//       if (currentCycle < numOfCycles) {
-//         console.log('---- still in cycles, creating new alarm for break time')
-//         // create break time alarm
-//         const breakTime = focusSessionSettings.breakTime || 1
-//         chrome.alarms
-//           .create('breakCountdown', {
-//             delayInMinutes: breakTime,
-//           })
-//           .then(() => {
-//             console.log(`Break time alarm set for ${breakTime} minutes`)
-//           })
-//         chrome.notifications
-//           .create({
-//             type: 'basic',
-//             iconUrl: '/icons/icon128.png',
-//             title: 'Time for a Break 🎉',
-//             message:
-//               'You’ve earned it! Relax for a few minutes before the next session.',
-//             priority: 2,
-//           })
-//           .then()
-//       } else {
-//         console.log('---- enough cycles, session ended')
-//         sendSessionEndedNotification()
-//       }
-//     })
-//   } else if (alarm.name === 'breakCountdown') {
-//     chrome.storage.local.get((result) => {
-//       const { focusProgress, focusSessionSettings } = result
-//
-//       const newCycleCount = (focusProgress.currentCycle || 0) + 1
-//       const numOfCycles = focusSessionSettings.numOfCycles || 0
-//
-//       console.log(
-//         `---- newCycleCount: ${newCycleCount}, numOfCycles: ${numOfCycles}`,
-//       )
-//
-//       if (newCycleCount < numOfCycles) {
-//         console.log(`---- still in cycles, creating new alarm for focus time`)
-//
-//         // update focus progress
-//         const updatedProgress = {
-//           ...focusProgress,
-//           currentCycle: newCycleCount,
-//         }
-//         chrome.storage.local.set({ focusProgress: updatedProgress }, () => {
-//           console.log('Focus state updated in local storage.')
-//         })
-//
-//         // create focus time alarm
-//         const focusTime = focusSessionSettings.focusTime || 1
-//         chrome.alarms
-//           .create('focusCountdown', {
-//             delayInMinutes: focusTime,
-//           })
-//           .then(() => {
-//             console.log(`Focus time alarm set for ${focusTime} minutes`)
-//           })
-//       } else {
-//         console.log('---- enough cycles, session ended')
-//         sendSessionEndedNotification()
-//       }
-//     })
-//   }
-// })
-
-const sendSessionEndedNotification = () => {
-  // notify the user
-  const { title, message } = getRandomFocusSessionEndedNotification()
-
-  chrome.notifications
-    .create('focusCountdown', {
-      type: 'basic',
-      iconUrl: '/icons/icon128.png',
-      title,
-      message,
-      priority: 2,
-      buttons: [
-        { title: 'Focus Again' },
-      ],
-    })
-    .then()
-
-  chrome.storage.local.get('focusProgress', (result) => {
-    if (result.focusProgress) {
-      const updatedProgress = {
-        ...result.focusProgress,
-        status: 'paused',
-        countdown: result.focusProgress.initialCountdown,
-      }
-
-      chrome.storage.local.set({ focusProgress: updatedProgress }, () => {
-        console.log('Focus state reset in local storage.')
-      })
-    }
-  })
-}
-
-chrome.notifications.onButtonClicked.addListener(
-  (notificationId, buttonIndex) => {
-    if (notificationId === 'focusCountdown') {
-      if (buttonIndex === 0) {
-        chrome.storage.local.get('focusProgress', (result) => {
-          if (result.focusProgress) {
-            const min = result.focusProgress.initialCountdown / 60
-
-            // create new alarm
-            chrome.alarms
-              .create('focusCountdown', {
-                delayInMinutes: min,
-              })
-              .then()
-            console.log(`Alarm created: ${min} minutes remaining`)
-
-            const updatedProgress = {
-              ...result.focusProgress,
-              status: 'running',
-              countdown: result.focusProgress.initialCountdown,
-              lastUpdated: Date.now(),
-            }
-
-            chrome.storage.local.set({ focusProgress: updatedProgress }, () => {
-              console.log('Focus state updated in local storage.')
-            })
-          }
-        })
-      }
-    }
-  },
-)
-
-const focusSessionEndedNotificationOptions = [
-  {
-    title: 'Focus Achieved!',
-    message: "🎉 Way to go! You've completed your focus session.",
-  },
-  {
-    title: "Time's Up!",
-    message: '⏰ Take a break or start another productive session.',
-  },
-  { title: 'Session Complete', message: "🎯 You've nailed it! What's next?" },
-  {
-    title: 'Great Job!',
-    message: '👏 Your focus session is done. Keep up the momentum!',
-  },
-  {
-    title: 'Break Time!',
-    message: "☕ You've earned this! Relax or dive into the next task.",
-  },
-  {
-    title: 'Well Done!',
-    message: '👍 You’ve finished strong! Ready for another round?',
-  },
-  {
-    title: 'Amazing Effort!',
-    message: '💪 Another session in the books. Celebrate your progress!',
-  },
-  {
-    title: 'Keep It Going!',
-    message: '🚀 Your focus session ended. Let’s plan the next step!',
-  },
-  {
-    title: 'Mission Accomplished',
-    message: '🏆 Great work! One step closer to your goals.',
-  },
-  {
-    title: 'Focus Mastered',
-    message: '🎓 You’ve completed your session like a pro!',
-  },
-  {
-    title: 'Boom! Session Done!',
-    message: "💥 Crushed it! What's next on your list?",
-  },
-  {
-    title: 'Beep Beep',
-    message: '🚗 Focus session complete! Take off to your next task!',
-  },
-  {
-    title: 'You Rocked It!',
-    message: '🤘 That was awesome! Ready for round two?',
-  },
-  {
-    title: 'Time Well Spent!',
-    message: '⏳ Focus session done. You’re unstoppable!',
-  },
-  {
-    title: 'Ding! Focus Complete!',
-    message: '🔔 Nice job! What’s your next move?',
-  },
-  {
-    title: 'Take a Deep Breath',
-    message: '😌 Your focus session is done. Enjoy a well-earned break.',
-  },
-  {
-    title: 'Peaceful Progress',
-    message: '🌱 You’ve completed a session. Reflect and recharge.',
-  },
-  {
-    title: 'A Step Forward',
-    message: '📈 Focus achieved. Keep moving toward your goals.',
-  },
-  {
-    title: 'Time to Unwind',
-    message: '🛋️ Session done. Take some time for yourself.',
-  },
-  {
-    title: 'Pause and Reset',
-    message: '🔄 You’ve finished this session. What’s next?',
-  },
-]
-
-const getRandomFocusSessionEndedNotification = () => {
-  const randomIndex = Math.floor(
-    Math.random() * focusSessionEndedNotificationOptions.length,
-  )
-  return focusSessionEndedNotificationOptions[randomIndex]
 }

@@ -25,7 +25,6 @@ const FocusProgressingView = () => {
     currentCycleCount,
     status,
     progress,
-    checkProgress,
     stopSession,
     phaseText,
   } = useFocusProgressingStore()
@@ -42,16 +41,15 @@ const FocusProgressingView = () => {
         if (currentCountdownSeconds > 0) {
           setCurrentCountdownSeconds(currentCountdownSeconds - 1) // Decrement countdown
         } else {
-          clearInterval(timer!) // Stop the timer when countdown reaches zero
-          checkProgress() // Reset the progress
+          clearInterval(timer!)
         }
       }, 1000)
     }
 
     return () => {
-      if (timer) clearInterval(timer) // Clean up interval on component unmount or when isRunning changes
+      if (timer) clearInterval(timer)
     }
-  }, [isRunning, isResting, setCurrentCountdownSeconds, checkProgress])
+  }, [isRunning, isResting, setCurrentCountdownSeconds])
 
   return (
     <div className='flex flex-col w-[400px] min-h-[600px] scrollbar-hide'>
@@ -64,7 +62,7 @@ const FocusProgressingView = () => {
       {/* Content */}
       <div className='flex flex-col flex-1 items-center justify-center gap-4'>
         <div className='flex flex-col w-full p-4 gap-4 justify-center items-center'>
-          <div className='text-6xl font-bold tracking-wider font-mono w-[12ch] text-center'>
+          <div className='text-6xl font-bold tracking-wider tabular-nums w-[12ch] text-center'>
             {formatTimeToCountdown(currentCountdownSeconds)}
           </div>
           <div className='w-[80%] h-2 bg-gray-300 rounded-lg overflow-hidden'>
@@ -74,11 +72,11 @@ const FocusProgressingView = () => {
             ></div>
           </div>
         </div>
-        <div className='flex w-full flex-shrink-0 p-4 items-center justify-center'>
+        <div className='flex flex-shrink-0 p-4 items-center justify-center w-[60%]'>
           <img
             src={`https://i.bapbi.app/${isRunning ? 'illus-working-late' : 'illus-coffee-break'}.svg`}
             alt='focus'
-            className='w-[60%] h-auto'
+            className='bg-cover'
           />
         </div>
         <div className='flex w-full items-center justify-around gap-4 px-8'>
@@ -87,23 +85,8 @@ const FocusProgressingView = () => {
               Cycle {currentCycleCount + 1} of {numOfCycles} -{' '}
               {status === FocusStatus.running ? 'Focusing' : 'Resting'}
             </p>
-            <p className='text-base font-bold'>{phaseText}</p>
+            <p className='text-sm font-bold'>{phaseText}</p>
           </div>
-          {/*<Button*/}
-          {/*  className='font-bold'*/}
-          {/*  variant='default'*/}
-          {/*  onClick={toggleRunning}*/}
-          {/*>*/}
-          {/*  {isRunning ? <Pause size={16} /> : <Play size={16} />}{' '}*/}
-          {/*  {isRunning ? 'Pause' : 'Resume'}*/}
-          {/*</Button>*/}
-          {/*<Button*/}
-          {/*  className='font-bold'*/}
-          {/*  variant='secondary'*/}
-          {/*  onClick={resetProgress}*/}
-          {/*>*/}
-          {/*  <RotateCcw size={16} /> Reset*/}
-          {/*</Button>*/}
           <StopFocus onConfirm={stopSession} />
         </div>
       </div>
@@ -119,7 +102,6 @@ const StopFocus = (props: IStopFocusProps) => {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        {/*<CircleStop size={40} className='cursor-pointer text-destructive' />*/}
         <Button className='font-bold' variant='destructive'>
           Stop Focus
         </Button>

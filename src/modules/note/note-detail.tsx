@@ -11,6 +11,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
+  AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog.tsx'
 import { INote } from '@/modules/note/types.ts'
@@ -88,6 +89,7 @@ const DeleteNoteAlert = (props: IDeleteNoteAlertProps) => {
       </AlertDialogTrigger>
       <AlertDialogContent className='w-[90%] rounded-xl'>
         <AlertDialogHeader>
+          <AlertDialogTitle />
           <AlertDialogDescription>
             Are you sure you want to delete this note? This action cannot be
             undone

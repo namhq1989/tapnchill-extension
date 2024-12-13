@@ -25,21 +25,10 @@ chrome.storage.local.get((result) => {
   }
 
   if (result.focusProgress) {
-    const { initialCountdown, countdown, status, lastUpdated } =
-      result.focusProgress
-
-    let remainingTime = countdown
-    if (status === FocusStatus.running) {
-      const now = Date.now()
-      const elapsed = Math.floor((now - lastUpdated) / 1000)
-      remainingTime = Math.max(countdown - elapsed, 0)
-    }
+    const { status } = result.focusProgress
 
     useFocusProgressingStore.setState({
-      initialCountdown: initialCountdown || 1500,
-      countdown: remainingTime,
       status,
-      progress: ((initialCountdown - remainingTime) / initialCountdown) * 100,
     })
   }
 })
@@ -59,6 +48,25 @@ chrome.runtime.onMessage.addListener(async (request) => {
     setState({
       isPlaying: false,
     })
+  } else if (request.type === 'focus-phase-updating') {
+    const {
+      data: {
+        countdownSeconds,
+        currentCountdownSeconds,
+        status,
+        currentCycleCount,
+      },
+    } = request
+    const { setRunning, setResting, setCompleted } =
+      useFocusProgressingStore.getState()
+
+    if (status === FocusStatus.running) {
+      setRunning(countdownSeconds, currentCountdownSeconds, currentCycleCount)
+    } else if (status === FocusStatus.resting) {
+      setResting(countdownSeconds, currentCountdownSeconds, currentCycleCount)
+    } else if (status === FocusStatus.completed) {
+      setCompleted()
+    }
   }
 })
 
