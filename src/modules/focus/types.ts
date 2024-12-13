@@ -28,9 +28,11 @@ export interface IFocusSetupStore {
   focusTime: number
   breakTime: number
   numOfCycles: number
+  isPlaySoundOnResting: boolean
   setFocusTime: (min: number) => void
   setBreakTime: (min: number) => void
   setNumOfCycles: (num: number) => void
+  setIsPlaySoundOnResting: (value: boolean) => void
   blockedSites: IBlockedSite[]
   addBlockedSite: (site: string) => void
   removeBlockedSite: (site: string) => void

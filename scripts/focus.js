@@ -1,4 +1,4 @@
-import { createOffscreen } from './background.js'
+import { createOffscreen } from './create-offscreen.js'
 
 const FocusStatus = Object.freeze({
   running: 'running',
@@ -6,6 +6,23 @@ const FocusStatus = Object.freeze({
   paused: 'paused',
   completed: 'completed',
 })
+
+/**
+ * Retrieves the setup state from Chrome's local storage.
+ * @param {function} callback - A function to handle the retrieved state.
+ * @callback callback
+ * @param {{
+ *   focusTime: number,
+ *   breakTime: number,
+ *   numOfCycles: number,
+ *   isPlaySoundOnResting: boolean,
+ * } | null} state - The retrieved setup state or null if not found.
+ */
+const getSessionSettings = (callback) => {
+  chrome.storage.local.get(['focusSessionSettings'], (result) => {
+    callback(result.focusSessionSettings || null)
+  })
+}
 
 /**
  * Retrieves the progress state from Chrome's local storage.
@@ -122,7 +139,7 @@ const setRunning = () => {
           createOffscreen()
             .then(() => {
               chrome.runtime
-                .sendMessage({ type: 'offscreen-play-focus-phase-sound' })
+                .sendMessage({ type: 'offscreen-play-focusing-phase-sound' })
                 .then()
             })
             .catch((error) => {
@@ -149,13 +166,13 @@ const setRunning = () => {
 const setResting = () => {
   getProgressStateFromStorage((savedState) => {
     if (savedState) {
-      const { breakSeconds, numOfCycles, currentCycleCount } = savedState
+      const { breakSeconds, currentCycleCount } = savedState
       const breakTime = breakSeconds / 60
 
       persistProgressState({
         ...savedState,
         currentCountdownSeconds: breakSeconds,
-        status: FocusStatus.running,
+        status: FocusStatus.resting,
       })
 
       chrome.alarms
@@ -178,6 +195,20 @@ const setResting = () => {
                 `[background] message 'focus-phase-updating' status RESTING sent`,
               )
             })
+
+          getSessionSettings((settings) => {
+            if (settings && settings.isPlaySoundOnResting) {
+              createOffscreen()
+                .then(() => {
+                  chrome.runtime
+                    .sendMessage({ type: 'offscreen-play-resting-phase-sound' })
+                    .then()
+                })
+                .catch((error) => {
+                  console.error('Failed to create offscreen document:', error)
+                })
+            }
+          })
 
           console.log(`Break time alarm set for ${breakTime} minutes`)
         })
@@ -257,7 +288,7 @@ const isBlockingEnabled = async () => {
   if (!focusProgress) return false
 
   const status = focusProgress && focusProgress.status
-  if (!status || status !== 'running') {
+  if (!status || status !== FocusStatus.running) {
     return false
   }
 
@@ -284,7 +315,6 @@ const isBlockedDomain = (url) => {
 
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   const blockingEnabled = await isBlockingEnabled()
-
   if (!blockingEnabled) return
 
   const currentUrl = tab.url

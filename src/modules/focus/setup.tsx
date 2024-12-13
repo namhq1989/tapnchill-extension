@@ -13,6 +13,7 @@ import useFocusSetupStore, {
   MIN_CYCLES,
   MIN_FOCUS_TIME,
 } from '@/modules/focus/setup-store.ts'
+import { Checkbox } from '@/components/ui/checkbox.tsx'
 
 const FocusSetupView = () => {
   const {
@@ -23,9 +24,11 @@ const FocusSetupView = () => {
     focusTime,
     breakTime,
     numOfCycles,
+    isPlaySoundOnResting,
     setFocusTime,
     setBreakTime,
     setNumOfCycles,
+    setIsPlaySoundOnResting,
     startFocus,
   } = useFocusSetupStore()
 
@@ -126,6 +129,23 @@ const FocusSetupView = () => {
                 )
               }
             />
+          </div>
+          <div className='flex items-center justify-between my-4'>
+            <label
+              htmlFor='terms'
+              className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
+            >
+              Notify me with sound for breaks
+            </label>
+            <div className='w-[40px] flex items-center justify-center'>
+              <Checkbox
+                id='enable-resting-sound'
+                checked={isPlaySoundOnResting}
+                onCheckedChange={(value) => {
+                  setIsPlaySoundOnResting(value as boolean)
+                }}
+              />
+            </div>
           </div>
         </div>
         <Button className='font-bold' onClick={startFocus}>
