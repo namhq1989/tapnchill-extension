@@ -6,117 +6,125 @@ import {
 import { create } from 'zustand'
 import useFocusUIStore from '@/modules/focus/ui-store.ts'
 
-const persistProgressState = (state: {
-  initialCountdown: number
-  countdown: number
-  status: FocusStatus
-  lastUpdated: number
-}) => {
-  chrome.storage.local.set({ focusProgress: state }, () => {
-    console.log('Progress state persisted:', state)
-  })
-}
+const focusTexts = [
+  'Time to Stay Focused',
+  'Deep Work in Progress',
+  'Focus and Stay Productive',
+  'Concentrate on Your Goals',
+]
+
+const restTexts = [
+  'Take a Short Break',
+  'Relax and Recharge Yourself',
+  'Time to Rest Now',
+  'Breathe, Stretch, and Relax',
+]
 
 const useFocusProgressingStore = create<IFocusProgressingStore>((set, get) => ({
-  initialCountdown: 1500, // Default 25 minutes in seconds
-  countdown: 1500, // Initialize countdown to match initialCountdown
-  status: FocusStatus.paused,
+  countdownSeconds: 1500,
+  currentCountdownSeconds: 1500,
+  currentCycleCount: 0,
   progress: 0,
+  status: FocusStatus.paused,
+  numOfCycles: 0,
 
-  // Persist initialCountdown and countdown
-  setInitialCountdown: (value: number) => {
-    set(() => ({
-      initialCountdown: value,
-      countdown: value,
-      progress: 0,
-      status: FocusStatus.running,
-    }))
-
-    persistProgressState({
-      initialCountdown: value,
-      countdown: value,
-      status: get().status,
-      lastUpdated: Date.now(),
+  startSession: (
+    focusSeconds: number,
+    breakSeconds: number,
+    numOfCycles: number,
+  ) => {
+    set({
+      countdownSeconds: focusSeconds,
+      currentCountdownSeconds: focusSeconds,
+      numOfCycles,
     })
-  },
 
-  setCountdown: (value: number) => {
-    const { status, initialCountdown } = get()
-    const progress = ((initialCountdown - value) / initialCountdown) * 100
-
-    set(() => ({
-      countdown: value,
-      progress,
-    }))
-
-    persistProgressState({
-      initialCountdown, // Persist the current initialCountdown value
-      countdown: value,
-      status,
-      lastUpdated: Date.now(),
-    })
-  },
-
-  toggleRunning: () => {
-    const currentState = get()
-
-    let newStatus = FocusStatus.paused
-    if (currentState.status === FocusStatus.paused) {
-      newStatus = FocusStatus.running
-    }
-
-    if (newStatus === FocusStatus.running) {
-      const countdownInMinutes = currentState.countdown / 60
-
-      chrome.alarms
-        .create('focusCountdown', {
-          delayInMinutes: countdownInMinutes,
-        })
-        .then()
-      console.log(`Alarm created: ${countdownInMinutes} minutes remaining`)
-    } else {
-      chrome.alarms.clear('focusCountdown', () => {
-        console.log('Alarm cleared')
+    chrome.runtime
+      .sendMessage({
+        type: 'focus-session-start',
+        data: {
+          focusSeconds,
+          breakSeconds,
+          numOfCycles,
+        },
       })
-    }
+      .then(() => {
+        const { switchView } = useFocusUIStore.getState()
+        switchView(FocusView.progressing)
+      })
+  },
 
-    set({ status: newStatus })
+  setRunning: (
+    countdownSeconds: number,
+    currentCountdownSeconds: number,
+    currentCycleCount: number,
+  ) => {
+    set({
+      countdownSeconds,
+      currentCountdownSeconds,
+      currentCycleCount,
+      status: FocusStatus.running,
+    })
 
-    persistProgressState({
-      initialCountdown: currentState.initialCountdown,
-      countdown: currentState.countdown,
-      status: newStatus,
-      lastUpdated: Date.now(),
+    const { randomPhaseText } = get()
+    randomPhaseText()
+  },
+  setResting: (
+    countdownSeconds: number,
+    currentCountdownSeconds: number,
+    currentCycleCount: number,
+  ) => {
+    set({
+      countdownSeconds,
+      currentCountdownSeconds,
+      currentCycleCount,
+      status: FocusStatus.resting,
+    })
+
+    const { randomPhaseText } = get()
+    randomPhaseText()
+  },
+  setCompleted: () => {
+    set({
+      currentCountdownSeconds: 0,
+      status: FocusStatus.completed,
     })
   },
 
-  resetProgress: () => {
-    const { initialCountdown } = get()
+  setCurrentCountdownSeconds: (seconds: number) => {
+    const { countdownSeconds } = get()
 
-    chrome.alarms.clear('focusCountdown', () => {
-      console.log('Alarm cleared on reset')
+    const progress = ((countdownSeconds - seconds) / countdownSeconds) * 100
+    set({
+      currentCountdownSeconds: seconds,
+      progress,
     })
+  },
 
-    set(() => ({
-      initialCountdown,
-      countdown: initialCountdown,
-      status: FocusStatus.paused,
+  stopSession: () => {
+    set({
+      currentCountdownSeconds: 0,
       progress: 0,
-    }))
-
-    persistProgressState({
-      initialCountdown,
-      countdown: initialCountdown,
       status: FocusStatus.paused,
-      lastUpdated: Date.now(),
     })
+
+    chrome.runtime
+      .sendMessage({
+        type: 'focus-session-stop',
+      })
+      .then(() => {
+        const { switchView } = useFocusUIStore.getState()
+        switchView(FocusView.setup)
+      })
   },
 
-  stopFocus: () => {
-    get().resetProgress()
+  phaseText: '',
+  randomPhaseText: () => {
+    const { status } = get()
 
-    const { switchView } = useFocusUIStore.getState()
-    switchView(FocusView.setup)
+    const texts = status === FocusStatus.running ? focusTexts : restTexts
+    const text = texts[Math.floor(Math.random() * texts.length)]
+    set({ phaseText: text })
   },
 }))
 

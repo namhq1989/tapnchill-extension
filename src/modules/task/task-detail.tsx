@@ -14,6 +14,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
+  AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import {
@@ -145,6 +146,7 @@ const DeleteTaskAlert = (props: IDeleteTaskAlertProps) => {
       </AlertDialogTrigger>
       <AlertDialogContent className='w-[90%] rounded-xl'>
         <AlertDialogHeader>
+          <AlertDialogTitle />
           <AlertDialogDescription>
             Are you sure you want to delete this task? This action cannot be
             undone

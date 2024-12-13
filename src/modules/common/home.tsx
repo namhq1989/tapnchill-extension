@@ -116,7 +116,8 @@ const HomeView = () => {
         <div className='flex w-full flex-row justify-between p-4 border-b-[1px]'>
           <div className='flex flex-row gap-6 items-center'>
             <AppMenu />
-            {status === FocusStatus.running && <Pulse />}
+            {(status === FocusStatus.running ||
+              status === FocusStatus.resting) && <Pulse />}
             {me.subscription.plan === 'free' ? (
               isSubscriptionEnabled && (
                 <Link component={SubscriptionView}>

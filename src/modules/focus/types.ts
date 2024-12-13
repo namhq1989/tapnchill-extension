@@ -10,7 +10,9 @@ export enum FocusView {
 
 export enum FocusStatus {
   running = 'running',
+  resting = 'resting',
   paused = 'paused',
+  completed = 'completed',
 }
 
 export interface IFocusUIStore {
@@ -24,7 +26,11 @@ export interface IFocusSetupStore {
   maxBlockedSites: number
   setMaxBlockedSites: (value: number) => void
   focusTime: number
+  breakTime: number
+  numOfCycles: number
   setFocusTime: (min: number) => void
+  setBreakTime: (min: number) => void
+  setNumOfCycles: (num: number) => void
   blockedSites: IBlockedSite[]
   addBlockedSite: (site: string) => void
   removeBlockedSite: (site: string) => void
@@ -33,13 +39,33 @@ export interface IFocusSetupStore {
 }
 
 export interface IFocusProgressingStore {
-  initialCountdown: number
-  setInitialCountdown: (value: number) => void
-  countdown: number
-  status: FocusStatus
+  countdownSeconds: number
+  numOfCycles: number
+  currentCountdownSeconds: number
+  currentCycleCount: number
   progress: number
-  setCountdown: (value: number) => void
-  toggleRunning: () => void
-  resetProgress: () => void
-  stopFocus: () => void
+  status: FocusStatus
+
+  startSession: (
+    focusSeconds: number,
+    breakSeconds: number,
+    numOfCycles: number,
+  ) => void
+  setRunning: (
+    countdownSeconds: number,
+    currentCountdownSeconds: number,
+    currentCycleCount: number,
+  ) => void
+  setResting: (
+    countdownSeconds: number,
+    currentCountdownSeconds: number,
+    currentCycleCount: number,
+  ) => void
+  setCompleted: () => void
+
+  setCurrentCountdownSeconds: (seconds: number) => void
+  stopSession: () => void
+
+  phaseText: string
+  randomPhaseText: () => void
 }

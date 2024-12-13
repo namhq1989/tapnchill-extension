@@ -24,18 +24,27 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
     })
 
     return true
+  } else if (request.type === 'offscreen-play-focus-phase-sound') {
+    playStartFocusPhaseSound()
   }
   // return true
 })
 
-// chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
-//   if (request.type === 'offscreen-sign-in-with-google') {
-//     handleGoogleSignIn(request.userToken, (data) => {
-//       sendResponse(data)
-//     })
-//   }
-//   return true
-// })
+//
+// FOCUS
+//
+
+const playStartFocusPhaseSound = () => {
+  const audio = new Howl({
+    src: ['https://i.bapbi.app/ding-ding.mp3'],
+    format: ['mp3'],
+    html5: true,
+    preload: true,
+    loop: false,
+    volume: 1,
+  })
+  audio.play()
+}
 
 //
 // AMBIENCES

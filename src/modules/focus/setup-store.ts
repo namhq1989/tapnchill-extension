@@ -15,9 +15,25 @@ const PRO_PLAN_BLOCKED_SITES = 50
 export const MIN_FOCUS_TIME = 1
 export const MAX_FOCUS_TIME = 300
 
+export const MIN_BREAK_TIME = 1
+export const MAX_BREAK_TIME = 30
+
+export const MIN_CYCLES = 1
+export const MAX_CYCLES = 60
+
 const persistBlockedSites = (sites: IBlockedSite[]) => {
   chrome.storage.local.set({ blockedSites: sites }, () => {
     console.log('Blocked sites persisted to local storage:', sites)
+  })
+}
+
+const persistSessionSettings = (state: {
+  focusTime: number
+  breakTime: number
+  numOfCycles: number
+}) => {
+  chrome.storage.local.set({ focusSessionSettings: state }, () => {
+    console.log('Session settings state persisted:', state)
   })
 }
 
@@ -42,6 +58,9 @@ const useFocusSetupStore = create<IFocusSetupStore>((set, get) => ({
   },
 
   focusTime: 25,
+  breakTime: 5,
+  numOfCycles: 2,
+
   blockedSites: [],
 
   setFocusTime: (min: number) => {
@@ -55,8 +74,32 @@ const useFocusSetupStore = create<IFocusSetupStore>((set, get) => ({
     set(() => ({
       focusTime: min,
     }))
+  },
+  setBreakTime: (min: number) => {
+    const { showErrorNotification } = useNotificationStore.getState()
 
-    useFocusProgressingStore.getState().setCountdown(min * 60 * 1000)
+    if (min < MIN_BREAK_TIME || min > MAX_BREAK_TIME) {
+      showErrorNotification({
+        description: `Break time must be between ${MIN_BREAK_TIME} and ${MAX_BREAK_TIME} minutes`,
+      })
+    }
+
+    set(() => ({
+      breakTime: min,
+    }))
+  },
+  setNumOfCycles: (num: number) => {
+    const { showErrorNotification } = useNotificationStore.getState()
+
+    if (num < MIN_CYCLES || num > MAX_CYCLES) {
+      showErrorNotification({
+        description: `Number of cycles must be between ${MIN_CYCLES} and ${MAX_CYCLES}`,
+      })
+    }
+
+    set(() => ({
+      numOfCycles: num,
+    }))
   },
 
   addBlockedSite: (site) => {
@@ -112,20 +155,18 @@ const useFocusSetupStore = create<IFocusSetupStore>((set, get) => ({
 
   // Start focus mode and switch to Progressing View
   startFocus: () => {
+    const { focusTime, breakTime, numOfCycles } = get()
+    persistSessionSettings({
+      focusTime,
+      breakTime,
+      numOfCycles,
+    })
+
+    const { startSession } = useFocusProgressingStore.getState()
+    startSession(focusTime * 60, breakTime * 60, numOfCycles)
+
     const { switchView } = useFocusUIStore.getState()
     switchView(FocusView.progressing)
-
-    const { focusTime } = get()
-    const { setInitialCountdown } = useFocusProgressingStore.getState()
-    setInitialCountdown(focusTime * 60)
-
-    chrome.alarms
-      .create('focusCountdown', {
-        delayInMinutes: focusTime,
-      })
-      .then(() => {
-        console.log(`Focus session alarm set for ${focusTime} minutes.`)
-      })
   },
 }))
 

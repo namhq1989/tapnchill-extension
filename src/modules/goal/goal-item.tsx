@@ -10,6 +10,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
+  AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog.tsx'
 
@@ -96,6 +97,7 @@ const DeleteGoalAlert = (props: IDeleteGoalAlertProps) => {
       </AlertDialogTrigger>
       <AlertDialogContent className='w-[90%] rounded-xl'>
         <AlertDialogHeader>
+          <AlertDialogTitle />
           <AlertDialogDescription>
             Are you sure you want to delete this goal? This action cannot be
             undone

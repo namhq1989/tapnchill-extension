@@ -6,7 +6,11 @@ import { Plus, Trash2 } from 'lucide-react'
 import { ScrollArea } from '@/components/ui/scroll-area.tsx'
 import { useState } from 'react'
 import useFocusSetupStore, {
+  MAX_BREAK_TIME,
+  MAX_CYCLES,
   MAX_FOCUS_TIME,
+  MIN_BREAK_TIME,
+  MIN_CYCLES,
   MIN_FOCUS_TIME,
 } from '@/modules/focus/setup-store.ts'
 
@@ -17,7 +21,11 @@ const FocusSetupView = () => {
     addBlockedSite,
     removeBlockedSite,
     focusTime,
+    breakTime,
+    numOfCycles,
     setFocusTime,
+    setBreakTime,
+    setNumOfCycles,
     startFocus,
   } = useFocusSetupStore()
 
@@ -37,7 +45,7 @@ const FocusSetupView = () => {
         <HeaderTitle title='Focus' />
       </div>
       <div className='flex flex-col p-4 gap-4'>
-        <div className='flex flex-col gap-2 mt-2'>
+        <div className='flex flex-col gap-4 mt-2'>
           <div className='flex flex-row items-start justify-between'>
             <div>
               <p className='text-sm font-medium'>Focus time (minutes)</p>
@@ -65,11 +73,65 @@ const FocusSetupView = () => {
               }
             />
           </div>
+          <div className='flex flex-row items-start justify-between'>
+            <div>
+              <p className='text-sm font-medium'>Break time (minutes)</p>
+              <p className='text-xs text-muted-foreground'>
+                Take a moment to relax, stretch, or do something enjoyable
+              </p>
+            </div>
+            <div className='w-4' />
+            <Input
+              type='number'
+              value={breakTime}
+              min={MIN_BREAK_TIME}
+              max={MAX_BREAK_TIME}
+              className='w-[125px]'
+              onChange={(e) =>
+                setBreakTime(
+                  Math.min(
+                    Math.max(
+                      parseInt(e.target.value || `${MIN_BREAK_TIME}`, 10),
+                      MIN_BREAK_TIME,
+                    ),
+                    MAX_BREAK_TIME,
+                  ),
+                )
+              }
+            />
+          </div>
+          <div className='flex flex-row items-start justify-between'>
+            <div>
+              <p className='text-sm font-medium'>Number of cycles</p>
+              <p className='text-xs text-muted-foreground'>
+                Each cycle includes one Focus time and one Break time
+              </p>
+            </div>
+            <div className='w-4' />
+            <Input
+              type='number'
+              value={numOfCycles}
+              min={MIN_CYCLES}
+              max={MAX_CYCLES}
+              className='w-[125px]'
+              onChange={(e) =>
+                setNumOfCycles(
+                  Math.min(
+                    Math.max(
+                      parseInt(e.target.value || `${MIN_CYCLES}`, 10),
+                      MIN_CYCLES,
+                    ),
+                    MAX_CYCLES,
+                  ),
+                )
+              }
+            />
+          </div>
         </div>
         <Button className='font-bold' onClick={startFocus}>
           Start Session
         </Button>
-        <div className='flex flex-col gap-4 mt-4'>
+        <div className='flex flex-col gap-4 mt-8'>
           <h2 className='text-sm font-bold tracking-wide'>
             Blocked sites ({blockedSites.length}/{maxBlockedSites})
           </h2>
