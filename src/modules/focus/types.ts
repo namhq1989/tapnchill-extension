@@ -15,11 +15,38 @@ export enum FocusStatus {
   completed = 'completed',
 }
 
+export interface IFocusOverallMetrics {
+  totalFocusTime: number
+  totalRestTime: number
+  totalCycles: number
+  completedCycles: number
+  totalSessions: number
+  completedSessions: number
+  longestFocusPhase: number
+}
+
+export interface IFocusDailyMetrics {
+  date: string
+  focusTime: number
+  restTime: number
+  cycles: number
+  completedCycles: number
+  sessions: number
+  completedSessions: number
+  longestFocusPhase: number
+}
+
 export interface IFocusUIStore {
   isInitializing: boolean
   initFocus: () => void
   currentView: FocusView
   switchView: (view: FocusView) => void
+}
+
+export interface IFocusMetricsStore {
+  fetchOverallMetrics: () => Promise<IFocusOverallMetrics>
+  fetchTodayMetrics: () => Promise<IFocusDailyMetrics>
+  fetchLastNDaysMetrics: (days: number) => Promise<IFocusDailyMetrics[]>
 }
 
 export interface IFocusSetupStore {

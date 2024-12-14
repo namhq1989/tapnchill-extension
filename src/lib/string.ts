@@ -49,9 +49,41 @@ const validateAndExtractHostname = (input: string): string | null => {
   }
 }
 
+const formatNumber = (
+  value: number,
+  type: 'time' | 'number' = 'number',
+): string => {
+  if (type === 'time') {
+    const hours = Math.floor(value / 3600)
+    const minutes = Math.floor((value % 3600) / 60)
+    const seconds = value % 60
+
+    const pad = (n: number): string => n.toString().padStart(2, '0') // Add leading zero
+
+    if (hours > 0) {
+      return `${pad(hours)}h ${pad(minutes)}m`
+    } else if (minutes > 0) {
+      return `${pad(minutes)}m ${pad(seconds)}s`
+    } else {
+      return `${pad(seconds)}s`
+    }
+  } else if (type === 'number') {
+    if (value >= 1_000_000) {
+      return `${(value / 1_000_000).toFixed(1)}M`
+    } else if (value >= 1_000) {
+      return `${(value / 1_000).toFixed(1)}K`
+    } else {
+      return value.toString()
+    }
+  }
+
+  return value.toString()
+}
+
 export {
   copyToClipboard,
   getDomainForDisplaying,
   getDomain,
   validateAndExtractHostname,
+  formatNumber,
 }

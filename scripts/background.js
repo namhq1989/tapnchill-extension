@@ -7,7 +7,14 @@ import {
   updateNoteInIndexedDB,
   updateNotesLastSyncAt,
 } from './note.js'
-import { startSession, stopSession } from './focus.js'
+import {
+  cleanupOldDailyMetrics,
+  getLastNDaysMetrics,
+  getOverallMetrics,
+  getTodayMetrics,
+  startSession,
+  stopSession,
+} from './focus.js'
 import { createOffscreen } from './create-offscreen.js'
 
 const LISTENING_TRACKING_INTERVAL = 60000 // 1 minute
@@ -34,6 +41,8 @@ chrome.runtime.onStartup.addListener(function () {
   chrome.storage.local.set({ focusProgress: null }, () => {
     console.log('Focus state reset in local storage')
   })
+
+  cleanupOldDailyMetrics()
 })
 
 let trackListeningTimeJobIntervalId
@@ -372,6 +381,21 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
     )
   } else if (request.type === 'focus-session-stop') {
     stopSession()
+  } else if (request.type === 'get-focus-last-n-days-metrics') {
+    getLastNDaysMetrics(request.days, (metrics) => {
+      sendResponse({ data: metrics })
+    })
+    return true
+  } else if (request.type === 'get-focus-overall-metrics') {
+    getOverallMetrics((metrics) => {
+      sendResponse({ data: metrics })
+    })
+    return true
+  } else if (request.type === 'get-focus-today-metrics') {
+    getTodayMetrics((metrics) => {
+      sendResponse({ data: metrics })
+    })
+    return true
   } else {
     sendResponse({
       success: false,
