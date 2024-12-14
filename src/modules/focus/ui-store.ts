@@ -35,6 +35,7 @@ const getSessionSettings = (
     focusTime: number
     breakTime: number
     numOfCycles: number
+    isPlaySoundOnResting: boolean
   }) => void,
 ) => {
   chrome.storage.local.get(['focusSessionSettings'], (result) => {
@@ -65,6 +66,7 @@ const useFocusUIStore = create<IFocusUIStore>((set) => ({
           focusTime: settings.focusTime,
           breakTime: settings.breakTime,
           numOfCycles: settings.numOfCycles,
+          isPlaySoundOnResting: settings.isPlaySoundOnResting,
         })
       }
     })
@@ -76,6 +78,7 @@ const useFocusUIStore = create<IFocusUIStore>((set) => ({
           breakSeconds,
           numOfCycles,
           currentCountdownSeconds,
+          currentCycleCount,
           status,
           lastUpdated,
         } = savedState
@@ -90,9 +93,9 @@ const useFocusUIStore = create<IFocusUIStore>((set) => ({
         }
 
         let progress = 0
-        if (isCounting) {
+        if (status === FocusStatus.running) {
           progress = ((focusSeconds - remainingTime) / focusSeconds) * 100
-        } else {
+        } else if (status === FocusStatus.resting) {
           progress = ((breakSeconds - remainingTime) / breakSeconds) * 100
         }
 
@@ -101,6 +104,7 @@ const useFocusUIStore = create<IFocusUIStore>((set) => ({
           countdownSeconds:
             status === FocusStatus.running ? focusSeconds : breakSeconds,
           currentCountdownSeconds: remainingTime,
+          currentCycleCount,
           status,
           progress,
         })

@@ -24,8 +24,10 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
     })
 
     return true
-  } else if (request.type === 'offscreen-play-focus-phase-sound') {
-    playStartFocusPhaseSound()
+  } else if (request.type === 'offscreen-play-focusing-phase-sound') {
+    playStartFocusingPhaseSound()
+  } else if (request.type === 'offscreen-play-resting-phase-sound') {
+    playStartRestingPhaseSound()
   }
   // return true
 })
@@ -34,9 +36,21 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
 // FOCUS
 //
 
-const playStartFocusPhaseSound = () => {
+const playStartFocusingPhaseSound = () => {
   const audio = new Howl({
     src: ['https://i.bapbi.app/ding-ding.mp3'],
+    format: ['mp3'],
+    html5: true,
+    preload: true,
+    loop: false,
+    volume: 1,
+  })
+  audio.play()
+}
+
+const playStartRestingPhaseSound = () => {
+  const audio = new Howl({
+    src: ['https://i.bapbi.app/soft-piano.mp3'],
     format: ['mp3'],
     html5: true,
     preload: true,

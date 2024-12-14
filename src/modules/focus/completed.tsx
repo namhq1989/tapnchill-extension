@@ -31,17 +31,17 @@ const FocusCompletedView = () => {
         </div>
         <div className='flex flex-col'>
           <div className='flex flex-row items-center justify-between p-4 border-b-[1px]'>
-            <p>Total Focus Time</p>
+            <p className='text-sm'>Total Focus Time</p>
             <p className='text-sm text-primary font-bold'>
               {focusTime * numOfCycles} minutes
             </p>
           </div>
           <div className='flex flex-row items-center justify-between p-4 border-b-[1px]'>
-            <p>Completed Cycles</p>
+            <p className='text-sm'>Completed Cycles</p>
             <p className='text-sm text-primary font-bold'>{numOfCycles}</p>
           </div>
           <div className='flex flex-row items-center justify-between p-4'>
-            <p>Break Time Take</p>
+            <p className='text-sm'>Break Time Take</p>
             <p className='text-sm text-primary font-bold'>
               {breakTime * numOfCycles} minutes
             </p>

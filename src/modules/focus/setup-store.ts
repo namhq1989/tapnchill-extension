@@ -31,6 +31,7 @@ const persistSessionSettings = (state: {
   focusTime: number
   breakTime: number
   numOfCycles: number
+  isPlaySoundOnResting: boolean
 }) => {
   chrome.storage.local.set({ focusSessionSettings: state }, () => {
     console.log('Session settings state persisted:', state)
@@ -60,6 +61,7 @@ const useFocusSetupStore = create<IFocusSetupStore>((set, get) => ({
   focusTime: 25,
   breakTime: 5,
   numOfCycles: 2,
+  isPlaySoundOnResting: false,
 
   blockedSites: [],
 
@@ -71,9 +73,9 @@ const useFocusSetupStore = create<IFocusSetupStore>((set, get) => ({
         description: `Focus time must be between ${MIN_FOCUS_TIME} and ${MAX_FOCUS_TIME} minutes`,
       })
     }
-    set(() => ({
+    set({
       focusTime: min,
-    }))
+    })
   },
   setBreakTime: (min: number) => {
     const { showErrorNotification } = useNotificationStore.getState()
@@ -84,9 +86,9 @@ const useFocusSetupStore = create<IFocusSetupStore>((set, get) => ({
       })
     }
 
-    set(() => ({
+    set({
       breakTime: min,
-    }))
+    })
   },
   setNumOfCycles: (num: number) => {
     const { showErrorNotification } = useNotificationStore.getState()
@@ -97,9 +99,14 @@ const useFocusSetupStore = create<IFocusSetupStore>((set, get) => ({
       })
     }
 
-    set(() => ({
+    set({
       numOfCycles: num,
-    }))
+    })
+  },
+  setIsPlaySoundOnResting: (value: boolean) => {
+    set({
+      isPlaySoundOnResting: value,
+    })
   },
 
   addBlockedSite: (site) => {
@@ -155,11 +162,12 @@ const useFocusSetupStore = create<IFocusSetupStore>((set, get) => ({
 
   // Start focus mode and switch to Progressing View
   startFocus: () => {
-    const { focusTime, breakTime, numOfCycles } = get()
+    const { focusTime, breakTime, numOfCycles, isPlaySoundOnResting } = get()
     persistSessionSettings({
       focusTime,
       breakTime,
       numOfCycles,
+      isPlaySoundOnResting,
     })
 
     const { startSession } = useFocusProgressingStore.getState()

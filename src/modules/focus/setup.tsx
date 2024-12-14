@@ -13,6 +13,9 @@ import useFocusSetupStore, {
   MIN_CYCLES,
   MIN_FOCUS_TIME,
 } from '@/modules/focus/setup-store.ts'
+import { Checkbox } from '@/components/ui/checkbox.tsx'
+import FocusMetricsChart from '@/modules/focus/metrics-chart.tsx'
+import FocusMetricsOverall from '@/modules/focus/metrics-overall.tsx'
 
 const FocusSetupView = () => {
   const {
@@ -23,9 +26,11 @@ const FocusSetupView = () => {
     focusTime,
     breakTime,
     numOfCycles,
+    isPlaySoundOnResting,
     setFocusTime,
     setBreakTime,
     setNumOfCycles,
+    setIsPlaySoundOnResting,
     startFocus,
   } = useFocusSetupStore()
 
@@ -46,20 +51,19 @@ const FocusSetupView = () => {
       </div>
       <div className='flex flex-col p-4 gap-4'>
         <div className='flex flex-col gap-4 mt-2'>
-          <div className='flex flex-row items-start justify-between'>
-            <div>
+          <div className='flex flex-row items-start justify-between gap-8'>
+            <div className='flex-grow'>
               <p className='text-sm font-medium'>Focus time (minutes)</p>
               <p className='text-xs text-muted-foreground'>
                 Blocked sites will be inaccessible during Focus time
               </p>
             </div>
-            <div className='w-4' />
             <Input
               type='number'
               value={focusTime}
               min={MIN_FOCUS_TIME}
               max={MAX_FOCUS_TIME}
-              className='w-[125px]'
+              className='w-[85px] flex-shrink-0'
               onChange={(e) =>
                 setFocusTime(
                   Math.min(
@@ -73,20 +77,19 @@ const FocusSetupView = () => {
               }
             />
           </div>
-          <div className='flex flex-row items-start justify-between'>
-            <div>
+          <div className='flex flex-row items-start justify-between gap-8'>
+            <div className='flex-grow'>
               <p className='text-sm font-medium'>Break time (minutes)</p>
               <p className='text-xs text-muted-foreground'>
                 Take a moment to relax, stretch, or do something enjoyable
               </p>
             </div>
-            <div className='w-4' />
             <Input
               type='number'
               value={breakTime}
               min={MIN_BREAK_TIME}
               max={MAX_BREAK_TIME}
-              className='w-[125px]'
+              className='w-[85px] flex-shrink-0'
               onChange={(e) =>
                 setBreakTime(
                   Math.min(
@@ -100,20 +103,19 @@ const FocusSetupView = () => {
               }
             />
           </div>
-          <div className='flex flex-row items-start justify-between'>
-            <div>
+          <div className='flex flex-row items-start justify-between gap-8'>
+            <div className='flex-grow'>
               <p className='text-sm font-medium'>Number of cycles</p>
               <p className='text-xs text-muted-foreground'>
                 Each cycle includes one Focus time and one Break time
               </p>
             </div>
-            <div className='w-4' />
             <Input
               type='number'
               value={numOfCycles}
               min={MIN_CYCLES}
               max={MAX_CYCLES}
-              className='w-[125px]'
+              className='w-[85px] flex-shrink-0'
               onChange={(e) =>
                 setNumOfCycles(
                   Math.min(
@@ -127,12 +129,29 @@ const FocusSetupView = () => {
               }
             />
           </div>
+          <div className='flex items-center justify-between my-4'>
+            <label
+              htmlFor='terms'
+              className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
+            >
+              Notify me with sound for breaks
+            </label>
+            <div className='w-[40px] flex items-center justify-center'>
+              <Checkbox
+                id='enable-resting-sound'
+                checked={isPlaySoundOnResting}
+                onCheckedChange={(value) => {
+                  setIsPlaySoundOnResting(value as boolean)
+                }}
+              />
+            </div>
+          </div>
         </div>
         <Button className='font-bold' onClick={startFocus}>
           Start Session
         </Button>
         <div className='flex flex-col gap-4 mt-8'>
-          <h2 className='text-sm font-bold tracking-wide'>
+          <h2 className='text-base font-bold tracking-wide'>
             Blocked sites ({blockedSites.length}/{maxBlockedSites})
           </h2>
           <div className='flex w-full max-w-sm items-center space-x-2'>
@@ -184,6 +203,8 @@ const FocusSetupView = () => {
             </div>
           </ScrollArea>
         </div>
+        <FocusMetricsChart />
+        <FocusMetricsOverall />
       </div>
     </div>
   )
