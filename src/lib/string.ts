@@ -53,6 +53,10 @@ const formatNumber = (
   value: number,
   type: 'time' | 'number' = 'number',
 ): string => {
+  if (value === 0) {
+    return type === 'time' ? '0s' : '0'
+  }
+
   if (type === 'time') {
     const hours = Math.floor(value / 3600)
     const minutes = Math.floor((value % 3600) / 60)
