@@ -88,7 +88,7 @@ const FocusMetricsOverall = () => {
           <div className='flex min-w-[100px] h-full flex-shrink-0 justify-end items-center'>
             <p className='text-base text-primary font-bold'>
               {formatNumber(
-                Math.round(data.totalFocusTime / data.totalSessions),
+                Math.round(data.totalFocusTime / data.totalCycles) || 0,
                 'time',
               )}
             </p>
