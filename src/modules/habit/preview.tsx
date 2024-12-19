@@ -4,7 +4,7 @@ import HabitView from '@/modules/habit/view.tsx'
 import { getTodayShortName } from '@/lib/date.ts'
 import useHabitsStore from '@/modules/habit/store.ts'
 import HabitPreviewItem from '@/modules/habit/habit-preview-item.tsx'
-import { isSameDay } from 'date-fns'
+import { HabitStatus } from '@/modules/habit/types.ts'
 
 const HabitPreview = () => {
   const { habits, stats, completeHabit } = useHabitsStore()
@@ -13,17 +13,19 @@ const HabitPreview = () => {
   const nowDay = now.getDay()
 
   // filter habits
-  const filteredHabits = habits.filter((habit) => {
-    if (isSameDay(habit.createdAt, now)) {
-      return null
-    }
+  const filteredHabits = habits
+    .filter((habit) => {
+      if (habit.status === HabitStatus.inactive) {
+        return null
+      }
 
-    if (!habit.daysOfWeek.includes(nowDay)) {
-      return null
-    }
+      if (!habit.daysOfWeek.includes(nowDay)) {
+        return null
+      }
 
-    return habit
-  })
+      return habit
+    })
+    .sort((a, b) => a.sortOrder - b.sortOrder)
 
   return (
     <div className='flex flex-col w-full gap-2 p-4'>

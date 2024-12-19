@@ -15,7 +15,6 @@ import { Button } from '@/components/ui/button.tsx'
 import { Input } from '@/components/ui/input.tsx'
 import useAppStore from '@/modules/common/store.ts'
 import useHabitsStore from '@/modules/habit/store.ts'
-import { Info } from 'lucide-react'
 import { IHabit } from '@/modules/habit/types.ts'
 import { goBack } from 'react-chrome-extension-router'
 import { useEffect } from 'react'
@@ -255,15 +254,15 @@ const HabitCreateView = (props: IHabitCreateViewProps) => {
             />
 
             <div className='flex flex-col m4-4 gap-4'>
-              {!isUpdating && (
-                <div className='flex flex-row gap-2'>
-                  <Info strokeWidth={1} />
-                  <span className='text-sm text-muted-foreground'>
-                    New habits will be added to your daily schedule starting the
-                    next day after creation
-                  </span>
-                </div>
-              )}
+              {/*{!isUpdating && (*/}
+              {/*  <div className='flex flex-row gap-2'>*/}
+              {/*    <Info strokeWidth={1} />*/}
+              {/*    <span className='text-sm text-muted-foreground'>*/}
+              {/*      New habits will be added to your daily schedule starting the*/}
+              {/*      next day after creation*/}
+              {/*    </span>*/}
+              {/*  </div>*/}
+              {/*)}*/}
               <Button>{isUpdating ? 'Update activity' : 'Add activity'}</Button>
             </div>
           </form>
