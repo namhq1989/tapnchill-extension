@@ -5,9 +5,9 @@ import { Link } from 'react-chrome-extension-router'
 import HabitCreateView from '@/modules/habit/habit-create.tsx'
 import useHabitsStore from '@/modules/habit/store.ts'
 import { HabitStatus, IHabit, IHabitDailyStats } from '@/modules/habit/types.ts'
-import { addDays, format, isSameDay, subDays } from 'date-fns'
-import DailyActivitiesView from '@/modules/habit/daily-activities-view.tsx'
+import { addDays, format, isBefore, isSameDay, subDays } from 'date-fns'
 import HabitInfoView from '@/modules/habit/habit-info.tsx'
+import HabitMetricsChart from '@/modules/habit/metrics-chart.tsx'
 
 const HabitView = () => {
   const { habits, stats } = useHabitsStore()
@@ -19,7 +19,7 @@ const HabitView = () => {
         <HeaderTitle title='Daily activities' />
       </div>
       <div className='flex flex-col p-4 gap-8'>
-        <StatsSummaryView stats={stats} />
+        <HabitMetricsChart stats={stats} />
 
         <div className='flex flex-col gap-2'>
           <div className='flex flex-row items-center justify-between'>
@@ -36,46 +36,46 @@ const HabitView = () => {
     </div>
   )
 }
-
-interface IStatsSummaryViewProps {
-  stats: IHabitDailyStats[]
-}
-
-const StatsSummaryView = (props: IStatsSummaryViewProps) => {
-  const { stats } = props
-  const dates = generateDateArray()
-
-  const isAllCompleted = (date: Date): boolean => {
-    const stat = stats.find((stat) => isSameDay(new Date(stat.date), date))
-    return stat ? stat.isCompleted : false
-  }
-
-  return (
-    <div className='flex flex-row gap-2 justify-around'>
-      {dates.map((date, index) => {
-        let styles = ''
-        if (index === dates.length - 1) {
-          styles =
-            'text-muted-foreground ring-1 ring-muted-foreground cursor-not-allowed'
-        } else if (isAllCompleted(date)) {
-          styles = 'bg-primary text-primary-foreground'
-        } else if (index === dates.length - 2) {
-          styles = 'border border-primary'
-        } else {
-          styles = 'border border-dashed border-red-400'
-        }
-
-        return (
-          <DailyActivitiesView
-            key={date.getTime()}
-            date={date}
-            styles={styles}
-          />
-        )
-      })}
-    </div>
-  )
-}
+//
+// interface IStatsSummaryViewProps {
+//   stats: IHabitDailyStats[]
+// }
+//
+// const StatsSummaryView = (props: IStatsSummaryViewProps) => {
+//   const { stats } = props
+//   const dates = generateDateArray()
+//
+//   const isAllCompleted = (date: Date): boolean => {
+//     const stat = stats.find((stat) => isSameDay(new Date(stat.date), date))
+//     return stat ? stat.isCompleted : false
+//   }
+//
+//   return (
+//     <div className='flex flex-row gap-2 justify-around'>
+//       {dates.map((date, index) => {
+//         let styles = ''
+//         if (index === dates.length - 1) {
+//           styles =
+//             'text-muted-foreground ring-1 ring-muted-foreground cursor-not-allowed'
+//         } else if (isAllCompleted(date)) {
+//           styles = 'bg-primary text-primary-foreground'
+//         } else if (index === dates.length - 2) {
+//           styles = 'border border-primary'
+//         } else {
+//           styles = 'border border-dashed border-red-400'
+//         }
+//
+//         return (
+//           <DailyActivitiesView
+//             key={date.getTime()}
+//             date={date}
+//             styles={styles}
+//           />
+//         )
+//       })}
+//     </div>
+//   )
+// }
 
 interface IHabitStatsViewProps {
   habit: IHabit
@@ -83,6 +83,7 @@ interface IHabitStatsViewProps {
 }
 
 const HabitStatsView = (props: IHabitStatsViewProps) => {
+  const { completeHabit } = useHabitsStore()
   const { habit, stats } = props
   const dates = generateDateArray()
 
@@ -93,33 +94,44 @@ const HabitStatsView = (props: IHabitStatsViewProps) => {
 
   return (
     <div className='flex flex-row gap-2 justify-around'>
-      {dates.map((date, index) => {
+      {dates.map((date) => {
         const isScheduled = habit.daysOfWeek.includes(date.getDay())
+        let canComplete = false
 
         let styles = ''
-        if (index === dates.length - 1) {
-          styles = 'text-muted-foreground ring-1 ring-muted-foreground'
-        } else if (isCompleted(date)) {
+        // if (index === dates.length - 1) {
+        //   styles =
+        //     'text-muted-foreground border border-dashed border-muted-foreground/50 cursor-not-allowed'
+        // } else
+        if (isCompleted(date)) {
           styles = 'bg-primary text-primary-foreground'
-        } else if (index === dates.length - 2) {
-          styles = 'border border-primary'
-        } else if (!isScheduled) {
-          styles = 'border border-muted-foreground/30'
+        } else if (!isScheduled || isBefore(date, habit.createdAt)) {
+          styles = 'border border-muted-foreground/30 cursor-not-allowed'
         } else {
-          styles = 'border border-red-300'
+          styles = 'border border-primary/50 cursor-pointer'
+          canComplete = true
         }
 
         return (
           <div
             key={`habit-stat-${date.getDay()}`}
             className='flex flex-col gap-1 w-full'
+            title={canComplete ? 'Check' : ''}
           >
             <p
               className={`self-center ${isScheduled ? '' : 'text-muted-foreground/30'}`}
             >
               {format(date, 'dd')}
             </p>
-            <div className={`flex h-2 rounded-lg ${styles}`}></div>
+            <div
+              className={`flex h-8 rounded-xl ${styles}`}
+              onClick={async () => {
+                if (!canComplete) {
+                  return
+                }
+                await completeHabit(habit.id, date)
+              }}
+            ></div>
           </div>
         )
       })}
@@ -180,7 +192,7 @@ const HabitRecordsView = (props: IHabitRecordsViewProps) => {
 
 const generateDateArray = (): Date[] => {
   const today = new Date()
-  const startDate = subDays(today, 5) // Start 5 days before today
+  const startDate = subDays(today, 6) // Start 5 days before today
   return Array.from({ length: 7 }, (_, index) => addDays(startDate, index))
 }
 

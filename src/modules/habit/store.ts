@@ -21,9 +21,6 @@ import useHttpStore from '@/modules/http/store.ts'
 import { mapHabits, mapStats } from '@/modules/habit/util.ts'
 import useNotificationStore from '@/modules/notification/store.ts'
 import { getRFC3339WithTimezone } from '@/lib/date.ts'
-import { isYesterday } from 'date-fns/isYesterday'
-import { isToday } from 'date-fns/isToday'
-import { isBefore } from 'date-fns'
 
 const useHabitsStore = create<IHabitsStore>((set, get) => ({
   icons: listHabitIcons,
@@ -197,9 +194,12 @@ const useHabitsStore = create<IHabitsStore>((set, get) => ({
       useNotificationStore.getState()
 
     try {
-      await httpPost<ICompleteHabitApiResponse>(`api/habit/${id}/complete`, {
-        date: getRFC3339WithTimezone(date),
-      } as ICompleteHabitApiRequest)
+      const response = await httpPost<ICompleteHabitApiResponse>(
+        `api/habit/${id}/complete`,
+        {
+          date: getRFC3339WithTimezone(date),
+        } as ICompleteHabitApiRequest,
+      )
 
       showNotification({
         description: getRandomMotivationalMessage(),
@@ -214,24 +214,10 @@ const useHabitsStore = create<IHabitsStore>((set, get) => ({
       const { habits } = get()
       const habit = habits.find((h) => h.id === id)
       if (habit) {
-        habit.statsTotalCompletions++
-
-        if (isToday(date)) {
-          if (!habit.lastCompletedAt || isYesterday(habit.lastCompletedAt)) {
-            habit.statsCurrentStreak++
-          } else {
-            habit.statsCurrentStreak = 1
-          }
-        }
-
-        if (!habit.lastCompletedAt || isBefore(habit.lastCompletedAt, date)) {
-          habit.lastCompletedAt = date
-        }
-
-        if (habit.statsCurrentStreak > habit.statsLongestStreak) {
-          habit.statsLongestStreak = habit.statsCurrentStreak
-        }
-
+        habit.lastCompletedAt = new Date(response.lastCompletedAt)
+        habit.statsLongestStreak = response.statsLongestStreak
+        habit.statsCurrentStreak = response.statsCurrentStreak
+        habit.statsTotalCompletions = response.statsTotalCompletions
         set({
           habits: habits.map((h) => (h.id === id ? habit : h)),
         })

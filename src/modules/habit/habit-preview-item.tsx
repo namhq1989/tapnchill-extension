@@ -1,6 +1,5 @@
 import { HabitStatus, IHabit, IHabitDailyStats } from '@/modules/habit/types.ts'
 import { Badge } from '@/components/ui/badge.tsx'
-import { isSameDay } from 'date-fns'
 
 interface IHabitPreviewItemProps {
   habit: IHabit
@@ -11,14 +10,6 @@ interface IHabitPreviewItemProps {
 const HabitPreviewItem = (props: IHabitPreviewItemProps) => {
   const { habit, stats, onComplete } = props
   const isCompleted = stats.completedIds.includes(habit.id)
-
-  // don't show habit if it was created today, or activated today
-  if (
-    isSameDay(habit.createdAt, new Date()) ||
-    isSameDay(habit.lastActivatedAt, new Date())
-  ) {
-    return null
-  }
 
   // don't show habit if it is inactive
   if (!isCompleted && habit.status === HabitStatus.inactive) {

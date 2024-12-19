@@ -10,6 +10,7 @@ import useHabitsStore from '@/modules/habit/store.ts'
 import { format, isAfter, isBefore, isSameDay } from 'date-fns'
 import HabitPreviewItem from '@/modules/habit/habit-preview-item.tsx'
 import { getDateNameFirstLetter } from '@/lib/date.ts'
+import { HabitStatus } from '@/modules/habit/types.ts'
 
 const side = 'bottom'
 
@@ -33,6 +34,10 @@ const DailyActivitiesView = (props: IDailyActivitiesViewProps) => {
   const filteredHabits = habits.filter((habit) => {
     if (dateStats.completedIds.includes(habit.id)) {
       return habit
+    }
+
+    if (habit.status === HabitStatus.inactive) {
+      return null
     }
 
     if (

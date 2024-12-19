@@ -136,5 +136,8 @@ export interface ICompleteHabitApiRequest {
 }
 
 export interface ICompleteHabitApiResponse {
-  id: string
+  lastCompletedAt: string
+  statsTotalCompletions: number
+  statsLongestStreak: number
+  statsCurrentStreak: number
 }

@@ -91,6 +91,25 @@ const HabitInfoView = (props: IHabitInfoViewProps) => {
                   <Edit /> Edit
                 </Button>
               </Link>
+
+              {/*<div className='flex mt-8 flex-col'>*/}
+              {/*  <h2 className='text-base font-bold tracking-wide'>*/}
+              {/*    Last 30 Days Completions*/}
+              {/*  </h2>*/}
+              {/*  <div className='grid grid-cols-10 gap-2 mt-4'>*/}
+              {/*    {Array.from({ length: 30 }, (_, index) => {*/}
+              {/*      const isCompleted = Math.random() > 0.5*/}
+              {/*      return (*/}
+              {/*        <div*/}
+              {/*          key={index}*/}
+              {/*          className={`w-8 h-8 rounded-xl ${*/}
+              {/*            isCompleted ? 'bg-primary' : 'bg-transparent'*/}
+              {/*          } border border-muted`}*/}
+              {/*        ></div>*/}
+              {/*      )*/}
+              {/*    })}*/}
+              {/*  </div>*/}
+              {/*</div>*/}
             </div>
           </SheetContent>
         )}
