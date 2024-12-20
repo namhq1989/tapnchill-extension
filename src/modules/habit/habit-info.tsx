@@ -21,7 +21,7 @@ interface IHabitInfoViewProps {
 
 const HabitInfoView = (props: IHabitInfoViewProps) => {
   const [isOpen, setIsOpen] = useState(false)
-  const { changeHabitStatus } = useHabitsStore()
+  const { isBlocking, changeHabitStatus } = useHabitsStore()
 
   const { habit } = props
   const isActive = habit.status === HabitStatus.active
@@ -68,6 +68,7 @@ const HabitInfoView = (props: IHabitInfoViewProps) => {
               </div>
               {isActive ? (
                 <Button
+                  disabled={isBlocking}
                   variant='outline'
                   className='mt-4'
                   onClick={async () =>
@@ -78,6 +79,7 @@ const HabitInfoView = (props: IHabitInfoViewProps) => {
                 </Button>
               ) : (
                 <Button
+                  disabled={isBlocking}
                   className='mt-4'
                   onClick={async () =>
                     await changeHabitStatus(habit.id, HabitStatus.active)
@@ -103,7 +105,7 @@ const HabitInfoView = (props: IHabitInfoViewProps) => {
               {/*        <div*/}
               {/*          key={index}*/}
               {/*          className={`w-8 h-8 rounded-xl ${*/}
-              {/*            isCompleted ? 'bg-primary' : 'bg-transparent'*/}
+              {/*            isCompleted ? 'bg-primary' : 'bg-muted-foreground/20'*/}
               {/*          } border border-muted`}*/}
               {/*        ></div>*/}
               {/*      )*/}

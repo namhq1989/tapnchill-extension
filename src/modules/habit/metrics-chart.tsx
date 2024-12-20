@@ -40,7 +40,7 @@ const HabitMetricsChart = (props: IHabitMetricsChartProps) => {
           accessibilityLayer
           data={processedData}
           margin={{
-            top: 20,
+            top: 25,
           }}
         >
           <CartesianGrid vertical={false} />

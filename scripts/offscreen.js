@@ -37,27 +37,35 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
 //
 
 const playStartFocusingPhaseSound = () => {
-  const audio = new Howl({
-    src: ['https://i.bapbi.app/ding-ding.mp3'],
-    format: ['mp3'],
-    html5: true,
-    preload: true,
-    loop: false,
-    volume: 1,
-  })
-  audio.play()
+  try {
+    const audio = new Howl({
+      src: ['https://i.bapbi.app/ding-ding.mp3'],
+      format: ['mp3'],
+      html5: true,
+      preload: true,
+      loop: false,
+      volume: 1,
+    })
+    audio.play()
+  } catch (err) {
+    console.log('playStartFocusingPhaseSound got error', err)
+  }
 }
 
 const playStartRestingPhaseSound = () => {
-  const audio = new Howl({
-    src: ['https://i.bapbi.app/soft-piano.mp3'],
-    format: ['mp3'],
-    html5: true,
-    preload: true,
-    loop: false,
-    volume: 1,
-  })
-  audio.play()
+  try {
+    const audio = new Howl({
+      src: ['https://i.bapbi.app/soft-piano.mp3'],
+      format: ['mp3'],
+      html5: true,
+      preload: true,
+      loop: false,
+      volume: 1,
+    })
+    audio.play()
+  } catch (err) {
+    console.log('playStartFocusingPhaseSound got error', err)
+  }
 }
 
 //

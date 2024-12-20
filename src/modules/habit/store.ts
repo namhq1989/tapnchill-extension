@@ -24,6 +24,7 @@ import { getRFC3339WithTimezone } from '@/lib/date.ts'
 
 const useHabitsStore = create<IHabitsStore>((set, get) => ({
   icons: listHabitIcons,
+  isBlocking: false,
 
   isFetchingHabits: false,
   habitsHasFetched: false,
@@ -79,6 +80,8 @@ const useHabitsStore = create<IHabitsStore>((set, get) => ({
     icon: string,
     sortOrder: number,
   ) => {
+    set({ isBlocking: true })
+
     const { post: httpPost } = useHttpStore.getState()
     const { showNotification, showErrorNotification } =
       useNotificationStore.getState()
@@ -117,17 +120,21 @@ const useHabitsStore = create<IHabitsStore>((set, get) => ({
       habits.unshift(newHabit)
       set({ habits })
 
+      set({ isBlocking: false })
       return true
     } catch (err) {
       showErrorNotification({
         description: (err as Error).message,
       })
 
+      set({ isBlocking: false })
       return false
     }
   },
 
   updateHabit: async (habit: IHabit) => {
+    set({ isBlocking: true })
+
     const { put: httpPut } = useHttpStore.getState()
     const { showNotification, showErrorNotification } =
       useNotificationStore.getState()
@@ -151,17 +158,21 @@ const useHabitsStore = create<IHabitsStore>((set, get) => ({
         habits: habits.map((h) => (h.id === habit.id ? habit : h)),
       })
 
+      set({ isBlocking: false })
       return true
     } catch (err) {
       showErrorNotification({
         description: (err as Error).message,
       })
 
+      set({ isBlocking: false })
       return false
     }
   },
 
   changeHabitStatus: async (id: string, status: HabitStatus) => {
+    set({ isBlocking: true })
+
     const { patch: httpPatch } = useHttpStore.getState()
     const { showErrorNotification } = useNotificationStore.getState()
 
@@ -181,14 +192,20 @@ const useHabitsStore = create<IHabitsStore>((set, get) => ({
           return h
         }),
       })
+
+      set({ isBlocking: false })
     } catch (err) {
       showErrorNotification({
         description: (err as Error).message,
       })
+
+      set({ isBlocking: false })
     }
   },
 
   completeHabit: async (id: string, date: Date) => {
+    set({ isBlocking: true })
+
     const { post: httpPost } = useHttpStore.getState()
     const { showNotification, showErrorNotification } =
       useNotificationStore.getState()
@@ -222,10 +239,14 @@ const useHabitsStore = create<IHabitsStore>((set, get) => ({
           habits: habits.map((h) => (h.id === id ? habit : h)),
         })
       }
+
+      set({ isBlocking: false })
     } catch (err) {
       showErrorNotification({
         description: (err as Error).message,
       })
+
+      set({ isBlocking: false })
     }
   },
 

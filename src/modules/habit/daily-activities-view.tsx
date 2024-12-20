@@ -21,7 +21,7 @@ interface IDailyActivitiesViewProps {
 
 const DailyActivitiesView = (props: IDailyActivitiesViewProps) => {
   const [isOpen, setIsOpen] = useState(false)
-  const { habits, stats, completeHabit, createDefaultDailyStats } =
+  const { isBlocking, habits, stats, completeHabit, createDefaultDailyStats } =
     useHabitsStore()
 
   const { date, styles } = props
@@ -113,6 +113,10 @@ const DailyActivitiesView = (props: IDailyActivitiesViewProps) => {
                   habit={habit}
                   stats={dateStats}
                   onComplete={async () => {
+                    if (isBlocking) {
+                      return
+                    }
+
                     await completeHabit(habit.id, date)
                   }}
                 />

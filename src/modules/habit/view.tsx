@@ -83,7 +83,7 @@ interface IHabitStatsViewProps {
 }
 
 const HabitStatsView = (props: IHabitStatsViewProps) => {
-  const { completeHabit } = useHabitsStore()
+  const { isBlocking, completeHabit } = useHabitsStore()
   const { habit, stats } = props
   const dates = generateDateArray()
 
@@ -126,7 +126,11 @@ const HabitStatsView = (props: IHabitStatsViewProps) => {
             <div
               className={`flex h-8 rounded-xl ${styles}`}
               onClick={async () => {
-                if (!canComplete) {
+                if (
+                  isBlocking ||
+                  !canComplete ||
+                  habit.status === HabitStatus.inactive
+                ) {
                   return
                 }
                 await completeHabit(habit.id, date)

@@ -52,7 +52,7 @@ interface IHabitCreateViewProps {
 const HabitCreateView = (props: IHabitCreateViewProps) => {
   const { habit } = props
   const { weekdays } = useAppStore()
-  const { icons, createHabit, updateHabit } = useHabitsStore()
+  const { icons, isBlocking, createHabit, updateHabit } = useHabitsStore()
 
   const isUpdating = habit !== undefined
 
@@ -263,7 +263,9 @@ const HabitCreateView = (props: IHabitCreateViewProps) => {
               {/*    </span>*/}
               {/*  </div>*/}
               {/*)}*/}
-              <Button>{isUpdating ? 'Update activity' : 'Add activity'}</Button>
+              <Button disabled={isBlocking}>
+                {isUpdating ? 'Update activity' : 'Add activity'}
+              </Button>
             </div>
           </form>
         </Form>
