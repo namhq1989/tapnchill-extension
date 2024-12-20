@@ -37,14 +37,14 @@ const FocusCompletedView = () => {
             </p>
           </div>
           <div className='flex flex-row items-center justify-between p-4 border-b-[1px]'>
-            <p className='text-sm'>Completed Cycles</p>
-            <p className='text-sm text-primary font-bold'>{numOfCycles}</p>
-          </div>
-          <div className='flex flex-row items-center justify-between p-4'>
             <p className='text-sm'>Break Time Take</p>
             <p className='text-sm text-primary font-bold'>
               {breakTime * numOfCycles} minutes
             </p>
+          </div>
+          <div className='flex flex-row items-center justify-between p-4'>
+            <p className='text-sm'>Completed Cycles</p>
+            <p className='text-sm text-primary font-bold'>{numOfCycles}</p>
           </div>
         </div>
         <Button className='font-bold' onClick={() => stopSession()}>

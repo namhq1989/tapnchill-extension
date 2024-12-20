@@ -34,6 +34,7 @@ export interface IHabitIcon {
 
 export interface IHabitsStore {
   icons: IHabitIcon[]
+  isBlocking: boolean
 
   isFetchingHabits: boolean
   habitsHasFetched: boolean

@@ -34,7 +34,7 @@ const FocusMetricsChart = () => {
     fetchData().then()
   }, [fetchLastNDaysMetrics])
 
-  if (!data.length) return null
+  if (!data || !data.length) return null
 
   const processedData = data.map((item) => ({
     ...item,
