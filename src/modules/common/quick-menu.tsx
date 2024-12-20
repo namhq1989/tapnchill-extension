@@ -5,6 +5,7 @@ import {
 } from '@/components/ui/carousel.tsx'
 import { Link } from 'react-chrome-extension-router'
 import FocusUIView from '@/modules/focus/view.tsx'
+import QRCodeView from '@/modules/qrcode/view.tsx'
 
 const QuickMenu = () => {
   return (
@@ -52,19 +53,19 @@ const QuickMenu = () => {
             <p className='text-xs font-bold'>Note</p>
           </div>
         </CarouselItem>
-        {/*<CarouselItem className='basis-1/5 flex items-center justify-center'>*/}
-        {/*  <Link*/}
-        {/*    component={TaskView}*/}
-        {/*    className='flex flex-col gap-2 p-4 items-center justify-center'*/}
-        {/*  >*/}
-        {/*    <img*/}
-        {/*      src='https://i.bapbi.app/task.png?v=2'*/}
-        {/*      alt='task'*/}
-        {/*      className='w-7 h-7 bg-cover'*/}
-        {/*    />*/}
-        {/*    <p className='text-xs font-bold'>Task</p>*/}
-        {/*  </Link>*/}
-        {/*</CarouselItem>*/}
+        <CarouselItem className='basis-1/5 flex items-center justify-center'>
+          <Link
+            component={QRCodeView}
+            className='flex flex-col gap-2 p-4 items-center justify-center'
+          >
+            <img
+              src='https://i.bapbi.app/qr-code.png?v=2'
+              alt='task'
+              className='w-7 h-7 bg-cover'
+            />
+            <p className='text-xs font-bold'>QR</p>
+          </Link>
+        </CarouselItem>
         {/*<CarouselItem className='basis-1/5 flex items-center justify-center'>*/}
         {/*  <Link*/}
         {/*    component={HabitView}*/}

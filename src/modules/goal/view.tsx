@@ -15,7 +15,7 @@ const GoalView = () => {
         <BackButton />
         <HeaderTitle title='Goals' />
       </div>
-      <div className='flex flex-col p-4 gap-4 scrollbar-hide'>
+      <div className='flex flex-col p-4 gap-4'>
         <div className='flex flex-col w-full gap-4'>
           <Link component={GoalCreateView} className='cursor-pointer self-end'>
             <Plus />
