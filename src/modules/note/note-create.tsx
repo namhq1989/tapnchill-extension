@@ -3,7 +3,6 @@ import { useCreateBlockNote } from '@blocknote/react'
 import { BlockNoteView } from '@blocknote/mantine'
 import '@blocknote/mantine/style.css'
 import { z } from 'zod'
-import { INote } from '@/modules/note/types.ts'
 import useNoteStore from '@/modules/note/store.ts'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -48,17 +47,17 @@ const FormSchema = z.object({
     }),
 })
 
-export interface INoteCreateViewProps {
-  note: INote | undefined
-}
-
-const NoteCreateView = (props: INoteCreateViewProps) => {
+const NoteCreateView = () => {
   const [hasEditing, setHasEditing] = useState(false)
-  const { note } = props
-  const { createNote, updateNote, deleteNote } = useNoteStore()
+  const {
+    currentNote: note,
+    createNote,
+    updateNote,
+    deleteNote,
+  } = useNoteStore()
   const { theme } = useTheme()
 
-  const isUpdating = note !== undefined
+  const isUpdating = note !== null
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -82,6 +81,7 @@ const NoteCreateView = (props: INoteCreateViewProps) => {
       note.title = data.title
       note.description = JSON.stringify(editor.document)
       await updateNote(note)
+      setHasEditing(false)
     } else {
       await createNote(data.title, JSON.stringify(editor.document), null)
     }

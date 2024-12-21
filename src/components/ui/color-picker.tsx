@@ -56,7 +56,7 @@ const ColorPicker = ({
           </div>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className='w-64'>
+      <PopoverContent className='w-64 mr-4'>
         <div className='grid grid-cols-8 gap-2'>
           {solids.map((s) => (
             <div

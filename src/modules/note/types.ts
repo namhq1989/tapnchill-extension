@@ -6,6 +6,9 @@ export interface INoteStore {
   isInitializing: boolean
   initApp: () => Promise<void>
 
+  currentNote: INote | null
+  setCurrentNote: (note: INote | null) => void
+
   syncNotes(): Promise<void>
   fetchNotes(): Promise<void>
   createNote(

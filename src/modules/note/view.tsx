@@ -1,14 +1,22 @@
 import { ChevronRight, Plus } from 'lucide-react'
-import { Link } from 'react-chrome-extension-router'
+import { goTo } from 'react-chrome-extension-router'
 import useNoteStore from '@/modules/note/store.ts'
 import { useEffect } from 'react'
 import { INote } from '@/modules/note/types.ts'
 import { format } from 'date-fns'
 import NoteCreateView from '@/modules/note/note-create.tsx'
+import BackButton from '@/modules/common/back-button.tsx'
+import HeaderTitle from '@/modules/common/header-title.tsx'
 
 const NoteView = () => {
-  const { initApp, isInitializing, notes, syncNotes, fetchNotes } =
-    useNoteStore()
+  const {
+    initApp,
+    isInitializing,
+    setCurrentNote,
+    notes,
+    syncNotes,
+    fetchNotes,
+  } = useNoteStore()
 
   useEffect(() => {
     const fetch = async () => {
@@ -26,15 +34,23 @@ const NoteView = () => {
 
   return (
     <div className='flex flex-col scrollbar-hide'>
-      <div className='flex w-full flex-row justify-between p-4 pr-6 border-b-[1px]'>
-        <h2 className='text-base text-primary font-bold tracking-wide'>
-          Notes
-        </h2>
-        <Link component={NoteCreateView}>
-          <Plus className='cursor-pointer text-primary' />
-        </Link>
+      <div className='flex w-full flex-row justify-between p-4 border-b-[1px]'>
+        <BackButton />
+        <HeaderTitle title='Notes' />
       </div>
-      <div className='flex flex-col p-4 gap-4'>
+      <div className='flex flex-col w-full p-4 gap-2'>
+        <div className='flex flex-col gap-2'>
+          <div className='flex flex-row items-center justify-between'>
+            <h2 className='text-base font-bold tracking-wide'>Recent Notes</h2>
+            <Plus
+              className='cursor-pointer'
+              onClick={() => {
+                setCurrentNote(null)
+                goTo(NoteCreateView)
+              }}
+            />
+          </div>
+        </div>
         <div className='flex flex-col gap-2'>
           {notes.length === 0 && (
             <div className='flex flex-col gap-2 items-center py-4 mb-4'>
@@ -57,6 +73,7 @@ interface INoteItemProps {
 }
 
 const NoteItem = (props: INoteItemProps) => {
+  const { setCurrentNote } = useNoteStore()
   const { note } = props
 
   return (
@@ -69,9 +86,14 @@ const NoteItem = (props: INoteItemProps) => {
           <p className='text-base'>{note.title}</p>
         </div>
       </div>
-      <Link component={NoteCreateView} props={{ note }}>
-        <ChevronRight strokeWidth={1} className='cursor-pointer' />
-      </Link>
+      <ChevronRight
+        strokeWidth={1}
+        className='cursor-pointer'
+        onClick={() => {
+          setCurrentNote(note)
+          goTo(NoteCreateView)
+        }}
+      />
     </div>
   )
 }

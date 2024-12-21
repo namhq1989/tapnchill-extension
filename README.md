@@ -3,6 +3,8 @@
 ### Build notes
 
 - [ ] Modify `public/offscreen.html`: remove `/scripts` in offscreen script
-- [ ] Update `manifest.json`
+- [ ] Update `manifest.json`: update version, rename extension
 - [ ] Update `scripts/offscreen.js`: change API host
 - [ ] Check .env data
+- [ ] Update extension version in App Menu
+- [ ] Build with `pnpm build-production`

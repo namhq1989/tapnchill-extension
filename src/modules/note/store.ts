@@ -32,6 +32,11 @@ const useNoteStore = create<INoteStore>((set, get) => ({
     })
   },
 
+  currentNote: null,
+  setCurrentNote: (note: INote | null) => {
+    set({ currentNote: note })
+  },
+
   syncNotes: async () => {
     const { showErrorNotification } = useNotificationStore.getState()
 
@@ -227,7 +232,7 @@ const useNoteStore = create<INoteStore>((set, get) => ({
 
           const { notes } = get()
           notes.unshift(newNote)
-          set({ notes })
+          set({ notes, currentNote: newNote })
         },
       )
 

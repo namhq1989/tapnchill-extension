@@ -1,215 +1,98 @@
-import { ChangeEvent, useEffect, useState } from 'react'
-import QrCodeWithLogo from 'qrcode-with-logos'
 import BackButton from '@/modules/common/back-button.tsx'
 import HeaderTitle from '@/modules/common/header-title.tsx'
+import { ChevronRight, Dot, Plus } from 'lucide-react'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { Button } from '@/components/ui/button.tsx'
-import QRCodeURLForm from '@/modules/qrcode/url-form'
-import ColorPicker from '@/components/ui/color-picker.tsx'
-import useNotificationStore from '@/modules/notification/store.ts'
-import { CornerType, DotType } from 'qrcode-with-logos/types/src/core/types'
-import { Input } from '@/components/ui/input.tsx'
-
-const types = [
-  { value: 'url', label: 'URL' },
-  { value: 'vcard', label: 'vCard' },
-  { value: 'text', label: 'Text' },
-  { value: 'email', label: 'E-mail' },
-  { value: 'sms', label: 'SMS' },
-  { value: 'wifi', label: 'Wi-Fi' },
-  { value: 'bitcoin', label: 'Bitcoin' },
-  { value: 'twitter', label: 'Twitter' },
-  { value: 'facebook', label: 'Facebook' },
-  { value: 'pdf', label: 'PDF' },
-  { value: 'mp3', label: 'MP3' },
-  { value: 'appstores', label: 'App Stores' },
-  { value: 'images', label: 'Images' },
-  { value: '2dbarcode', label: '2D Barcodes' },
-]
-
-const styles = [
-  {
-    value: 'rounded',
-    cornerValue: 'rounded',
-    label: 'Rounded',
-  },
-  {
-    value: 'square',
-    cornerValue: 'square',
-    label: 'Square',
-  },
-  {
-    value: 'dot',
-    cornerValue: 'circle',
-    label: 'Dot',
-  },
-  {
-    value: 'diamond',
-    cornerValue: 'circle-diamond',
-    label: 'Diamond',
-  },
-  {
-    value: 'star',
-    cornerValue: 'circle-star',
-    label: 'Star',
-  },
-  {
-    value: 'fluid-line',
-    cornerValue: 'rounded',
-    label: 'Fluid',
-  },
-  {
-    value: 'stripe',
-    cornerValue: 'square',
-    label: 'Stripe',
-  },
-]
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { qrTypes } from '@/modules/qrcode/data.ts'
+import { QRCodeType } from '@/modules/qrcode/types.ts'
+import { goTo } from 'react-chrome-extension-router'
+import CreateQRCodeURLForm from '@/modules/qrcode/create-url-form.tsx'
+import CreateQRCodeTextForm from '@/modules/qrcode/create-text-form.tsx'
+import CreateQRCodeEmailForm from '@/modules/qrcode/create-email-form.tsx'
+import CreateQRCodeSMSForm from '@/modules/qrcode/create-sms-form.tsx'
+import CreateQRCodeVCardForm from '@/modules/qrcode/create-vcard-form.tsx'
+import CreateQRCodeLocationForm from '@/modules/qrcode/create-location-form.tsx'
+import CreateQRCodeCryptocurrencyForm from '@/modules/qrcode/create-cryptocurrency-form.tsx'
 
 const QRCodeView = () => {
-  const { showErrorNotification } = useNotificationStore()
-
-  const [logo, setLogo] = useState<string | null>(null)
-  const [color, setColor] = useState('#000000')
-  const [selectedType, setSelectedType] = useState<string>('url')
-  const [selectedStyle, setSelectedStyle] = useState<string>('rounded')
-  const [url, setUrl] = useState<string>('')
-
-  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        setLogo(e.target?.result as string) // Base64 URL of the selected file
-      }
-      reader.readAsDataURL(file)
-    }
-  }
-
-  const handleRender = () => {
-    if (selectedType === 'url' && !url) {
-      showErrorNotification({
-        description: 'Please enter a valid URL',
-      })
-      return
-    }
-
-    const imageElement = document.getElementById('image')
-    if (imageElement instanceof HTMLImageElement && url) {
-      const style = styles.find((style) => style.value === selectedStyle)
-
-      new QrCodeWithLogo({
-        image: imageElement,
-        content: url,
-        width: 200,
-        logo: {
-          src: logo || '/icons/icon128.png',
-        },
-        dotsOptions: {
-          color,
-          type: style?.value as DotType,
-        },
-        cornersOptions: {
-          color,
-          type: style?.cornerValue as CornerType,
-        },
-      })
-    }
-  }
-
-  useEffect(() => {
-    const imageElement = document.getElementById('image')
-    if (imageElement instanceof HTMLImageElement) {
-      new QrCodeWithLogo({
-        image: imageElement,
-        content: 'https://bapbi.app',
-        width: 200,
-        logo: {
-          src: '/icons/icon128.png',
-        },
-      })
-    }
-  }, [])
-
   return (
-    <div className='flex flex-col w-[400px] min-h-[600px] scrollbar-hide'>
+    <div className='flex flex-col scrollbar-hide'>
       <div className='flex w-full flex-row justify-between p-4 border-b-[1px]'>
         <BackButton />
         <HeaderTitle title='QR Code' />
       </div>
       <div className='flex flex-col w-full p-4 gap-4'>
-        <div className='flex flex-col items-center justify-center my-8 gap-4 pb-4 border-b-[1px]'>
-          <img id='image' alt='qr-code' className='w-[200px] mb-4' />
-          <div className='flex flex-row w-full gap-4 items-center justify-between'>
-            <p className='text-base'>Color</p>
-            <ColorPicker
-              background={color}
-              setBackground={setColor}
-              className='w-[200px]'
-            />
+        <div className='flex flex-col gap-2'>
+          <div className='flex flex-row items-center justify-between'>
+            <h2 className='text-base font-bold tracking-wide'>
+              Recent QR Codes
+            </h2>
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <Plus />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className='mr-4 w-[220px]'>
+                {qrTypes.map((t) => {
+                  const Icon = t.icon
+                  return (
+                    <DropdownMenuItem
+                      key={t.value}
+                      className='p-4 cursor-pointer'
+                      onClick={() => {
+                        if (t.value === QRCodeType.url) {
+                          goTo(CreateQRCodeURLForm)
+                        } else if (t.value === QRCodeType.text) {
+                          goTo(CreateQRCodeTextForm)
+                        } else if (t.value === QRCodeType.email) {
+                          goTo(CreateQRCodeEmailForm)
+                        } else if (t.value === QRCodeType.sms) {
+                          goTo(CreateQRCodeSMSForm)
+                        } else if (t.value === QRCodeType.vcard) {
+                          goTo(CreateQRCodeVCardForm)
+                        } else if (t.value === QRCodeType.location) {
+                          goTo(CreateQRCodeLocationForm)
+                        } else if (t.value === QRCodeType.cryptocurrency) {
+                          goTo(CreateQRCodeCryptocurrencyForm)
+                        }
+                      }}
+                    >
+                      <Icon />
+                      <p className='ml-2'>{t.label}</p>
+                    </DropdownMenuItem>
+                  )
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
-          <div className='flex flex-row w-full gap-4 items-center justify-between'>
-            <p className='text-base'>Logo</p>
-            <div className='relative'>
-              <Input
-                id='fileInput'
-                className='absolute inset-0 w-full h-full opacity-0 cursor-pointer'
-                type='file'
-                accept='image/*'
-                onChange={handleFileChange}
-              />
-              <label
-                htmlFor='fileInput'
-                className='w-[200px] inline-block px-4 py-2 text-sm border-[1px] rounded-xl bg-transparent cursor-pointer'
-              >
-                Upload Logo
-              </label>
-            </div>
+          <div className='flex flex-col gap-2'>
+            <QRCodeItem />
+            <QRCodeItem />
+            <QRCodeItem />
+            <QRCodeItem />
+            <QRCodeItem />
           </div>
-          <div className='flex flex-row w-full items-center justify-between'>
-            <p className='text-sm'>Select Style</p>
-            <Select
-              onValueChange={setSelectedStyle}
-              defaultValue={selectedStyle}
-            >
-              <SelectTrigger className='w-[200px]'>
-                <SelectValue placeholder='Select a style' />
-              </SelectTrigger>
-              <SelectContent>
-                {styles.map((type) => (
-                  <SelectItem key={type.value} value={type.value}>
-                    {type.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className='flex flex-row w-full items-center justify-between'>
-            <p className='text-sm'>Select Type</p>
-            <Select onValueChange={setSelectedType} defaultValue={selectedType}>
-              <SelectTrigger className='w-[200px]'>
-                <SelectValue placeholder='Select a type' />
-              </SelectTrigger>
-              <SelectContent className='h-[300px]'>
-                {types.map((type) => (
-                  <SelectItem key={type.value} value={type.value}>
-                    {type.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <Button className='w-full font-bold' onClick={handleRender}>
-            Render
-          </Button>
         </div>
-        {selectedType === 'url' && <QRCodeURLForm url={url} setUrl={setUrl} />}
       </div>
+    </div>
+  )
+}
+
+const QRCodeItem = () => {
+  return (
+    <div className='flex flex-row items-center justify-between p-4 container-selected rounded-xl'>
+      <div className='flex flex-col gap-1'>
+        <p className='text-sm'>QR code name</p>
+        <div className='flex flex-row items-center justify-center'>
+          <p className='text-sm text-muted-foreground'>25/12/2024</p>
+          <Dot className='text-muted-foreground' />
+          <p className='text-sm text-muted-foreground'>Link</p>
+        </div>
+      </div>
+      <ChevronRight />
     </div>
   )
 }
