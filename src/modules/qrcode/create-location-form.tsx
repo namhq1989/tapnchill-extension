@@ -8,12 +8,15 @@ import useQRCodeStore from '@/modules/qrcode/store.ts'
 import { Button } from '@/components/ui/button.tsx'
 import { Input } from '@/components/ui/input.tsx'
 import { renderQRCode } from '@/modules/qrcode/util.ts'
+import { QRCodeType } from '@/modules/qrcode/types.ts'
+import { goTo } from 'react-chrome-extension-router'
+import QRCodeDetailView from '@/modules/qrcode/detail.tsx'
 
 const CreateQRCodeLocationForm = () => {
   const { showErrorNotification } = useNotificationStore()
-  const { settings } = useQRCodeStore()
+  const { isBlocking, settings, createQRCode } = useQRCodeStore()
 
-  // Default values
+  const [name, setName] = useState('')
   const [latitude, setLatitude] = useState('51.510357')
   const [longitude, setLongitude] = useState('-0.116773')
 
@@ -34,6 +37,32 @@ const CreateQRCodeLocationForm = () => {
     handleRender()
   }, [handleRender])
 
+  const create = async () => {
+    if (!latitude.trim() || !longitude.trim()) {
+      showErrorNotification({
+        description: 'Please enter both latitude and longitude',
+      })
+      return
+    }
+
+    const { qrCode, isSuccess } = await createQRCode(
+      name,
+      QRCodeType.location,
+      `geo:${latitude},${longitude}`,
+      settings,
+      {
+        location: {
+          latitude: Number(latitude),
+          longitude: Number(longitude),
+        },
+      },
+    )
+
+    if (isSuccess) {
+      goTo(QRCodeDetailView, { qrCode })
+    }
+  }
+
   return (
     <div className='flex flex-col scrollbar-hide'>
       <div className='flex w-full flex-row justify-between p-4 border-b-[1px]'>
@@ -51,7 +80,12 @@ const CreateQRCodeLocationForm = () => {
           </h2>
           <div className='flex flex-col w-full gap-2'>
             <Label htmlFor='name'>Name</Label>
-            <Input id='name' placeholder='QR Code Name' />
+            <Input
+              id='name'
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder='QR Code Name'
+            />
           </div>
           <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
             <div className='flex flex-col w-full gap-2'>
@@ -79,7 +113,9 @@ const CreateQRCodeLocationForm = () => {
               />
             </div>
           </div>
-          <Button className='font-bold'>Create</Button>
+          <Button disabled={isBlocking} className='font-bold' onClick={create}>
+            Create
+          </Button>
         </div>
       </div>
     </div>

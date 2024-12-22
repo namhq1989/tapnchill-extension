@@ -1,39 +1,43 @@
 import { goTo, Link } from 'react-chrome-extension-router'
 import QRCodeView from '@/modules/qrcode/view.tsx'
 import NoteView from '@/modules/note/view.tsx'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import LoadingIndicator from '@/modules/common/loading-indicator.tsx'
 import useQRCodeStore from '@/modules/qrcode/store.ts'
+import usePanelStore from '@/modules/panel/store.ts'
 
-const MenuItem = () => {
+const PanelMenuItem = () => {
+  const { initApp, isInitializing } = usePanelStore()
   const { initQRCodes } = useQRCodeStore()
-  const [initializing, setInitializing] = useState(false)
 
   useEffect(() => {
-    chrome.storage.local.get(['panelMenu'], async (result) => {
-      await initQRCodes()
-      const { panelMenu } = result
+    const fetch = async () => {
+      await initApp()
+    }
 
-      if (panelMenu) {
-        chrome.storage.local
-          .set({
-            panelMenu: '',
-          })
-          .then(() => {
-            if (panelMenu === 'notes') {
-              goTo(NoteView)
-            } else if (panelMenu === 'qr') {
-              goTo(QRCodeView)
-            }
-            setInitializing(true)
-          })
-      } else {
-        setInitializing(true)
-      }
+    fetch().then(() => {
+      chrome.storage.local.get(['panelMenu'], async (result) => {
+        await initQRCodes()
+        const { panelMenu } = result
+
+        if (panelMenu) {
+          chrome.storage.local
+            .set({
+              panelMenu: '',
+            })
+            .then(() => {
+              if (panelMenu === 'notes') {
+                goTo(NoteView)
+              } else if (panelMenu === 'qr') {
+                goTo(QRCodeView)
+              }
+            })
+        }
+      })
     })
-  }, [])
+  }, [initApp, initQRCodes])
 
-  if (!initializing) {
+  if (isInitializing) {
     return (
       <div className='flex flex-col gap-8 w-[400px] h-[600px] scrollbar-hide justify-center items-center'>
         <img src='/icons/icon128.png' alt='logo' width={48} height={48} />
@@ -70,4 +74,4 @@ const MenuItem = () => {
   )
 }
 
-export default MenuItem
+export default PanelMenuItem

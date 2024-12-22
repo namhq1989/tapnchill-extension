@@ -8,12 +8,15 @@ import useQRCodeStore from '@/modules/qrcode/store.ts'
 import { Button } from '@/components/ui/button.tsx'
 import { Input } from '@/components/ui/input.tsx'
 import { renderQRCode } from '@/modules/qrcode/util.ts'
+import { QRCodeType } from '@/modules/qrcode/types.ts'
+import { goTo } from 'react-chrome-extension-router'
+import QRCodeDetailView from '@/modules/qrcode/detail.tsx'
 
 const CreateQRCodeVCardForm = () => {
   const { showErrorNotification } = useNotificationStore()
-  const { settings } = useQRCodeStore()
+  const { isBlocking, settings, createQRCode } = useQRCodeStore()
 
-  // Default values
+  const [name, setName] = useState('')
   const [firstName, setFirstName] = useState('John')
   const [lastName, setLastName] = useState('Doe')
   const [phoneNumber, setPhoneNumber] = useState('+1234567890')
@@ -31,15 +34,15 @@ const CreateQRCodeVCardForm = () => {
 
     // Format the vCard QR code content
     const vCardContent = `
-      BEGIN:VCARD
-      VERSION:3.0
-      N:${lastName};${firstName};;;
-      FN:${firstName} ${lastName}
-      ORG:${organization}
-      TITLE:${title}
-      TEL:${phoneNumber}
-      EMAIL:${email}
-      END:VCARD
+BEGIN:VCARD
+VERSION:3.0
+N:${lastName};${firstName};;;
+FN:${firstName} ${lastName}
+ORG:${organization}
+TITLE:${title}
+TEL:${phoneNumber}
+EMAIL:${email}
+END:VCARD
     `.trim()
 
     renderQRCode(vCardContent, settings)
@@ -58,6 +61,48 @@ const CreateQRCodeVCardForm = () => {
     handleRender()
   }, [handleRender])
 
+  const create = async () => {
+    if (!firstName.trim() || !lastName.trim()) {
+      showErrorNotification({
+        description: 'Please enter both first and last names',
+      })
+      return
+    }
+
+    const vCardContent = `
+BEGIN:VCARD
+VERSION:3.0
+N:${firstName};${lastName};;;
+FN:${firstName} ${lastName}
+ORG:${organization}
+TITLE:${title}
+TEL:${phoneNumber}
+EMAIL:${email}
+END:VCARD
+    `.trim()
+
+    const { qrCode, isSuccess } = await createQRCode(
+      name,
+      QRCodeType.vcard,
+      vCardContent,
+      settings,
+      {
+        vcard: {
+          firstName,
+          lastName,
+          phone: phoneNumber,
+          email,
+          organization,
+          job: title,
+        },
+      },
+    )
+
+    if (isSuccess) {
+      goTo(QRCodeDetailView, { qrCode })
+    }
+  }
+
   return (
     <div className='flex flex-col scrollbar-hide'>
       <div className='flex w-full flex-row justify-between p-4 border-b-[1px]'>
@@ -75,7 +120,12 @@ const CreateQRCodeVCardForm = () => {
           </h2>
           <div className='flex flex-col w-full gap-2'>
             <Label htmlFor='name'>Name</Label>
-            <Input id='name' placeholder='QR Code Name' />
+            <Input
+              id='name'
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder='QR Code Name'
+            />
           </div>
 
           {/* First Name and Last Name in One Row */}
@@ -164,7 +214,9 @@ const CreateQRCodeVCardForm = () => {
             </div>
           </div>
 
-          <Button className='font-bold'>Create</Button>
+          <Button disabled={isBlocking} className='font-bold' onClick={create}>
+            Create
+          </Button>
         </div>
       </div>
     </div>

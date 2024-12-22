@@ -9,12 +9,15 @@ import useQRCodeStore from '@/modules/qrcode/store.ts'
 import { Button } from '@/components/ui/button.tsx'
 import { Input } from '@/components/ui/input.tsx'
 import { renderQRCode } from '@/modules/qrcode/util.ts'
+import { QRCodeType } from '@/modules/qrcode/types.ts'
+import { goTo } from 'react-chrome-extension-router'
+import QRCodeDetailView from '@/modules/qrcode/detail.tsx'
 
 const CreateQRCodeSMSForm = () => {
   const { showErrorNotification } = useNotificationStore()
-  const { settings } = useQRCodeStore()
+  const { isBlocking, settings, createQRCode } = useQRCodeStore()
 
-  // Default values
+  const [name, setName] = useState('')
   const [phoneNumber, setPhoneNumber] = useState('111-111-111')
   const [message, setMessage] = useState(
     'Hi there, this is a QR Code-generated SMS.',
@@ -37,6 +40,32 @@ const CreateQRCodeSMSForm = () => {
     handleRender()
   }, [handleRender])
 
+  const create = async () => {
+    if (!phoneNumber.trim()) {
+      showErrorNotification({
+        description: 'Please enter a valid phone number',
+      })
+      return
+    }
+
+    const { qrCode, isSuccess } = await createQRCode(
+      name,
+      QRCodeType.sms,
+      `SMSTO:${phoneNumber}:${message}`,
+      settings,
+      {
+        sms: {
+          to: phoneNumber,
+          body: message,
+        },
+      },
+    )
+
+    if (isSuccess) {
+      goTo(QRCodeDetailView, { qrCode })
+    }
+  }
+
   return (
     <div className='flex flex-col scrollbar-hide'>
       <div className='flex w-full flex-row justify-between p-4 border-b-[1px]'>
@@ -54,7 +83,12 @@ const CreateQRCodeSMSForm = () => {
           </h2>
           <div className='flex flex-col w-full gap-2'>
             <Label htmlFor='name'>Name</Label>
-            <Input id='name' placeholder='QR Code Name' />
+            <Input
+              id='name'
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder='QR Code Name'
+            />
           </div>
           <div className='flex flex-col w-full gap-2'>
             <Label htmlFor='phoneNumber'>Phone Number</Label>
@@ -83,7 +117,9 @@ const CreateQRCodeSMSForm = () => {
               rows={4}
             />
           </div>
-          <Button className='font-bold'>Create</Button>
+          <Button disabled={isBlocking} className='font-bold' onClick={create}>
+            Create
+          </Button>
         </div>
       </div>
     </div>

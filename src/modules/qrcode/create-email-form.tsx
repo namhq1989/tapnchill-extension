@@ -9,12 +9,15 @@ import useQRCodeStore from '@/modules/qrcode/store.ts'
 import { Button } from '@/components/ui/button.tsx'
 import { Input } from '@/components/ui/input.tsx'
 import { renderQRCode } from '@/modules/qrcode/util.ts'
+import { QRCodeType } from '@/modules/qrcode/types.ts'
+import { goTo } from 'react-chrome-extension-router'
+import QRCodeDetailView from '@/modules/qrcode/detail.tsx'
 
 const CreateQRCodeEmailForm = () => {
   const { showErrorNotification } = useNotificationStore()
-  const { settings } = useQRCodeStore()
+  const { isBlocking, settings, createQRCode } = useQRCodeStore()
 
-  // Default values
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('hi@bapbi.app')
   const [subject, setSubject] = useState('Hello from BapBi')
   const [body, setBody] = useState(
@@ -38,6 +41,33 @@ const CreateQRCodeEmailForm = () => {
     handleRender()
   }, [handleRender])
 
+  const create = async () => {
+    if (!email.trim()) {
+      showErrorNotification({
+        description: 'Please enter a valid email address',
+      })
+      return
+    }
+
+    const { qrCode, isSuccess } = await createQRCode(
+      name,
+      QRCodeType.email,
+      `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`,
+      settings,
+      {
+        email: {
+          to: email,
+          subject,
+          body,
+        },
+      },
+    )
+
+    if (isSuccess) {
+      goTo(QRCodeDetailView, { qrCode })
+    }
+  }
+
   return (
     <div className='flex flex-col scrollbar-hide'>
       <div className='flex w-full flex-row justify-between p-4 border-b-[1px]'>
@@ -55,7 +85,12 @@ const CreateQRCodeEmailForm = () => {
           </h2>
           <div className='flex flex-col w-full gap-2'>
             <Label htmlFor='name'>Name</Label>
-            <Input id='name' placeholder='QR Code Name' />
+            <Input
+              id='name'
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder='QR Code Name'
+            />
           </div>
           <div className='flex flex-col w-full gap-2'>
             <Label htmlFor='email'>Email Address</Label>
@@ -96,7 +131,9 @@ const CreateQRCodeEmailForm = () => {
               rows={8}
             />
           </div>
-          <Button className='font-bold'>Create</Button>
+          <Button disabled={isBlocking} className='font-bold' onClick={create}>
+            Create
+          </Button>
         </div>
       </div>
     </div>

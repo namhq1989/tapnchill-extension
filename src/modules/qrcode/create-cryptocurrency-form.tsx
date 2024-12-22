@@ -45,13 +45,6 @@ const CreateQRCodeCryptocurrencyForm = () => {
       return
     }
 
-    if (walletAddress === 'YOUR_WALLET_ADDRESS') {
-      showErrorNotification({
-        description: 'Please enter a valid wallet address',
-      })
-      return
-    }
-
     // Format the Cryptocurrency QR code content
     const cryptoContent = `${finalCurrency}:${walletAddress}${amount ? `?amount=${amount}` : ''}`
     renderQRCode(cryptoContent.trim(), settings)

@@ -1,12 +1,12 @@
-import { ChevronRight, Plus } from 'lucide-react'
+import { ArrowLeft, ChevronRight, Plus } from 'lucide-react'
 import { goTo } from 'react-chrome-extension-router'
 import useNoteStore from '@/modules/note/store.ts'
 import { useEffect } from 'react'
 import { INote } from '@/modules/note/types.ts'
 import { format } from 'date-fns'
 import NoteCreateView from '@/modules/note/note-create.tsx'
-import BackButton from '@/modules/common/back-button.tsx'
 import HeaderTitle from '@/modules/common/header-title.tsx'
+import PanelMenuItem from '@/modules/panel/menu-item.tsx'
 
 const NoteView = () => {
   const {
@@ -35,7 +35,10 @@ const NoteView = () => {
   return (
     <div className='flex flex-col scrollbar-hide'>
       <div className='flex w-full flex-row justify-between p-4 border-b-[1px]'>
-        <BackButton />
+        <ArrowLeft
+          className='cursor-pointer'
+          onClick={() => goTo(PanelMenuItem)}
+        />
         <HeaderTitle title='Notes' />
       </div>
       <div className='flex flex-col w-full p-4 gap-2'>
@@ -53,9 +56,14 @@ const NoteView = () => {
         </div>
         <div className='flex flex-col gap-2'>
           {notes.length === 0 && (
-            <div className='flex flex-col gap-2 items-center py-4 mb-4'>
+            <div className='flex flex-col gap-2 items-center py-4 my-8'>
+              <img
+                src='https://i.bapbi.app/illus-add-notes.svg'
+                alt='empty'
+                className='w-40 h-40 my-8'
+              />
               <p className='text-base text-muted-foreground'>
-                You don't have any notes yet!
+                You don't have any Notes yet!
               </p>
             </div>
           )}

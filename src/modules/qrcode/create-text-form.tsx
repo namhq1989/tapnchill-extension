@@ -9,10 +9,15 @@ import useQRCodeStore from '@/modules/qrcode/store.ts'
 import { Button } from '@/components/ui/button.tsx'
 import { renderQRCode } from '@/modules/qrcode/util.ts'
 import { Input } from '@/components/ui/input.tsx'
+import { QRCodeType } from '@/modules/qrcode/types.ts'
+import { goTo } from 'react-chrome-extension-router'
+import QRCodeDetailView from '@/modules/qrcode/detail.tsx'
 
 const CreateQRCodeTextForm = () => {
   const { showErrorNotification } = useNotificationStore()
-  const { settings } = useQRCodeStore()
+  const { isBlocking, settings, createQRCode } = useQRCodeStore()
+
+  const [name, setName] = useState('')
   const [text, setText] = useState('Your text here')
 
   const handleRender = useCallback(() => {
@@ -36,6 +41,29 @@ const CreateQRCodeTextForm = () => {
     handleRender()
   }, [handleRender])
 
+  const create = async () => {
+    if (!text.trim()) {
+      showErrorNotification({
+        description: 'Please enter some text',
+      })
+      return
+    }
+
+    const { qrCode, isSuccess } = await createQRCode(
+      name,
+      QRCodeType.text,
+      text,
+      settings,
+      {
+        text,
+      },
+    )
+
+    if (isSuccess) {
+      goTo(QRCodeDetailView, { qrCode })
+    }
+  }
+
   return (
     <div className='flex flex-col scrollbar-hide'>
       <div className='flex w-full flex-row justify-between p-4 border-b-[1px]'>
@@ -53,7 +81,12 @@ const CreateQRCodeTextForm = () => {
           </h2>
           <div className='flex flex-col w-full gap-2'>
             <Label htmlFor='name'>Name</Label>
-            <Input id='name' placeholder='QR Code Name' />
+            <Input
+              id='name'
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder='QR Code Name'
+            />
           </div>
           <div className='flex flex-col w-full gap-2'>
             <Label htmlFor='text'>Text</Label>
@@ -71,7 +104,9 @@ const CreateQRCodeTextForm = () => {
               rows={4}
             />
           </div>
-          <Button className='font-bold'>Create</Button>
+          <Button disabled={isBlocking} className='font-bold' onClick={create}>
+            Create
+          </Button>
         </div>
       </div>
     </div>
