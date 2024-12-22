@@ -6,6 +6,21 @@ import {
 import { Link } from 'react-chrome-extension-router'
 import FocusUIView from '@/modules/focus/view.tsx'
 
+const openSidePanel = (menu: string) => {
+  chrome.storage.local
+    .set({
+      panelMenu: menu,
+    })
+    .then(() => {
+      chrome.windows.getCurrent({ populate: true }, (window) => {
+        const windowId = window.id || 0
+        chrome.sidePanel.open({ windowId }).then(() => {
+          chrome.extension.getViews({ type: 'popup' }).forEach((v) => v.close())
+        })
+      })
+    })
+}
+
 const QuickMenu = () => {
   return (
     <Carousel
@@ -33,16 +48,7 @@ const QuickMenu = () => {
         <CarouselItem className='basis-1/5 flex items-center justify-center'>
           <div
             className='flex flex-col gap-2 p-4 items-center justify-center cursor-pointer'
-            onClick={() => {
-              chrome.windows.getCurrent({ populate: true }, (window) => {
-                const windowId = window.id || 0
-                chrome.sidePanel.open({ windowId }).then(() => {
-                  chrome.extension
-                    .getViews({ type: 'popup' })
-                    .forEach((v) => v.close())
-                })
-              })
-            }}
+            onClick={() => openSidePanel('notes')}
           >
             <img
               src='https://i.bapbi.app/notes.png'
@@ -52,19 +58,19 @@ const QuickMenu = () => {
             <p className='text-xs font-bold'>Note</p>
           </div>
         </CarouselItem>
-        {/*<CarouselItem className='basis-1/5 flex items-center justify-center'>*/}
-        {/*  <Link*/}
-        {/*    component={TaskView}*/}
-        {/*    className='flex flex-col gap-2 p-4 items-center justify-center'*/}
-        {/*  >*/}
-        {/*    <img*/}
-        {/*      src='https://i.bapbi.app/task.png?v=2'*/}
-        {/*      alt='task'*/}
-        {/*      className='w-7 h-7 bg-cover'*/}
-        {/*    />*/}
-        {/*    <p className='text-xs font-bold'>Task</p>*/}
-        {/*  </Link>*/}
-        {/*</CarouselItem>*/}
+        <CarouselItem className='basis-1/5 flex items-center justify-center'>
+          <div
+            className='flex flex-col gap-2 p-4 items-center justify-center cursor-pointer'
+            onClick={() => openSidePanel('qr')}
+          >
+            <img
+              src='https://i.bapbi.app/qr-code.png?v=2'
+              alt='task'
+              className='w-7 h-7 bg-cover'
+            />
+            <p className='text-xs font-bold'>QR</p>
+          </div>
+        </CarouselItem>
         {/*<CarouselItem className='basis-1/5 flex items-center justify-center'>*/}
         {/*  <Link*/}
         {/*    component={HabitView}*/}

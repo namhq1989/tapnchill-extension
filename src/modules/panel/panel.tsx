@@ -4,7 +4,7 @@ import '@/assets/stylesheet/wave-form.css'
 import { Toaster } from '@/components/ui/toaster.tsx'
 import { ThemeProvider } from '@/components/theme/theme-provider.tsx'
 import { Router } from 'react-chrome-extension-router'
-import NoteView from '@/modules/note/view.tsx'
+import PanelMenuItem from '@/modules/panel/menu-item.tsx'
 
 function init() {
   const rootContainer = document.querySelector('#__root')
@@ -15,7 +15,7 @@ function init() {
     <ThemeProvider defaultTheme='dark' storageKey='vite-ui-theme'>
       <Toaster />
       <Router>
-        <NoteView />
+        <PanelMenuItem />
       </Router>
     </ThemeProvider>,
   )

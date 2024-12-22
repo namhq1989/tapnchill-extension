@@ -36,46 +36,6 @@ const HabitView = () => {
     </div>
   )
 }
-//
-// interface IStatsSummaryViewProps {
-//   stats: IHabitDailyStats[]
-// }
-//
-// const StatsSummaryView = (props: IStatsSummaryViewProps) => {
-//   const { stats } = props
-//   const dates = generateDateArray()
-//
-//   const isAllCompleted = (date: Date): boolean => {
-//     const stat = stats.find((stat) => isSameDay(new Date(stat.date), date))
-//     return stat ? stat.isCompleted : false
-//   }
-//
-//   return (
-//     <div className='flex flex-row gap-2 justify-around'>
-//       {dates.map((date, index) => {
-//         let styles = ''
-//         if (index === dates.length - 1) {
-//           styles =
-//             'text-muted-foreground ring-1 ring-muted-foreground cursor-not-allowed'
-//         } else if (isAllCompleted(date)) {
-//           styles = 'bg-primary text-primary-foreground'
-//         } else if (index === dates.length - 2) {
-//           styles = 'border border-primary'
-//         } else {
-//           styles = 'border border-dashed border-red-400'
-//         }
-//
-//         return (
-//           <DailyActivitiesView
-//             key={date.getTime()}
-//             date={date}
-//             styles={styles}
-//           />
-//         )
-//       })}
-//     </div>
-//   )
-// }
 
 interface IHabitStatsViewProps {
   habit: IHabit

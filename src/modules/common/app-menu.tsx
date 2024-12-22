@@ -177,7 +177,7 @@ const AppMenu = () => {
             </div>
             <div className='flex flex-row items-center justify-between px-4 py-1 w-full'>
               <p className='text-xs'>Extension version</p>
-              <p className='text-xs'>v1.0.0</p>
+              <p className='text-xs'>v1.0.6</p>
             </div>
           </div>
           <div className='flex flex-col my-8 items-center justify-center'>
