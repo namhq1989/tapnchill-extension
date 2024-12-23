@@ -1,3 +1,5 @@
+import { SubscriptionPlan } from '@/modules/common/types.ts'
+
 export interface IBlockedSite {
   hostname: string
   addedAt: string
@@ -64,7 +66,7 @@ export interface IFocusSetupStore {
   addBlockedSite: (site: string) => void
   removeBlockedSite: (site: string) => void
   startFocus: () => void
-  setUserPlan: (plan: string) => void
+  setUserPlan: (plan: SubscriptionPlan) => void
 }
 
 export interface IFocusProgressingStore {

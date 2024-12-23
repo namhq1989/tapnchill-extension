@@ -8,6 +8,7 @@ import {
   IGetMeResponse,
   IGetSubscriptionPlansResponse,
   IGoogleSignInApiResponse,
+  SubscriptionPlan,
 } from '@/modules/common/types.ts'
 import useHttpStore from '@/modules/http/store.ts'
 import useNotificationStore from '@/modules/notification/store.ts'
@@ -33,7 +34,12 @@ const useAppStore = create<IAppStore>((set, get) => ({
       const me = mapMe(response)
       set({ me })
 
-      useFocusSetupStore.getState().setUserPlan(me.subscription.plan)
+      const plan =
+        (me.subscription.plan as SubscriptionPlan) || SubscriptionPlan.free
+      useFocusSetupStore.getState().setUserPlan(plan)
+
+      // persist plan to local storage
+      chrome.storage.local.set({ userPlan: plan }, () => {})
     } catch (err) {
       showErrorNotification({
         description: `Something went wrong. Please try again (${err})`,

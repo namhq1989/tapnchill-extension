@@ -17,8 +17,14 @@ import {
 import useHttpStore from '@/modules/http/store.ts'
 import { mapQRCodes } from '@/modules/qrcode/util.ts'
 import useNotificationStore from '@/modules/notification/store.ts'
+import { SubscriptionPlan } from '@/modules/common/types.ts'
 
 const useQRCodeStore = create<IQRStore>((set, get) => ({
+  userPlan: SubscriptionPlan.free,
+  setUserPlan: (plan: SubscriptionPlan) => {
+    set({ userPlan: plan })
+  },
+
   initQRCodes: (): Promise<void> => {
     return new Promise((resolve, reject) => {
       chrome.storage.local.get(['qrcodeSettings'], (result) => {
@@ -28,6 +34,7 @@ const useQRCodeStore = create<IQRStore>((set, get) => ({
         if (result.qrcodeSettings) {
           set({ settings: result.qrcodeSettings })
         }
+
         resolve()
       })
     })

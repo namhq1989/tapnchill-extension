@@ -32,6 +32,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog.tsx'
+import { SubscriptionPlan } from '@/modules/common/types.ts'
 
 export interface IQRCodeDetailProps {
   qrCode: IQRCode
@@ -39,7 +40,7 @@ export interface IQRCodeDetailProps {
 
 const QRCodeDetailView = (props: IQRCodeDetailProps) => {
   const { showNotification } = useNotificationStore()
-  const { updateQRCode, deleteQRCode } = useQRCodeStore()
+  const { userPlan, updateQRCode, deleteQRCode } = useQRCodeStore()
   const { qrCode } = props
   const type = qrTypes.find((t) => t.value === qrCode.type)
 
@@ -125,9 +126,10 @@ const QRCodeDetailView = (props: IQRCodeDetailProps) => {
                       key={value}
                       value={value.toString()}
                       disabled={
-                        value === QRCodeSize.xlarge ||
-                        value === QRCodeSize.xxlarge
-                      } // Disable xlarge and xxlarge
+                        userPlan === SubscriptionPlan.free &&
+                        (value === QRCodeSize.xlarge ||
+                          value === QRCodeSize.xxlarge)
+                      }
                       className='flex items-center justify-between cursor-pointer'
                     >
                       <span>{value}px</span>

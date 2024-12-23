@@ -1,4 +1,5 @@
 import { ComponentType } from 'react'
+import { SubscriptionPlan } from '@/modules/common/types.ts'
 
 export interface IQRType {
   value: QRCodeType
@@ -101,6 +102,9 @@ export interface IQRCode {
 }
 
 export interface IQRStore {
+  userPlan: SubscriptionPlan
+  setUserPlan: (plan: SubscriptionPlan) => void
+
   initQRCodes: () => Promise<void>
   settings: IQRSettings
   setSettings: (settings: IQRSettings) => void
