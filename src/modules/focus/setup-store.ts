@@ -8,6 +8,7 @@ import { validateAndExtractHostname } from '@/lib/string.ts'
 import useNotificationStore from '@/modules/notification/store.ts'
 import useFocusUIStore from '@/modules/focus/ui-store.ts'
 import useFocusProgressingStore from '@/modules/focus/progressing-store.ts'
+import { SubscriptionPlan } from '@/modules/common/types.ts'
 
 const FREE_PLAN_BLOCKED_SITES = 5
 const PRO_PLAN_BLOCKED_SITES = 50
@@ -40,7 +41,7 @@ const persistSessionSettings = (state: {
 
 const useFocusSetupStore = create<IFocusSetupStore>((set, get) => ({
   setUserPlan: (plan) => {
-    if (plan === 'pro') {
+    if (plan === SubscriptionPlan.pro) {
       set({ maxBlockedSites: PRO_PLAN_BLOCKED_SITES })
     } else {
       set({ maxBlockedSites: FREE_PLAN_BLOCKED_SITES })

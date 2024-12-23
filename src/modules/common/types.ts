@@ -1,3 +1,8 @@
+export enum SubscriptionPlan {
+  free = 'free',
+  pro = 'pro',
+}
+
 export interface IAppStore {
   userId: string
   userToken: string
