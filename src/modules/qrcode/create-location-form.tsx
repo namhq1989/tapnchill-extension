@@ -76,7 +76,7 @@ const CreateQRCodeLocationForm = () => {
         </div>
         <div className='flex flex-col gap-8'>
           <h2 className='text-base font-bold tracking-wide'>
-            [Location] QR Code Details
+            [LOCATION] QR Code Details
           </h2>
           <div className='flex flex-col w-full gap-2'>
             <Label htmlFor='name'>Name</Label>

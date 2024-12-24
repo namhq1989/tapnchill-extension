@@ -15,12 +15,14 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { renderQRCode } from '@/modules/qrcode/util.ts'
+import { QRCodeType } from '@/modules/qrcode/types.ts'
+import { goTo } from 'react-chrome-extension-router'
+import QRCodeDetailView from '@/modules/qrcode/detail.tsx'
 
 const CreateQRCodeCryptocurrencyForm = () => {
   const { showErrorNotification } = useNotificationStore()
-  const { settings } = useQRCodeStore()
+  const { isBlocking, settings, createQRCode } = useQRCodeStore()
 
-  // Default values
   const [name, setName] = useState('')
   const [currencyType, setCurrencyType] = useState('bitcoin')
   const [customCurrency, setCustomCurrency] = useState('')
@@ -61,6 +63,43 @@ const CreateQRCodeCryptocurrencyForm = () => {
     handleRender()
   }, [handleRender])
 
+  const create = async () => {
+    const finalCurrency =
+      currencyType === 'custom' ? customCurrency : currencyType
+
+    if (!finalCurrency.trim()) {
+      showErrorNotification({
+        description: 'Please select a currency or provide a custom coin code',
+      })
+      return
+    }
+
+    if (!walletAddress.trim() || walletAddress === 'YOUR_WALLET_ADDRESS') {
+      showErrorNotification({
+        description: 'Please enter a valid wallet address',
+      })
+      return
+    }
+
+    const { qrCode, isSuccess } = await createQRCode(
+      name,
+      QRCodeType.cryptocurrency,
+      `${finalCurrency}:${walletAddress}${amount ? `?amount=${amount}` : ''}`,
+      settings,
+      {
+        cryptocurrency: {
+          currency: finalCurrency,
+          walletAddress,
+          amount: Number(amount),
+        },
+      },
+    )
+
+    if (isSuccess) {
+      goTo(QRCodeDetailView, { qrCode })
+    }
+  }
+
   return (
     <div className='flex flex-col scrollbar-hide'>
       <div className='flex w-full flex-row justify-between p-4 border-b-[1px]'>
@@ -80,9 +119,9 @@ const CreateQRCodeCryptocurrencyForm = () => {
             <Label htmlFor='name'>Name</Label>
             <Input
               id='name'
-              placeholder='Enter QR code name'
               value={name}
               onChange={(e) => setName(e.target.value)}
+              placeholder='QR Code Name'
             />
           </div>
           <div className='flex flex-col w-full gap-2'>
@@ -146,7 +185,9 @@ const CreateQRCodeCryptocurrencyForm = () => {
               }}
             />
           </div>
-          <Button className='font-bold'>Create</Button>
+          <Button disabled={isBlocking} className='font-bold' onClick={create}>
+            Create
+          </Button>
         </div>
       </div>
     </div>
