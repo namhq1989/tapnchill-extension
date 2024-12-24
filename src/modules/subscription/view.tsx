@@ -8,6 +8,7 @@ const SubscriptionView = () => {
   const {
     isSubscriptionEnabled,
     subscriptionPlans,
+    resourcesLimitation,
     isGeneratingSubscriptionCheckoutURL,
     generateSubscriptionCheckoutURL,
     isGoogleSigningIn,
@@ -137,7 +138,9 @@ const SubscriptionView = () => {
               <p className='text-xs'>Play up to 2</p>
             </div>
             <div className='flex flex-col w-[30%] items-start gap-1'>
-              <p className='text-xs'>Play unlimited</p>
+              <p className='text-xs'>
+                Play <span className='text-primary'>Unlimited</span>
+              </p>
               {/*<p className='text-xs'>Custom presets</p>*/}
             </div>
           </div>
@@ -146,10 +149,18 @@ const SubscriptionView = () => {
               <p className='text-xs'>Note</p>
             </div>
             <div className='flex w-[30%] items-start'>
-              <p className='text-xs'>Max 20 notes</p>
+              <p className='text-xs'>
+                Max {resourcesLimitation.note.free} notes
+              </p>
             </div>
             <div className='flex w-[30%] items-start'>
-              <p className='text-xs'>Max 1000 notes</p>
+              <p className='text-xs'>
+                Max{' '}
+                <span className='text-primary'>
+                  {resourcesLimitation.note.pro}
+                </span>{' '}
+                notes
+              </p>
             </div>
           </div>
           <div className='flex px-0 py-4 border-b-2 border-b-muted'>
@@ -157,10 +168,18 @@ const SubscriptionView = () => {
               <p className='text-xs'>Habit Tracking</p>
             </div>
             <div className='flex w-[30%] items-start'>
-              <p className='text-xs'>Max 5 habits</p>
+              <p className='text-xs'>
+                Max {resourcesLimitation.habit.free} habits
+              </p>
             </div>
             <div className='flex w-[30%] items-start'>
-              <p className='text-xs'>Max 30 habits</p>
+              <p className='text-xs'>
+                Max{' '}
+                <span className='text-primary'>
+                  {resourcesLimitation.habit.pro}
+                </span>{' '}
+                habits
+              </p>
             </div>
           </div>
           <div className='flex px-0 py-4 border-b-2 border-b-muted'>
@@ -168,12 +187,47 @@ const SubscriptionView = () => {
               <p className='text-xs'>Task Management</p>
             </div>
             <div className='flex flex-col w-[30%] items-start gap-1'>
-              <p className='text-xs'>Max 5 goals</p>
-              <p className='text-xs'>Max 20 tasks per goal</p>
+              <p className='text-xs'>
+                Max {resourcesLimitation.goal.free} goals
+              </p>
+              <p className='text-xs'>
+                Max {resourcesLimitation.task.free} tasks per goal
+              </p>
             </div>
             <div className='flex flex-col w-[30%] items-start gap-1'>
-              <p className='text-xs'>Max 20 goals</p>
-              <p className='text-xs'>Max 50 tasks per goal</p>
+              <p className='text-xs'>
+                Max{' '}
+                <span className='text-primary'>
+                  {resourcesLimitation.goal.pro}
+                </span>{' '}
+                goals
+              </p>
+              <p className='text-xs'>
+                Max{' '}
+                <span className='text-primary'>
+                  {resourcesLimitation.task.pro}
+                </span>{' '}
+                tasks per goal
+              </p>
+            </div>
+          </div>
+          <div className='flex px-0 py-4 border-b-2 border-b-muted'>
+            <div className='flex w-[40%] items-start'>
+              <p className='text-xs'>QR Code</p>
+            </div>
+            <div className='flex w-[30%] items-start'>
+              <p className='text-xs'>
+                Max {resourcesLimitation.qrCode.free} codes
+              </p>
+            </div>
+            <div className='flex w-[30%] items-start'>
+              <p className='text-xs'>
+                Max{' '}
+                <span className='text-primary'>
+                  {resourcesLimitation.qrCode.pro}
+                </span>{' '}
+                codes
+              </p>
             </div>
           </div>
           <div className='flex px-0 py-4 border-b-2 border-b-muted'>
@@ -184,7 +238,9 @@ const SubscriptionView = () => {
               <p className='text-xs'>Block up to 5 websites</p>
             </div>
             <div className='flex w-[30%] items-start'>
-              <p className='text-xs'>Block up to 100 websites</p>
+              <p className='text-xs'>
+                Block up to <span className='text-primary'>50</span> websites
+              </p>
             </div>
           </div>
           <div className='flex px-0 py-4'>

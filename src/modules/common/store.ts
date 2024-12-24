@@ -49,6 +49,28 @@ const useAppStore = create<IAppStore>((set, get) => ({
 
   isSubscriptionEnabled: false,
   subscriptionPlans: [],
+  resourcesLimitation: {
+    goal: {
+      free: 5,
+      pro: 20,
+    },
+    task: {
+      free: 20,
+      pro: 50,
+    },
+    habit: {
+      free: 5,
+      pro: 20,
+    },
+    note: {
+      free: 20,
+      pro: 1000,
+    },
+    qrCode: {
+      free: 20,
+      pro: 1000,
+    },
+  },
   fetchSubscriptionPlans: async () => {
     const { get: httpGet } = useHttpStore.getState()
     const { showErrorNotification } = useNotificationStore.getState()
@@ -60,7 +82,14 @@ const useAppStore = create<IAppStore>((set, get) => ({
       set({
         isSubscriptionEnabled: response.isEnabled,
         subscriptionPlans: response.plans,
+        resourcesLimitation: response.resourcesLimitation,
       })
+
+      // persist plan resources limitation to local storage
+      chrome.storage.local.set(
+        { resourcesLimitation: response.resourcesLimitation },
+        () => {},
+      )
     } catch (err) {
       showErrorNotification({
         description: `Something went wrong. Please try again (${err})`,

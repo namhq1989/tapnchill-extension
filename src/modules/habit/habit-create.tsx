@@ -169,10 +169,10 @@ const HabitCreateView = (props: IHabitCreateViewProps) => {
                           control={form.control}
                           render={({ field }) => (
                             <div
-                              className={`flex w-full h-8 text-muted-foreground rounded-sm items-center justify-center cursor-pointer ${
+                              className={`flex h-10 w-full rounded-xl text-muted-foreground items-center justify-center cursor-pointer ${
                                 field.value.includes(day.id)
                                   ? 'bg-primary text-primary-foreground'
-                                  : 'ring-1 ring-muted-foreground'
+                                  : 'ring-1 ring-border'
                               }`}
                               onClick={() => {
                                 const selectedDays =

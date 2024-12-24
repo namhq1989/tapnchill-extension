@@ -14,6 +14,7 @@ export interface IAppStore {
 
   isSubscriptionEnabled: boolean
   subscriptionPlans: ISubscriptionPlan[]
+  resourcesLimitation: IResourcesLimitation
   fetchSubscriptionPlans: () => Promise<void>
 
   isGeneratingSubscriptionCheckoutURL: boolean
@@ -88,6 +89,7 @@ export interface ISubscriptionPlan {
 export interface IGetSubscriptionPlansResponse {
   isEnabled: boolean
   plans: ISubscriptionPlan[]
+  resourcesLimitation: IResourcesLimitation
 }
 
 export interface IGenerateSubscriptionCheckoutURLApiRequest {
@@ -96,4 +98,17 @@ export interface IGenerateSubscriptionCheckoutURLApiRequest {
 
 export interface IGenerateSubscriptionCheckoutURLApiResponse {
   checkoutUrl: string
+}
+
+export interface IPlanLimitation {
+  free: number
+  pro: number
+}
+
+export interface IResourcesLimitation {
+  goal: IPlanLimitation
+  task: IPlanLimitation
+  habit: IPlanLimitation
+  note: IPlanLimitation
+  qrCode: IPlanLimitation
 }
