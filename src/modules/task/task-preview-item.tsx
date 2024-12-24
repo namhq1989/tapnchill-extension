@@ -22,7 +22,7 @@ const TaskPreviewItem = (props: ITaskPreviewItemProps) => {
       />
       <div className='flex flex-col flex-grow gap-1'>
         <p
-          className={`text-sm font-medium cursor-pointer leading-tight ${isCompleted ? 'line-through' : ''}`}
+          className={`text-sm font-medium leading-tight ${isCompleted ? 'line-through' : ''}`}
         >
           {task.name}
         </p>

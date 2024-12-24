@@ -1,6 +1,6 @@
 import BackButton from '@/modules/common/back-button.tsx'
 import HeaderTitle from '@/modules/common/header-title.tsx'
-import { Plus, Settings } from 'lucide-react'
+import { Check, Plus, Settings } from 'lucide-react'
 import { Link } from 'react-chrome-extension-router'
 import HabitCreateView from '@/modules/habit/habit-create.tsx'
 import useHabitsStore from '@/modules/habit/store.ts'
@@ -47,7 +47,7 @@ const HabitStatsView = (props: IHabitStatsViewProps) => {
   const { habit, stats } = props
   const dates = generateDateArray()
 
-  const isCompleted = (date: Date): boolean => {
+  const isHabitCompleted = (date: Date): boolean => {
     const stat = stats.find((stat) => isSameDay(new Date(stat.date), date))
     return stat ? stat.completedIds.includes(habit.id) : false
   }
@@ -56,6 +56,7 @@ const HabitStatsView = (props: IHabitStatsViewProps) => {
     <div className='flex flex-row gap-2 justify-around'>
       {dates.map((date) => {
         const isScheduled = habit.daysOfWeek.includes(date.getDay())
+        const isCompleted = isHabitCompleted(date)
         let canComplete = false
 
         let styles = ''
@@ -63,7 +64,7 @@ const HabitStatsView = (props: IHabitStatsViewProps) => {
         //   styles =
         //     'text-muted-foreground border border-dashed border-muted-foreground/50 cursor-not-allowed'
         // } else
-        if (isCompleted(date)) {
+        if (isCompleted) {
           styles = 'bg-primary text-primary-foreground'
         } else if (!isScheduled || isBefore(date, habit.createdAt)) {
           styles = 'border border-muted-foreground/30 cursor-not-allowed'
@@ -75,7 +76,7 @@ const HabitStatsView = (props: IHabitStatsViewProps) => {
         return (
           <div
             key={`habit-stat-${date.getDay()}`}
-            className='flex flex-col gap-1 w-full'
+            className='flex flex-col gap-1 w-full justify-center items-center'
             title={canComplete ? 'Check' : ''}
           >
             <p
@@ -84,7 +85,7 @@ const HabitStatsView = (props: IHabitStatsViewProps) => {
               {format(date, 'dd')}
             </p>
             <div
-              className={`flex h-8 rounded-xl ${styles}`}
+              className={`flex h-8 w-8 rounded-full items-center justify-center ${styles}`}
               onClick={async () => {
                 if (
                   isBlocking ||
@@ -95,7 +96,9 @@ const HabitStatsView = (props: IHabitStatsViewProps) => {
                 }
                 await completeHabit(habit.id, date)
               }}
-            ></div>
+            >
+              {isCompleted && <Check size={16} />}
+            </div>
           </div>
         )
       })}
@@ -116,7 +119,7 @@ const HabitRecordsView = (props: IHabitRecordsViewProps) => {
     <div
       className={`flex flex-col gap-4 ${isActive ? 'container-selected' : 'bg-muted/40'} p-4 rounded-xl`}
     >
-      <div className='flex flex-row w-full gap-2 items-center'>
+      <div className='flex flex-row w-full gap-4 items-center'>
         <img
           src={`${import.meta.env.VITE_CDN_ENDPOINT}/${habit.icon}.png`}
           alt={habit.icon}
