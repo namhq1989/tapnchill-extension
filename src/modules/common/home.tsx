@@ -96,7 +96,7 @@ const HomeView = () => {
           <span className='text-primary underline underline-offset-4'>
             hi@bapbi.app
           </span>{' '}
-          for support.
+          for support
         </p>
       </div>
     )
