@@ -34,8 +34,8 @@ const FormSchema = z.object({
     .min(5, {
       message: 'Feedback must be at least 5 characters',
     })
-    .max(300, {
-      message: 'Feedback must not be longer than 300 characters',
+    .max(1000, {
+      message: 'Feedback must not be longer than 1000 characters',
     }),
 })
 

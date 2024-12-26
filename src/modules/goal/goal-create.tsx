@@ -18,6 +18,9 @@ import useGoalsStore from '@/modules/goal/store.ts'
 import { IGoal } from '@/modules/goal/types.ts'
 import { useEffect } from 'react'
 import { goBack } from 'react-chrome-extension-router'
+import TextLimitDisplay from '@/modules/common/text-limit-display.tsx'
+
+const DESCRIPTION_LIMIT = 1000
 
 const FormSchema = z.object({
   name: z
@@ -33,8 +36,8 @@ const FormSchema = z.object({
     .min(3, {
       message: 'Goal description must be at least 3 characters',
     })
-    .max(200, {
-      message: 'Goal description must not be longer than 200 characters',
+    .max(DESCRIPTION_LIMIT, {
+      message: `Goal description must not be longer than ${DESCRIPTION_LIMIT} characters`,
     }),
 })
 
@@ -79,6 +82,8 @@ const GoalCreateView = (props: IGoalCreateViewProps) => {
     }
   }
 
+  const descriptionValue = form.watch('description', '')
+
   return (
     <div className='flex flex-col w-[400px] min-h-[600px] scrollbar-hide'>
       <div className='flex w-full flex-row justify-between p-4 border-b-[1px]'>
@@ -115,12 +120,18 @@ const GoalCreateView = (props: IGoalCreateViewProps) => {
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea
-                      className='focus-visible:ring-transparent resize-none'
-                      placeholder='Input a description'
-                      rows={8}
-                      {...field}
-                    />
+                    <>
+                      <Textarea
+                        className='focus-visible:ring-transparent resize-none'
+                        placeholder='Input a description'
+                        rows={8}
+                        {...field}
+                      />
+                      <TextLimitDisplay
+                        text={descriptionValue}
+                        limit={DESCRIPTION_LIMIT}
+                      />
+                    </>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

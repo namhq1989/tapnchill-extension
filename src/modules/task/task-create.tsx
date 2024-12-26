@@ -34,6 +34,9 @@ import useTaskManipulationStore from '@/modules/task/task-manipulation-store.ts'
 import { TimePicker } from '@/components/ui/time-picker.tsx'
 import useGoalsStore from '@/modules/goal/store.ts'
 import { goBack } from 'react-chrome-extension-router'
+import TextLimitDisplay from '@/modules/common/text-limit-display.tsx'
+
+const DESCRIPTION_LIMIT = 1000
 
 const FormSchema = z.object({
   name: z
@@ -44,8 +47,8 @@ const FormSchema = z.object({
     .max(100, {
       message: 'Task name must not be longer than 100 characters',
     }),
-  description: z.string().max(300, {
-    message: 'Task description must not be longer than 300 characters',
+  description: z.string().max(DESCRIPTION_LIMIT, {
+    message: `Task description must not be longer than ${DESCRIPTION_LIMIT} characters`,
   }),
   goalId: z.string({
     required_error: 'Please select a goal',
@@ -78,6 +81,8 @@ const CreateTaskView = () => {
       goBack()
     }
   }
+
+  const descriptionValue = form.watch('description', '')
 
   return (
     <div className='flex flex-col w-[400px] min-h-[600px] scrollbar-hide'>
@@ -168,12 +173,18 @@ const CreateTaskView = () => {
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea
-                      className='focus-visible:ring-transparent resize-none'
-                      placeholder='Input a description'
-                      rows={8}
-                      {...field}
-                    />
+                    <>
+                      <Textarea
+                        className='focus-visible:ring-transparent resize-none'
+                        placeholder='Input a description'
+                        rows={8}
+                        {...field}
+                      />
+                      <TextLimitDisplay
+                        text={descriptionValue}
+                        limit={DESCRIPTION_LIMIT}
+                      />
+                    </>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

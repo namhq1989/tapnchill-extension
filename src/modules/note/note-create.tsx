@@ -6,7 +6,6 @@ import { z } from 'zod'
 import useNoteStore from '@/modules/note/store.ts'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useEffect, useState } from 'react'
 import {
   Form,
   FormControl,
@@ -31,6 +30,7 @@ import {
 } from '@/components/ui/alert-dialog.tsx'
 import { Button } from '@/components/ui/button.tsx'
 import BackButton from '@/modules/common/back-button.tsx'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 const defaultContent = Array(20).fill({
   type: 'paragraph',
@@ -49,6 +49,7 @@ const FormSchema = z.object({
 
 const NoteCreateView = () => {
   const [hasEditing, setHasEditing] = useState(false)
+  const cooldownRef = useRef(false) // To prevent spamming hotkey
   const {
     currentNote: note,
     createNote,
@@ -76,16 +77,55 @@ const NoteCreateView = () => {
     initialContent: note ? JSON.parse(note.description) : defaultContent,
   })
 
-  const onSubmit = async (data: z.infer<typeof FormSchema>) => {
-    if (isUpdating) {
-      note.title = data.title
-      note.description = JSON.stringify(editor.document)
-      await updateNote(note)
-      setHasEditing(false)
-    } else {
-      await createNote(data.title, JSON.stringify(editor.document), null)
+  const onSubmit = useCallback(
+    async (data: z.infer<typeof FormSchema>) => {
+      if (cooldownRef.current) return // Prevent spamming
+
+      cooldownRef.current = true
+      setTimeout(() => {
+        cooldownRef.current = false // Reset cooldown after 2 seconds
+      }, 2000)
+
+      if (isUpdating) {
+        note.title = data.title
+        note.description = JSON.stringify(editor.document)
+        await updateNote(note)
+        setHasEditing(false)
+      } else {
+        await createNote(data.title, JSON.stringify(editor.document), null)
+      }
+    },
+    [isUpdating, note, createNote, updateNote, editor],
+  )
+
+  // Handle hotkeys for Ctrl + S / Command + S
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+        event.preventDefault()
+        onSubmit(form.getValues()).then()
+      }
     }
-  }
+
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [form, onSubmit])
+
+  // Auto-save every 10 seconds if there are changes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (hasEditing) {
+        onSubmit(form.getValues()).then()
+      }
+    }, 10000)
+
+    return () => {
+      clearInterval(interval) // Cleanup interval on unmount
+    }
+  }, [hasEditing, form, onSubmit])
 
   return (
     <div className='flex flex-col scrollbar-hide'>
