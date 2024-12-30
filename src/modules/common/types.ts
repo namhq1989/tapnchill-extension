@@ -20,6 +20,9 @@ export interface IAppStore {
   isGeneratingSubscriptionCheckoutURL: boolean
   generateSubscriptionCheckoutURL: (subscriptionId: string) => Promise<string>
 
+  isGettingPaymentCustomerPortalURL: boolean
+  getPaymentCustomerPortalURL: () => Promise<string>
+
   isInitializing: boolean
   initApp: () => Promise<void>
   generateAnonymousUserId: (length: number) => string
@@ -111,4 +114,8 @@ export interface IResourcesLimitation {
   habit: IPlanLimitation
   note: IPlanLimitation
   qrCode: IPlanLimitation
+}
+
+export interface IGetPaymentCustomerPortalURLResponse {
+  url: string
 }
