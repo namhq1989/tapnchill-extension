@@ -36,12 +36,16 @@ const AppMenu = () => {
     isGoogleSigningIn,
     googleSignIn,
     isSubscriptionEnabled,
+    isGettingPaymentCustomerPortalURL,
+    getPaymentCustomerPortalURL,
     me,
   } = useAppStore()
 
   if (!me) {
     return <div />
   }
+
+  const isFree = me.subscription.plan === 'free'
 
   return (
     <Sheet key={side} open={isOpen} onOpenChange={setIsOpen}>
@@ -133,15 +137,11 @@ const AppMenu = () => {
               </p>
               <div className='flex flex-row items-center justify-between'>
                 <p className='text-sm'>Current plan</p>
-                <Badge
-                  variant={
-                    me.subscription.plan === 'free' ? 'secondary' : 'default'
-                  }
-                >
+                <Badge variant={isFree ? 'secondary' : 'default'}>
                   {me.subscription.plan.toUpperCase()}
                 </Badge>
               </div>
-              {me.subscription.plan === 'free' && isSubscriptionEnabled && (
+              {isFree && isSubscriptionEnabled && (
                 <Link component={SubscriptionView}>
                   <Button className='w-full h-[32px] rounded-xl font-bold'>
                     UPGRADE
@@ -155,6 +155,21 @@ const AppMenu = () => {
                     {format(me.subscription.expiry, 'dd/MM/yyyy')}
                   </p>
                 </div>
+              )}
+              {!isFree && (
+                <Button
+                  disabled={isGettingPaymentCustomerPortalURL}
+                  variant='secondary'
+                  className='w-full h-[32px] rounded-xl'
+                  onClick={async () => {
+                    const url = await getPaymentCustomerPortalURL()
+                    if (url) {
+                      window.open(url, '_blank')
+                    }
+                  }}
+                >
+                  Manage Plan
+                </Button>
               )}
             </div>
           )}

@@ -6,6 +6,7 @@ import {
   IGenerateSubscriptionCheckoutURLApiRequest,
   IGenerateSubscriptionCheckoutURLApiResponse,
   IGetMeResponse,
+  IGetPaymentCustomerPortalURLResponse,
   IGetSubscriptionPlansResponse,
   IGoogleSignInApiResponse,
   SubscriptionPlan,
@@ -124,6 +125,31 @@ const useAppStore = create<IAppStore>((set, get) => ({
         description: `Something went wrong. Please try again (${err})`,
       })
       return ''
+    }
+  },
+
+  isGettingPaymentCustomerPortalURL: false,
+  getPaymentCustomerPortalURL: async (): Promise<string> => {
+    set({ isGettingPaymentCustomerPortalURL: true })
+
+    const { get: httpGet } = useHttpStore.getState()
+    const { showErrorNotification } = useNotificationStore.getState()
+
+    try {
+      const response = await httpGet<IGetPaymentCustomerPortalURLResponse>(
+        'api/user/payment-customer-portal-url',
+        {},
+      )
+      return response.url
+    } catch (err) {
+      showErrorNotification({
+        description: `Something went wrong. Please try again (${err})`,
+      })
+      return ''
+    } finally {
+      set({
+        isGettingPaymentCustomerPortalURL: false,
+      })
     }
   },
 
