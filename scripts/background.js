@@ -525,7 +525,7 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
         .executeScript({
           target: { tabId: tab.id },
           func: (styles, text, color) => {
-            window.highlightText(styles, text, color)
+            window.highlightText({ selectedText: text }, styles, color)
           },
           args: [HIGHLIGHT_STYLES, info.selectionText, HIGHLIGHT_COLORS[0]], // Default color
         })

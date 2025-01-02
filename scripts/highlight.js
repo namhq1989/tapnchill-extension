@@ -67,8 +67,20 @@ window.applyHighlight = (textNode, startOffset, endOffset, styles, color) => {
   console.log('Highlight applied successfully.')
 }
 
-window.highlightText = (styles, selectedText, color) => {
-  console.log('highlightText called with:', { styles, selectedText, color })
+window.highlightText = (
+  { selectedText, xpath, startOffset, endOffset },
+  styles,
+  color,
+) => {
+  console.log('-------------')
+  console.log('highlightText called with:', {
+    selectedText,
+    xpath,
+    startOffset,
+    endOffset,
+    styles,
+    color,
+  })
 
   const selection = window.getSelection()
   if (selection.rangeCount === 0) {
@@ -87,14 +99,20 @@ window.highlightText = (styles, selectedText, color) => {
     return
   }
 
-  const xpath = window.getXPath(
-    textNode.nodeType === Node.TEXT_NODE ? textNode.parentNode : textNode,
-  )
+  if (!xpath) {
+    xpath = window.getXPath(
+      textNode.nodeType === Node.TEXT_NODE ? textNode.parentNode : textNode,
+    )
+  }
 
   console.log('Calculated XPath:', xpath)
 
-  const startOffset = range.startOffset
-  const endOffset = range.endOffset
+  if (!startOffset) {
+    startOffset = range.startOffset
+  }
+  if (!endOffset) {
+    endOffset = range.endOffset
+  }
 
   const positionData = {
     xpath,
@@ -171,12 +189,12 @@ window.initializeHighlightWithPalette = (styles, colors, currentColor) => {
               ? currentRange.startContainer.parentNode
               : currentRange.startContainer
 
-          const xPath = calculateXPath(container)
+          const xpath = calculateXPath(container)
           const startOffset = currentRange.startOffset
           const endOffset = currentRange.endOffset
 
           console.log('Highlight Data:', {
-            xPath,
+            xpath,
             selectedText,
             startOffset,
             endOffset,
@@ -184,7 +202,11 @@ window.initializeHighlightWithPalette = (styles, colors, currentColor) => {
           })
 
           // Optionally call highlightText with the calculated data
-          // window.highlightText(styles, selectedText, color)
+          window.highlightText(
+            { selectedText, xpath, startOffset, endOffset },
+            styles,
+            color,
+          )
         } else {
           console.error('No text selected for highlighting.')
         }
