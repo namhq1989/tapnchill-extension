@@ -396,6 +396,8 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
       sendResponse({ data: metrics })
     })
     return true
+  } else if (request.type === 'update-highlight-color') {
+    lastHighlightColor = request.color
   } else {
     sendResponse({
       success: false,
@@ -408,7 +410,28 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
 // HIGHLIGHT
 //
 
+const HIGHLIGHT_STYLES = {
+  backgroundColor: '#a1a1aa',
+  color: '#1a202c',
+  borderRadius: '4px',
+  padding: '2px 4px',
+  display: 'inline',
+  wordBreak: 'break-word',
+  margin: '2px 0',
+}
+
+const HIGHLIGHT_COLORS = [
+  '#a1a1aa',
+  '#f87171',
+  '#eab308',
+  '#4d7c0f',
+  '#60a5fa',
+  '#a78bfa',
+  '#e879f9',
+]
+
 const highlightInjectedTabs = new Set()
+let lastHighlightColor = HIGHLIGHT_COLORS[0]
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete') {
@@ -439,92 +462,76 @@ chrome.tabs.onRemoved.addListener((tabId) => {
   highlightInjectedTabs.delete(tabId)
 })
 
-chrome.contextMenus.create({
-  id: 'highlight',
-  title: 'Highlight Text',
-  contexts: ['selection'],
+chrome.contextMenus.removeAll(() => {
+  // Root menu for BapBi
+  chrome.contextMenus.create({
+    id: 'bapbi-root',
+    title: 'BapBi',
+    contexts: ['all'],
+  })
+
+  // Submenu: Enable Highlight
+  chrome.contextMenus.create({
+    id: 'enable-highlight',
+    parentId: 'bapbi-root',
+    title: 'Enable Highlight',
+    contexts: ['all'],
+  })
+
+  // Submenu: Highlight this text
+  chrome.contextMenus.create({
+    id: 'highlight-text',
+    parentId: 'bapbi-root',
+    title: 'Highlight this text',
+    contexts: ['selection'],
+  })
 })
 
-const HIGHLIGHT_STYLES = {
-  backgroundColor: '#a1a1aa',
-  color: '#1a202c',
-  borderRadius: '4px',
-  padding: '2px 4px',
-  display: 'inline',
-  wordBreak: 'break-word',
-  margin: '2px 0',
+// Function to inject `highlight.js` and initialize the floating palette
+const injectHighlightScript = (tabId) => {
+  if (highlightInjectedTabs.has(tabId)) {
+    console.log('Highlight.js already injected into this tab.')
+    return Promise.resolve()
+  }
+
+  return chrome.scripting
+    .executeScript({
+      target: { tabId },
+      files: ['highlight.js'], // Inject the file containing the logic
+    })
+    .then(() => {
+      highlightInjectedTabs.add(tabId)
+      console.log(`Highlight.js injected into tab ${tabId}`)
+      return chrome.scripting.executeScript({
+        target: { tabId },
+        func: (styles, colors) => {
+          window.initializeHighlightWithPalette(styles, colors)
+        },
+        args: [HIGHLIGHT_STYLES, HIGHLIGHT_COLORS],
+      })
+    })
+    .catch((err) => console.error('Failed to inject highlight.js:', err))
 }
 
-const HIGHLIGHT_COLORS = [
-  '#a1a1aa',
-  '#f87171',
-  '#eab308',
-  '#4d7c0f',
-  '#60a5fa',
-  '#a78bfa',
-  '#e879f9',
-]
-
-// chrome.contextMenus.onClicked.addListener((info, tab) => {
-//   if (info.menuItemId === 'highlight') {
-//     chrome.scripting
-//       .executeScript({
-//         target: { tabId: tab.id },
-//         func: highlightText,
-//         args: [HIGHLIGHT_STYLES, info.selectionText],
-//       })
-//       .then(() => {
-//         if (!highlightInjectedTabs.has(tab.id)) {
-//           chrome.scripting
-//             .executeScript({
-//               target: { tabId: tab.id },
-//               func: initializeFloatingPaletteLogic,
-//               args: [HIGHLIGHT_STYLES, HIGHLIGHT_COLORS],
-//             })
-//             .then(() => {
-//               highlightInjectedTabs.add(tab.id) // Mark this tab as injected
-//               console.log(`Injected floating icon logic into tab ${tab.id}`)
-//             })
-//             .catch((err) => console.error('Injection failed:', err))
-//         }
-//       })
-//   }
-// })
-
+// Handle menu item clicks
 chrome.contextMenus.onClicked.addListener((info, tab) => {
-  if (info.menuItemId === 'highlight') {
-    // Inject `highlight.js` if not already injected
-    if (!highlightInjectedTabs.has(tab.id)) {
+  if (info.menuItemId === 'enable-highlight') {
+    injectHighlightScript(tab.id).then(() => {
+      console.log('Highlight enabled for the tab.')
+    })
+  } else if (info.menuItemId === 'highlight-text') {
+    const highlightTextFunc = () => {
       chrome.scripting
         .executeScript({
           target: { tabId: tab.id },
-          files: ['highlight.js'], // Inject the file containing the logic
+          func: (styles, text, color) => {
+            window.highlightText(styles, text, color)
+          },
+          args: [HIGHLIGHT_STYLES, info.selectionText, HIGHLIGHT_COLORS[0]], // Default color
         })
-        .then(() => {
-          highlightInjectedTabs.add(tab.id)
-          console.log(`highlight.js injected into tab ${tab.id}`)
-        })
-        .catch((err) => console.error('Injection failed:', err))
+        .catch((err) => console.error('Failed to highlight text:', err))
     }
 
-    // Execute `highlightText` function after injection
-    chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      func: (styles, text, color) => {
-        // Call the global `highlightText` function
-        window.highlightText(styles, text, color)
-      },
-      args: [HIGHLIGHT_STYLES, info.selectionText, HIGHLIGHT_COLORS[0]], // Default color
-    })
-
-    // Initialize the floating palette if not already done
-    chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      func: (styles, colors) => {
-        // Call the global `initializeFloatingPaletteLogic` function
-        window.initializeFloatingPaletteLogic(styles, colors)
-      },
-      args: [HIGHLIGHT_STYLES, HIGHLIGHT_COLORS],
-    })
+    injectHighlightScript(tab.id).then(highlightTextFunc)
   }
 })

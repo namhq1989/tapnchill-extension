@@ -1,9 +1,131 @@
-window.highlightText = (styles, selectedText, color) => {
-  const applyHighlightStyles = (element, styles) => {
-    Object.assign(element.style, styles)
+window.getXPath = (node) => {
+  if (!node) return null // Handle invalid node input
+  if (node.id) {
+    console.log(`Node has ID, generating XPath: //*[@id="${node.id}"]`)
+    return `//*[@id="${node.id}"]`
+  }
+  if (node === document.body) {
+    console.log('Node is body, returning XPath: /html/body')
+    return '/html/body'
   }
 
-  const getXPath = (node) => {
+  let index = 1
+  let sibling = node.previousSibling
+
+  while (sibling) {
+    if (
+      sibling.nodeType === Node.ELEMENT_NODE &&
+      sibling.nodeName === node.nodeName
+    ) {
+      index++
+    }
+    sibling = sibling.previousSibling
+  }
+
+  const tagName = node.nodeName.toLowerCase()
+  const parentXPath = window.getXPath(node.parentNode)
+  return `${parentXPath}/${tagName}[${index}]`
+}
+
+window.saveHighlightData = (positionData) => {
+  console.log('Saving position data to localStorage:', positionData)
+
+  const baseUrl = `${location.origin}${location.pathname}`
+  const storedData = JSON.parse(localStorage.getItem('highlights') || '{}')
+
+  storedData[baseUrl] = storedData[baseUrl] || []
+  storedData[baseUrl].push(positionData)
+
+  localStorage.setItem('highlights', JSON.stringify(storedData))
+
+  console.log('Updated localStorage:', storedData)
+}
+
+window.applyHighlight = (textNode, startOffset, endOffset, styles, color) => {
+  console.log('Applying highlight:', { textNode, startOffset, endOffset })
+
+  const originalText = textNode.nodeValue
+  const beforeText = originalText.slice(0, startOffset)
+  const highlightedText = originalText.slice(startOffset, endOffset)
+  const afterText = originalText.slice(endOffset)
+
+  // Create a <span> element for the highlighted text
+  const span = document.createElement('span')
+  span.textContent = highlightedText
+  span.style.backgroundColor = color
+  Object.assign(span.style, styles)
+
+  // Replace the original text node with the modified content
+  const parentNode = textNode.parentNode
+  const beforeNode = document.createTextNode(beforeText)
+  const afterNode = document.createTextNode(afterText)
+
+  parentNode.replaceChild(afterNode, textNode)
+  parentNode.insertBefore(span, afterNode)
+  parentNode.insertBefore(beforeNode, span)
+
+  console.log('Highlight applied successfully.')
+}
+
+window.highlightText = (styles, selectedText, color) => {
+  console.log('highlightText called with:', { styles, selectedText, color })
+
+  const selection = window.getSelection()
+  if (selection.rangeCount === 0) {
+    console.error('No selection available.')
+    return
+  }
+
+  const range = selection.getRangeAt(0)
+  const textNode =
+    range.startContainer.nodeType === Node.TEXT_NODE
+      ? range.startContainer
+      : range.startContainer.firstChild
+
+  if (!textNode) {
+    console.error('No valid text node found.')
+    return
+  }
+
+  const xpath = window.getXPath(
+    textNode.nodeType === Node.TEXT_NODE ? textNode.parentNode : textNode,
+  )
+
+  console.log('Calculated XPath:', xpath)
+
+  const startOffset = range.startOffset
+  const endOffset = range.endOffset
+
+  const positionData = {
+    xpath,
+    startOffset,
+    endOffset,
+    color,
+  }
+
+  console.log('Position Data:', positionData)
+
+  window.saveHighlightData(positionData)
+  window.applyHighlight(textNode, startOffset, endOffset, styles, color)
+}
+
+window.initializeHighlightWithPalette = (styles, colors, currentColor) => {
+  console.log('Initializing highlight with palette...')
+  let currentRange = null
+  const palette = document.createElement('div')
+
+  palette.className = 'floating-palette'
+  palette.style.position = 'absolute'
+  palette.style.display = 'none'
+  palette.style.zIndex = '1000'
+  palette.style.padding = '8px'
+  palette.style.backgroundColor = '#ffffff'
+  palette.style.boxShadow = '0px 4px 6px rgba(0, 0, 0, 0.1)'
+  palette.style.borderRadius = '8px'
+  palette.style.display = 'flex'
+  palette.style.gap = '4px'
+
+  const calculateXPath = (node) => {
     if (node.id) {
       return `//*[@id="${node.id}"]`
     }
@@ -25,135 +147,8 @@ window.highlightText = (styles, selectedText, color) => {
     }
 
     const tagName = node.nodeName.toLowerCase()
-    return `${getXPath(node.parentNode)}/${tagName}[${index}]`
+    return `${calculateXPath(node.parentNode)}/${tagName}[${index}]`
   }
-
-  const calculateOffsets = (originalText, selectedText) => {
-    const selectionStart = originalText.indexOf(selectedText)
-    const selectionEnd = selectionStart + selectedText.length
-
-    return { startOffset: selectionStart, endOffset: selectionEnd }
-  }
-
-  const getBaseUrl = () => {
-    const url = new URL(window.location.href)
-    return `${url.origin}${url.pathname}`
-  }
-
-  const getFullTextFromRange = (range) => {
-    const container = range.commonAncestorContainer
-    if (container.nodeType === Node.TEXT_NODE) {
-      return container.textContent
-    } else {
-      // For multi-node selections, merge text from all selected nodes
-      const walker = document.createTreeWalker(
-        container,
-        NodeFilter.SHOW_TEXT,
-        {
-          acceptNode: (node) => {
-            return range.intersectsNode(node)
-              ? NodeFilter.FILTER_ACCEPT
-              : NodeFilter.FILTER_REJECT
-          },
-        },
-      )
-
-      let fullText = ''
-      while (walker.nextNode()) {
-        fullText += walker.currentNode.textContent
-      }
-      return fullText
-    }
-  }
-
-  const selection = window.getSelection()
-  if (selection.rangeCount > 0) {
-    const range = selection.getRangeAt(0)
-
-    // Locate the element containing the text
-    const textNode =
-      range.startContainer.nodeType === Node.TEXT_NODE
-        ? range.startContainer
-        : range.startContainer.firstChild
-
-    if (!textNode) {
-      console.error('No valid text node found.')
-      return
-    }
-
-    const containerElement =
-      textNode.nodeType === Node.TEXT_NODE ? textNode.parentNode : textNode
-
-    // Get the original text content
-    let originalText = containerElement.dataset.originalText
-
-    // If originalText is not already set, store it
-    if (!originalText) {
-      originalText = containerElement.innerText
-      containerElement.dataset.originalText = originalText
-    }
-
-    // Get the full selected text
-    const fullSelectedText = getFullTextFromRange(range)
-
-    // Calculate accurate offsets based on the original text
-    const { startOffset, endOffset } = calculateOffsets(
-      originalText,
-      fullSelectedText,
-    )
-
-    if (startOffset === -1) {
-      console.error('Selected text not found in original content.')
-      return
-    }
-
-    // Save the highlight data
-    const positionData = {
-      xpath: getXPath(textNode),
-      startOffset,
-      endOffset,
-      color,
-    }
-
-    const baseUrl = getBaseUrl()
-    const highlights = JSON.parse(localStorage.getItem('highlights') || '{}')
-    highlights[baseUrl] = highlights[baseUrl] || []
-    highlights[baseUrl].push(positionData)
-    localStorage.setItem('highlights', JSON.stringify(highlights))
-
-    console.log('Saved highlights:', highlights)
-
-    // Create a styled span for the highlight
-    const span = document.createElement('span')
-    applyHighlightStyles(span, { backgroundColor: color, ...styles })
-
-    span.textContent = fullSelectedText
-
-    range.deleteContents()
-    range.insertNode(span)
-
-    selection.removeAllRanges()
-    const icon = document.querySelector('.floating-icon')
-    if (icon) {
-      icon.style.display = 'none'
-    }
-  }
-}
-
-window.initializeFloatingPaletteLogic = (styles, colors) => {
-  let currentRange = null
-  const palette = document.createElement('div')
-
-  palette.className = 'floating-palette'
-  palette.style.position = 'absolute'
-  palette.style.display = 'none'
-  palette.style.zIndex = '1000'
-  palette.style.padding = '8px'
-  palette.style.backgroundColor = '#ffffff'
-  palette.style.boxShadow = '0px 4px 6px rgba(0, 0, 0, 0.1)'
-  palette.style.borderRadius = '8px'
-  palette.style.display = 'flex'
-  palette.style.gap = '4px'
 
   colors.forEach((color) => {
     const colorOption = document.createElement('div')
@@ -162,15 +157,39 @@ window.initializeFloatingPaletteLogic = (styles, colors) => {
     colorOption.style.backgroundColor = color
     colorOption.style.borderRadius = '50%'
     colorOption.style.cursor = 'pointer'
+    colorOption.style.border =
+      color === currentColor ? '1px solid black' : 'none'
 
     colorOption.addEventListener('click', () => {
       if (currentRange) {
-        const selectionText = currentRange.toString().trim()
-        if (selectionText) {
-          window.highlightText(styles, selectionText, color)
+        const selectedText = currentRange.toString().trim()
+
+        if (selectedText) {
+          // Calculate XPath and offsets
+          const container =
+            currentRange.startContainer.nodeType === Node.TEXT_NODE
+              ? currentRange.startContainer.parentNode
+              : currentRange.startContainer
+
+          const xPath = calculateXPath(container)
+          const startOffset = currentRange.startOffset
+          const endOffset = currentRange.endOffset
+
+          console.log('Highlight Data:', {
+            xPath,
+            selectedText,
+            startOffset,
+            endOffset,
+            color,
+          })
+
+          // Optionally call highlightText with the calculated data
+          // window.highlightText(styles, selectedText, color)
+        } else {
+          console.error('No text selected for highlighting.')
         }
       }
-      palette.style.display = 'none'
+      palette.style.display = 'none' // Hide the palette
     })
 
     palette.appendChild(colorOption)
@@ -178,6 +197,7 @@ window.initializeFloatingPaletteLogic = (styles, colors) => {
 
   document.body.appendChild(palette)
 
+  // Display the palette near the selection
   document.addEventListener('mouseup', () => {
     const selection = window.getSelection()
     if (selection.rangeCount > 0 && selection.toString().trim().length > 0) {
@@ -192,6 +212,7 @@ window.initializeFloatingPaletteLogic = (styles, colors) => {
     }
   })
 
+  // Hide the palette when clicking elsewhere
   document.addEventListener('mousedown', (event) => {
     if (!palette.contains(event.target)) {
       palette.style.display = 'none'
@@ -199,6 +220,7 @@ window.initializeFloatingPaletteLogic = (styles, colors) => {
   })
 }
 
+// Restore previously saved highlights
 window.restoreHighlights = () => {
   const getBaseUrl = () => {
     const url = new URL(window.location.href)
@@ -220,7 +242,7 @@ window.restoreHighlights = () => {
   highlights.forEach(({ xpath, startOffset, endOffset, color }) => {
     const evaluator = new XPathEvaluator()
     const result = evaluator.evaluate(
-      xpath.replace('/#text[1]', ''),
+      xpath,
       document,
       null,
       XPathResult.FIRST_ORDERED_NODE_TYPE,
@@ -230,7 +252,7 @@ window.restoreHighlights = () => {
     const container = result.singleNodeValue
 
     if (!container) {
-      console.error('Failed to locate element for XPath:', xpath)
+      console.error('Failed to locate container for XPath:', xpath)
       return
     }
 
