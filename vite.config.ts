@@ -20,6 +20,7 @@ export default defineConfig({
       input: {
         background: path.resolve(__dirname, 'scripts/background.js'),
         offscreen: path.resolve(__dirname, 'scripts/offscreen.js'),
+        highlight: path.resolve(__dirname, 'scripts/highlight.js'),
       },
       output: {
         entryFileNames: '[name].js',

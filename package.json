@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "rm -rf dist && vite",
     "build": "tsc -b && vite build",
     "build-development": "tsc -b && rm -rf dist && vite build --mode development",
     "build-production": "tsc -b && rm -rf dist && vite build --mode production",

@@ -403,3 +403,128 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
     })
   }
 })
+
+//
+// HIGHLIGHT
+//
+
+const highlightInjectedTabs = new Set()
+
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (changeInfo.status === 'complete') {
+    // Inject `highlight.js` first
+    chrome.scripting
+      .executeScript({
+        target: { tabId },
+        files: ['highlight.js'], // Inject the logic
+      })
+      .then(() => {
+        console.log(`Injected highlight.js into tab ${tabId}`)
+        // After injection, call `restoreHighlights`
+        return chrome.scripting.executeScript({
+          target: { tabId },
+          func: () => {
+            window.restoreHighlights() // Call the global restoreHighlights function
+          },
+        })
+      })
+      .then(() => {
+        console.log('Highlights restored successfully.')
+      })
+      .catch((err) => console.error('Error restoring highlights:', err))
+  }
+})
+
+chrome.tabs.onRemoved.addListener((tabId) => {
+  highlightInjectedTabs.delete(tabId)
+})
+
+chrome.contextMenus.create({
+  id: 'highlight',
+  title: 'Highlight Text',
+  contexts: ['selection'],
+})
+
+const HIGHLIGHT_STYLES = {
+  backgroundColor: '#a1a1aa',
+  color: '#1a202c',
+  borderRadius: '4px',
+  padding: '2px 4px',
+  display: 'inline',
+  wordBreak: 'break-word',
+  margin: '2px 0',
+}
+
+const HIGHLIGHT_COLORS = [
+  '#a1a1aa',
+  '#f87171',
+  '#eab308',
+  '#4d7c0f',
+  '#60a5fa',
+  '#a78bfa',
+  '#e879f9',
+]
+
+// chrome.contextMenus.onClicked.addListener((info, tab) => {
+//   if (info.menuItemId === 'highlight') {
+//     chrome.scripting
+//       .executeScript({
+//         target: { tabId: tab.id },
+//         func: highlightText,
+//         args: [HIGHLIGHT_STYLES, info.selectionText],
+//       })
+//       .then(() => {
+//         if (!highlightInjectedTabs.has(tab.id)) {
+//           chrome.scripting
+//             .executeScript({
+//               target: { tabId: tab.id },
+//               func: initializeFloatingPaletteLogic,
+//               args: [HIGHLIGHT_STYLES, HIGHLIGHT_COLORS],
+//             })
+//             .then(() => {
+//               highlightInjectedTabs.add(tab.id) // Mark this tab as injected
+//               console.log(`Injected floating icon logic into tab ${tab.id}`)
+//             })
+//             .catch((err) => console.error('Injection failed:', err))
+//         }
+//       })
+//   }
+// })
+
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  if (info.menuItemId === 'highlight') {
+    // Inject `highlight.js` if not already injected
+    if (!highlightInjectedTabs.has(tab.id)) {
+      chrome.scripting
+        .executeScript({
+          target: { tabId: tab.id },
+          files: ['highlight.js'], // Inject the file containing the logic
+        })
+        .then(() => {
+          highlightInjectedTabs.add(tab.id)
+          console.log(`highlight.js injected into tab ${tab.id}`)
+        })
+        .catch((err) => console.error('Injection failed:', err))
+    }
+
+    // Execute `highlightText` function after injection
+    chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: (styles, text, color) => {
+        // Call the global `highlightText` function
+        window.highlightText(styles, text, color)
+      },
+      args: [HIGHLIGHT_STYLES, info.selectionText, HIGHLIGHT_COLORS[0]], // Default color
+    })
+
+    // Initialize the floating palette if not already done
+    chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: (styles, colors) => {
+        // Call the global `initializeFloatingPaletteLogic` function
+        window.initializeFloatingPaletteLogic(styles, colors)
+      },
+      args: [HIGHLIGHT_STYLES, HIGHLIGHT_COLORS],
+    })
+  }
+})
