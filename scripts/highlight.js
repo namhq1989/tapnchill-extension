@@ -237,8 +237,7 @@ window.restoreHighlights = () => {
     return
   }
 
-  highlights.sort((a, b) => b.startOffset - a.startOffset)
-
+  // highlights.sort((a, b) => b.startOffset - a.startOffset)
   highlights.forEach(({ xpath, startOffset, endOffset, color }) => {
     const evaluator = new XPathEvaluator()
     const result = evaluator.evaluate(
@@ -249,6 +248,13 @@ window.restoreHighlights = () => {
       null,
     )
 
+    // console.log('----------------------')
+    //
+    // console.log('xpath', xpath)
+    // console.log('startOffset', startOffset)
+    // console.log('endOffset', endOffset)
+    // console.log('result', result)
+
     const container = result.singleNodeValue
 
     if (!container) {
@@ -256,12 +262,22 @@ window.restoreHighlights = () => {
       return
     }
 
+    const textContent = container.lastChild.textContent
+    const isLastChildEmpty =
+      textContent === null || textContent.replace(/\u200B/g, '').trim() === ''
+
     const textNode =
-      container.nodeType === Node.TEXT_NODE ? container : container.firstChild
+      container.nodeType === Node.TEXT_NODE
+        ? container
+        : !isLastChildEmpty
+          ? container.lastChild
+          : container.firstChild
     if (!textNode) {
       console.error('No valid text node found.')
       return
     }
+
+    // console.log('textNode', textNode.textContent)
 
     if (startOffset < 0 || endOffset > textNode.textContent.length) {
       console.error('Offsets are out of bounds:', { startOffset, endOffset })
