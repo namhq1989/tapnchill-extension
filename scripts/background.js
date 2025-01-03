@@ -398,6 +398,11 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
     return true
   } else if (request.type === 'update-highlight-color') {
     lastHighlightColor = request.color
+    chrome.storage.local
+      .set({
+        lastHighlightColor: request.color,
+      })
+      .then()
   } else {
     sendResponse({
       success: false,
@@ -434,8 +439,15 @@ const highlightInjectedTabs = new Set()
 let lastHighlightColor = HIGHLIGHT_COLORS[0]
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.status === 'complete') {
-    // Inject `highlight.js` first
+  if (changeInfo.status === 'loading') {
+    highlightInjectedTabs.delete(tabId)
+    console.log(`Tab ${tabId} refreshed. Removed from injected tabs.`)
+  } else if (changeInfo.status === 'complete') {
+    // read highlight color from local storage
+    chrome.storage.local.get('lastHighlightColor', (result) => {
+      lastHighlightColor = result.lastHighlightColor || HIGHLIGHT_COLORS[0]
+    })
+
     chrome.scripting
       .executeScript({
         target: { tabId },
@@ -525,10 +537,15 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
         .executeScript({
           target: { tabId: tab.id },
           func: (styles, text, color) => {
-            window.highlightText({ selectedText: text }, styles, color)
+            window.highlightText(text, styles, color)
           },
-          args: [HIGHLIGHT_STYLES, info.selectionText, HIGHLIGHT_COLORS[0]], // Default color
+          args: [
+            HIGHLIGHT_STYLES,
+            info.selectionText,
+            lastHighlightColor || HIGHLIGHT_COLORS[0],
+          ], // Default color
         })
+        .then()
         .catch((err) => console.error('Failed to highlight text:', err))
     }
 

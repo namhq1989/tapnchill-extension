@@ -38,11 +38,16 @@ window.saveHighlightData = (positionData) => {
 
   localStorage.setItem('highlights', JSON.stringify(storedData))
 
-  console.log('Updated localStorage:', storedData)
+  // console.log('Updated localStorage:', storedData)
 }
 
 window.applyHighlight = (textNode, startOffset, endOffset, styles, color) => {
-  console.log('Applying highlight:', { textNode, startOffset, endOffset })
+  console.log('Applying highlight:', {
+    textNode,
+    startOffset,
+    endOffset,
+    color,
+  })
 
   const originalText = textNode.nodeValue
   const beforeText = originalText.slice(0, startOffset)
@@ -52,8 +57,8 @@ window.applyHighlight = (textNode, startOffset, endOffset, styles, color) => {
   // Create a <span> element for the highlighted text
   const span = document.createElement('span')
   span.textContent = highlightedText
-  span.style.backgroundColor = color
   Object.assign(span.style, styles)
+  span.style.backgroundColor = color
 
   // Replace the original text node with the modified content
   const parentNode = textNode.parentNode
@@ -64,20 +69,13 @@ window.applyHighlight = (textNode, startOffset, endOffset, styles, color) => {
   parentNode.insertBefore(span, afterNode)
   parentNode.insertBefore(beforeNode, span)
 
-  console.log('Highlight applied successfully.')
+  // console.log('Highlight applied successfully.')
 }
 
-window.highlightText = (
-  { selectedText, xpath, startOffset, endOffset },
-  styles,
-  color,
-) => {
+window.highlightText = (selectedText, styles, color) => {
   console.log('-------------')
   console.log('highlightText called with:', {
     selectedText,
-    xpath,
-    startOffset,
-    endOffset,
     styles,
     color,
   })
@@ -99,22 +97,17 @@ window.highlightText = (
     return
   }
 
-  if (!xpath) {
-    xpath = window.getXPath(
-      textNode.nodeType === Node.TEXT_NODE ? textNode.parentNode : textNode,
-    )
-  }
+  const xpath = window.getXPath(
+    textNode.nodeType === Node.TEXT_NODE ? textNode.parentNode : textNode,
+  )
 
   console.log('Calculated XPath:', xpath)
 
-  if (!startOffset) {
-    startOffset = range.startOffset
-  }
-  if (!endOffset) {
-    endOffset = range.endOffset
-  }
+  const startOffset = range.startOffset
+  const endOffset = range.endOffset
 
   const positionData = {
+    selectedText,
     xpath,
     startOffset,
     endOffset,
@@ -143,31 +136,6 @@ window.initializeHighlightWithPalette = (styles, colors, currentColor) => {
   palette.style.display = 'flex'
   palette.style.gap = '4px'
 
-  const calculateXPath = (node) => {
-    if (node.id) {
-      return `//*[@id="${node.id}"]`
-    }
-    if (node === document.body) {
-      return '/html/body'
-    }
-
-    let index = 1
-    let sibling = node.previousSibling
-
-    while (sibling) {
-      if (
-        sibling.nodeType === Node.ELEMENT_NODE &&
-        sibling.nodeName === node.nodeName
-      ) {
-        index++
-      }
-      sibling = sibling.previousSibling
-    }
-
-    const tagName = node.nodeName.toLowerCase()
-    return `${calculateXPath(node.parentNode)}/${tagName}[${index}]`
-  }
-
   colors.forEach((color) => {
     const colorOption = document.createElement('div')
     colorOption.style.width = '20px'
@@ -181,32 +149,43 @@ window.initializeHighlightWithPalette = (styles, colors, currentColor) => {
     colorOption.addEventListener('click', () => {
       if (currentRange) {
         const selectedText = currentRange.toString().trim()
-
         if (selectedText) {
-          // Calculate XPath and offsets
+          // Calculate XPath and Normalize Offsets
           const container =
             currentRange.startContainer.nodeType === Node.TEXT_NODE
               ? currentRange.startContainer.parentNode
               : currentRange.startContainer
 
-          const xpath = calculateXPath(container)
-          const startOffset = currentRange.startOffset
-          const endOffset = currentRange.endOffset
+          const xpath = window.getXPath(container)
+          const originalText =
+            container.dataset.originalText || container.innerText
 
-          console.log('Highlight Data:', {
-            xpath,
+          const startOffset = originalText.indexOf(selectedText)
+          const endOffset = startOffset + selectedText.length
+
+          if (startOffset === -1) {
+            console.error('Selected text not found in original content.')
+            return
+          }
+
+          const data = {
             selectedText,
+            xpath,
             startOffset,
             endOffset,
             color,
-          })
+          }
+          console.log('Highlight Data:', data)
 
-          // Optionally call highlightText with the calculated data
-          window.highlightText(
-            { selectedText, xpath, startOffset, endOffset },
-            styles,
-            color,
-          )
+          window.saveHighlightData(data)
+          window.highlightWithXPath(data)
+
+          chrome.runtime
+            .sendMessage({
+              type: 'update-highlight-color',
+              color,
+            })
+            .then()
         } else {
           console.error('No text selected for highlighting.')
         }
@@ -219,7 +198,6 @@ window.initializeHighlightWithPalette = (styles, colors, currentColor) => {
 
   document.body.appendChild(palette)
 
-  // Display the palette near the selection
   document.addEventListener('mouseup', () => {
     const selection = window.getSelection()
     if (selection.rangeCount > 0 && selection.toString().trim().length > 0) {
@@ -234,7 +212,6 @@ window.initializeHighlightWithPalette = (styles, colors, currentColor) => {
     }
   })
 
-  // Hide the palette when clicking elsewhere
   document.addEventListener('mousedown', (event) => {
     if (!palette.contains(event.target)) {
       palette.style.display = 'none'
@@ -260,66 +237,110 @@ window.restoreHighlights = () => {
   }
 
   // highlights.sort((a, b) => b.startOffset - a.startOffset)
-  highlights.forEach(({ xpath, startOffset, endOffset, color }) => {
-    const evaluator = new XPathEvaluator()
-    const result = evaluator.evaluate(
-      xpath,
-      document,
-      null,
-      XPathResult.FIRST_ORDERED_NODE_TYPE,
-      null,
-    )
-
-    // console.log('----------------------')
-    //
-    // console.log('xpath', xpath)
-    // console.log('startOffset', startOffset)
-    // console.log('endOffset', endOffset)
-    // console.log('result', result)
-
-    const container = result.singleNodeValue
-
-    if (!container) {
-      console.error('Failed to locate container for XPath:', xpath)
-      return
-    }
-
-    const textContent = container.lastChild.textContent
-    const isLastChildEmpty =
-      textContent === null || textContent.replace(/\u200B/g, '').trim() === ''
-
-    const textNode =
-      container.nodeType === Node.TEXT_NODE
-        ? container
-        : !isLastChildEmpty
-          ? container.lastChild
-          : container.firstChild
-    if (!textNode) {
-      console.error('No valid text node found.')
-      return
-    }
-
-    // console.log('textNode', textNode.textContent)
-
-    if (startOffset < 0 || endOffset > textNode.textContent.length) {
-      console.error('Offsets are out of bounds:', { startOffset, endOffset })
-      return
-    }
-
-    const range = document.createRange()
-    range.setStart(textNode, startOffset)
-    range.setEnd(textNode, endOffset)
-
-    const span = document.createElement('span')
-    span.style.backgroundColor = color
-    span.style.color = '#000'
-    span.style.borderRadius = '4px'
-    span.style.padding = '2px 4px'
-
-    span.textContent = range.toString()
-    range.deleteContents()
-    range.insertNode(span)
+  highlights.forEach((data) => {
+    window.highlightWithXPath(data)
   })
 
-  console.log('Highlights restored successfully.')
+  // console.log('Highlights restored successfully.')
+}
+
+window.highlightWithXPath = ({
+  selectedText,
+  xpath,
+  startOffset,
+  endOffset,
+  color,
+}) => {
+  console.log('-------------- Highlighting with XPath:', {
+    selectedText,
+    xpath,
+    startOffset,
+    endOffset,
+    color,
+  })
+
+  const evaluator = new XPathEvaluator()
+  const result = evaluator.evaluate(
+    xpath,
+    document,
+    null,
+    XPathResult.FIRST_ORDERED_NODE_TYPE,
+    null,
+  )
+
+  const container = result.singleNodeValue
+  if (!container) {
+    console.error('Failed to locate container for XPath:', xpath)
+    return
+  }
+
+  // Retrieve all text nodes within the container
+  const textNodes = []
+  const walker = document.createTreeWalker(
+    container,
+    NodeFilter.SHOW_TEXT,
+    null,
+  )
+  let node
+  while ((node = walker.nextNode())) {
+    textNodes.push(node)
+  }
+
+  if (textNodes.length === 0) {
+    console.error('No text nodes found within container.')
+    return
+  }
+
+  let cumulativeOffset = 0
+  let targetNode = null
+  let nodeStartOffset = 0
+  let nodeEndOffset = 0
+
+  // Find the specific text node and calculate relative offsets
+  for (const textNode of textNodes) {
+    const nodeText = textNode.nodeValue || ''
+    const nodeLength = nodeText.length
+
+    if (startOffset < cumulativeOffset + nodeLength) {
+      targetNode = textNode
+      nodeStartOffset = startOffset - cumulativeOffset
+      nodeEndOffset = Math.min(endOffset - cumulativeOffset, nodeLength)
+      break
+    }
+    cumulativeOffset += nodeLength
+  }
+
+  if (!targetNode) {
+    console.error('Target text node not found.')
+    return
+  }
+
+  // Validate the offsets
+  if (nodeStartOffset < 0 || nodeEndOffset > targetNode.nodeValue.length) {
+    console.error('Adjusted offsets are out of bounds:', {
+      nodeStartOffset,
+      nodeEndOffset,
+    })
+    return
+  }
+
+  // console.log('Target text node:', targetNode.nodeValue)
+  console.log('Adjusted offsets:', { nodeStartOffset, nodeEndOffset })
+
+  // Apply the highlight
+  const range = document.createRange()
+  range.setStart(targetNode, nodeStartOffset)
+  range.setEnd(targetNode, nodeEndOffset)
+
+  const span = document.createElement('span')
+  span.style.backgroundColor = color
+  span.style.color = '#000'
+  span.style.borderRadius = '4px'
+  span.style.padding = '2px 4px'
+
+  span.textContent = range.toString()
+  range.deleteContents()
+  range.insertNode(span)
+
+  // console.log('Highlight applied successfully.')
 }
