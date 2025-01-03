@@ -417,7 +417,7 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
 
 const HIGHLIGHT_STYLES = {
   backgroundColor: '#a1a1aa',
-  color: '#1a202c',
+  color: '#000',
   borderRadius: '4px',
   padding: '2px 4px',
   display: 'inline',
@@ -455,12 +455,12 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       })
       .then(() => {
         console.log(`Injected highlight.js into tab ${tabId}`)
-        // After injection, call `restoreHighlights`
         return chrome.scripting.executeScript({
           target: { tabId },
-          func: () => {
-            window.restoreHighlights() // Call the global restoreHighlights function
+          func: (styles, colors) => {
+            window.restoreHighlights(styles, colors)
           },
+          args: [HIGHLIGHT_STYLES, HIGHLIGHT_COLORS],
         })
       })
       .then(() => {
@@ -517,7 +517,7 @@ const injectHighlightScript = (tabId) => {
       return chrome.scripting.executeScript({
         target: { tabId },
         func: (styles, colors) => {
-          window.initializeHighlightWithPalette(styles, colors)
+          // window.initializeHighlightWithPalette(styles, colors)
         },
         args: [HIGHLIGHT_STYLES, HIGHLIGHT_COLORS],
       })
