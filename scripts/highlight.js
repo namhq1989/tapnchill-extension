@@ -129,6 +129,83 @@ window.applyHighlight = (
   parentNode.insertBefore(beforeNode, span)
 }
 
+window.rebuildHighlights = (highlights, styles) => {
+  const groupedHighlights = {}
+
+  // Group highlights by XPath
+  highlights.forEach(({ id, xpath, startOffset, endOffset, color }) => {
+    if (!groupedHighlights[xpath]) {
+      groupedHighlights[xpath] = []
+    }
+    groupedHighlights[xpath].push({ id, startOffset, endOffset, color })
+  })
+
+  // Rebuild highlights for each XPath group
+  Object.entries(groupedHighlights).forEach(([xpath, highlightList]) => {
+    const element = document.evaluate(
+      xpath,
+      document,
+      null,
+      XPathResult.FIRST_ORDERED_NODE_TYPE,
+      null,
+    ).singleNodeValue
+
+    if (!element) {
+      console.error('Element not found for XPath:', xpath)
+      return
+    }
+
+    // Retrieve the original text for the element
+    const originalText = window.getOriginalTextFromXPath(xpath)
+    if (!originalText) {
+      console.error('No text content found for XPath:', xpath)
+      return
+    }
+
+    // Sort highlights by startOffset
+    highlightList.sort((a, b) => a.startOffset - b.startOffset)
+
+    // Rebuild the content with highlights
+    let currentIndex = 0
+    const fragment = document.createDocumentFragment()
+
+    highlightList.forEach(({ id, startOffset, endOffset, color }) => {
+      // Add plain text before the highlight
+      if (startOffset > currentIndex) {
+        const beforeText = originalText.slice(currentIndex, startOffset)
+        fragment.appendChild(document.createTextNode(beforeText))
+      }
+
+      // Add the highlighted text
+      const highlightedText = originalText.slice(startOffset, endOffset)
+      const span = document.createElement('span')
+      span.textContent = highlightedText
+      Object.assign(span.style, styles)
+      span.style.backgroundColor = color
+
+      // Add a click listener for removal
+      span.addEventListener('click', () => window.removeHighlight(span, id))
+      fragment.appendChild(span)
+
+      currentIndex = endOffset
+    })
+
+    // Add any remaining plain text
+    if (currentIndex < originalText.length) {
+      const afterText = originalText.slice(currentIndex)
+      fragment.appendChild(document.createTextNode(afterText))
+    }
+
+    // Replace the content of the element with the rebuilt fragment
+    while (element.firstChild) {
+      element.removeChild(element.firstChild)
+    }
+    element.appendChild(fragment)
+  })
+
+  console.log('Highlights rebuilt successfully.')
+}
+
 // Main function to handle text highlighting
 window.highlightText = (selectedText, styles, color) => {
   console.log('-------------')
@@ -161,11 +238,6 @@ window.highlightText = (selectedText, styles, color) => {
 
   console.log('Calculated XPath:', xpath)
 
-  // Retrieve existing highlights for the current URL
-  const baseUrl = `${location.origin}${location.pathname}`
-  const storedData = JSON.parse(localStorage.getItem('highlights') || '{}')
-  const existingHighlights = storedData[baseUrl] || []
-
   // Retrieve the original text using the XPath
   const originalText = window.getOriginalTextFromXPath(xpath)
   if (!originalText) {
@@ -181,23 +253,34 @@ window.highlightText = (selectedText, styles, color) => {
   }
   const endOffset = startOffset + selectedText.length
 
-  // Check if the new highlight is completely inside an existing highlight
-  const isInsideExistingHighlight = existingHighlights.some(
-    (highlight) =>
-      highlight.xpath === xpath &&
-      startOffset >= highlight.startOffset &&
-      endOffset <= highlight.endOffset,
-  )
+  // Retrieve existing highlights for the current URL
+  const baseUrl = `${location.origin}${location.pathname}`
+  const storedData = JSON.parse(localStorage.getItem('highlights') || '{}')
+  const existingHighlights = storedData[baseUrl] || []
 
-  if (isInsideExistingHighlight) {
-    console.log(
-      'The new highlight falls within an existing highlight. Skipping highlight.',
+  // Check for any overlap with existing highlights
+  const isOverlapping = existingHighlights.some((highlight) => {
+    if (highlight.xpath !== xpath) return false // Only compare highlights within the same XPath
+    return (
+      (startOffset >= highlight.startOffset &&
+        startOffset < highlight.endOffset) || // New start overlaps existing
+      (endOffset > highlight.startOffset && endOffset <= highlight.endOffset) || // New end overlaps existing
+      (startOffset <= highlight.startOffset && endOffset >= highlight.endOffset) // New fully contains existing
     )
-    return // Do nothing if the new highlight is already covered
+  })
+
+  if (isOverlapping) {
+    console.log(
+      'The new highlight overlaps an existing highlight. Skipping highlight.',
+    )
+    return // Do nothing if the new highlight overlaps an existing one
   }
 
+  // Generate a unique ID for this highlight
+  const id = window.generateHighlightId()
+
   const positionData = {
-    id: window.generateHighlightId(),
+    id,
     selectedText,
     xpath,
     startOffset,
@@ -207,96 +290,19 @@ window.highlightText = (selectedText, styles, color) => {
 
   console.log('Position Data:', positionData)
 
-  window.saveHighlightData(positionData)
-  window.applyHighlight(
-    positionData.id,
-    textNode,
-    range.startOffset,
-    range.endOffset,
-    styles,
-    color,
-  )
+  // Save highlight data and rebuild the DOM
+  existingHighlights.push(positionData)
+  storedData[baseUrl] = existingHighlights
+  localStorage.setItem('highlights', JSON.stringify(storedData))
+
+  window.rebuildHighlights(existingHighlights, styles)
 }
 
 window.restoreHighlights = (styles, colors) => {
   const baseUrl = `${location.origin}${location.pathname}`
   const storedData = JSON.parse(localStorage.getItem('highlights') || '{}')
   const highlights = storedData[baseUrl] || []
-
-  // Group highlights by XPath
-  const groupedHighlights = {}
-  highlights.forEach(({ id, xpath, startOffset, endOffset, color }) => {
-    if (!groupedHighlights[xpath]) {
-      groupedHighlights[xpath] = []
-    }
-    groupedHighlights[xpath].push({ id, startOffset, endOffset, color })
-  })
-
-  // Process each XPath group
-  Object.entries(groupedHighlights).forEach(([xpath, highlightList]) => {
-    const element = document.evaluate(
-      xpath,
-      document,
-      null,
-      XPathResult.FIRST_ORDERED_NODE_TYPE,
-      null,
-    ).singleNodeValue
-
-    if (!element) {
-      console.error('Element not found for XPath:', xpath)
-      return
-    }
-
-    const textNode = element.childNodes[0]
-    if (!textNode || textNode.nodeType !== Node.TEXT_NODE) {
-      console.error('Text node not found for XPath:', xpath)
-      return
-    }
-
-    // Get the original text content
-    const originalText = textNode.nodeValue
-
-    // Sort highlights by startOffset
-    highlightList.sort((a, b) => a.startOffset - b.startOffset)
-
-    // Rebuild the text node with highlights
-    let currentIndex = 0
-    const fragment = document.createDocumentFragment()
-
-    highlightList.forEach(({ id, startOffset, endOffset, color }) => {
-      // Add plain text before the highlight
-      if (startOffset > currentIndex) {
-        const beforeText = originalText.slice(currentIndex, startOffset)
-        fragment.appendChild(document.createTextNode(beforeText))
-      }
-
-      // Add the highlighted text using `applyHighlight`
-      const highlightedText = originalText.slice(startOffset, endOffset)
-      const span = document.createElement('span')
-      span.textContent = highlightedText
-      Object.assign(span.style, styles)
-      span.style.backgroundColor = color || colors[0]
-      fragment.appendChild(span)
-
-      // Add a click event listener to remove the restored highlight
-      console.log('id', id)
-      span.addEventListener('click', () => window.removeHighlight(span, id))
-
-      currentIndex = endOffset
-    })
-
-    // Add any remaining plain text after the last highlight
-    if (currentIndex < originalText.length) {
-      const afterText = originalText.slice(currentIndex)
-      fragment.appendChild(document.createTextNode(afterText))
-    }
-
-    // Replace the original text node with the rebuilt content
-    const parentNode = textNode.parentNode
-    parentNode.replaceChild(fragment, textNode)
-  })
-
-  console.log('Highlights restored successfully.')
+  window.rebuildHighlights(highlights, styles)
 }
 
 //
