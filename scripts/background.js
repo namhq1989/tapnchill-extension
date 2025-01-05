@@ -517,7 +517,7 @@ const injectHighlightScript = (tabId) => {
       return chrome.scripting.executeScript({
         target: { tabId },
         func: (styles, colors) => {
-          // window.initializeHighlightWithPalette(styles, colors)
+          window.initializeHighlightWithPalette(styles, colors)
         },
         args: [HIGHLIGHT_STYLES, HIGHLIGHT_COLORS],
       })
