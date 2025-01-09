@@ -416,13 +416,11 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
 //
 
 const HIGHLIGHT_STYLES = {
-  backgroundColor: '#a1a1aa',
   color: '#000',
-  borderRadius: '4px',
+  'border-radius': '4px',
   padding: '2px 4px',
   display: 'inline',
-  wordBreak: 'break-word',
-  margin: '2px 0',
+  'word-break': 'break-word',
 }
 
 const HIGHLIGHT_COLORS = [
@@ -443,7 +441,6 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     highlightInjectedTabs.delete(tabId)
     console.log(`Tab ${tabId} refreshed. Removed from injected tabs.`)
   } else if (changeInfo.status === 'complete') {
-    // read highlight color from local storage
     chrome.storage.local.get('lastHighlightColor', (result) => {
       lastHighlightColor = result.lastHighlightColor || HIGHLIGHT_COLORS[0]
     })

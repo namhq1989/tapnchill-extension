@@ -59,6 +59,69 @@ window.isHighlightOverlapping = (newHighlight) => {
   })
 }
 
+window.isTagColliding = (xpath, startOffset, endOffset) => {
+  const element = document.evaluate(
+    xpath,
+    document,
+    null,
+    XPathResult.FIRST_ORDERED_NODE_TYPE,
+    null,
+  ).singleNodeValue
+
+  if (!element) {
+    // console.warn(`Element not found for XPath: ${xpath}`)
+    return false
+  }
+
+  // console.log('Checking for tag collision...')
+  // console.log('Element found:', element)
+  // console.log('Start Offset:', startOffset, 'End Offset:', endOffset)
+
+  const fullText = element.textContent
+  // console.log('Full Text:', fullText)
+
+  const walker = document.createTreeWalker(element, NodeFilter.SHOW_ELEMENT, {
+    acceptNode: (node) => {
+      if (node.tagName === 'SPAN' && node.id?.startsWith('highlight-')) {
+        // console.log(`Ignoring highlight span: ${node.outerHTML}`)
+        return NodeFilter.FILTER_REJECT
+      }
+      return NodeFilter.FILTER_ACCEPT
+    },
+  })
+
+  while (walker.nextNode()) {
+    const node = walker.currentNode
+
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      const nodeText = node.textContent || ''
+      const nodeStart = fullText.indexOf(nodeText)
+      const nodeEnd = nodeStart + nodeText.length
+
+      // console.log(
+      //   `Node: <${node.tagName.toLowerCase()}>`,
+      //   `Node Start: ${nodeStart}`,
+      //   `Node End: ${nodeEnd}`,
+      //   `Node Text: "${nodeText}"`,
+      // )
+
+      if (
+        (startOffset >= nodeStart && startOffset < nodeEnd) ||
+        (endOffset > nodeStart && endOffset <= nodeEnd) ||
+        (startOffset <= nodeStart && endOffset >= nodeEnd)
+      ) {
+        // console.log(
+        //   `Collision detected with tag <${node.tagName.toLowerCase()}>`,
+        // )
+        return true
+      }
+    }
+  }
+
+  // console.log('No collision detected with any tags.')
+  return false
+}
+
 window.generateHighlightId = () =>
   `highlight-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
 
@@ -75,9 +138,15 @@ window.saveHighlightData = (positionData) => {
 
 window.removeHighlight = (span, id) => {
   const parentNode = span.parentNode
+
+  // Replace the span with its text content
   const plainText = document.createTextNode(span.textContent)
   parentNode.replaceChild(plainText, span)
 
+  // Normalize the parent node to merge adjacent text nodes
+  parentNode.normalize()
+
+  // Update the highlights in localStorage
   const baseUrl = `${location.origin}${location.pathname}`
   const storedData = JSON.parse(localStorage.getItem('highlights') || '{}')
   const highlights = storedData[baseUrl] || []
@@ -85,133 +154,233 @@ window.removeHighlight = (span, id) => {
   localStorage.setItem('highlights', JSON.stringify(storedData))
 }
 
-window.applyHighlight = (
-  id,
-  textNode,
-  startOffset,
-  endOffset,
-  styles,
-  color,
-) => {
-  const originalText = textNode.nodeValue
-  const beforeText = originalText.slice(0, startOffset)
-  const highlightedText = originalText.slice(startOffset, endOffset)
-  const afterText = originalText.slice(endOffset)
-
-  const span = document.createElement('span')
-  span.textContent = highlightedText
-  Object.assign(span.style, styles)
-  span.style.backgroundColor = color
-
-  span.addEventListener('click', () => window.removeHighlight(span, id))
-
-  const parentNode = textNode.parentNode
-  const beforeNode = document.createTextNode(beforeText)
-  const afterNode = document.createTextNode(afterText)
-
-  parentNode.replaceChild(afterNode, textNode)
-  parentNode.insertBefore(span, afterNode)
-  parentNode.insertBefore(beforeNode, span)
-}
+// window.removeHighlight = (span, id) => {
+//   const parentNode = span.parentNode
+//   const plainText = document.createTextNode(span.textContent)
+//   parentNode.replaceChild(plainText, span)
+//
+//   const baseUrl = `${location.origin}${location.pathname}`
+//   const storedData = JSON.parse(localStorage.getItem('highlights') || '{}')
+//   const highlights = storedData[baseUrl] || []
+//   storedData[baseUrl] = highlights.filter((highlight) => highlight.id !== id)
+//   localStorage.setItem('highlights', JSON.stringify(storedData))
+// }
 
 window.rebuildHighlights = (highlights, styles, colors) => {
-  const groupedHighlights = {}
+  // console.log('Starting to rebuild highlights...')
 
-  highlights.forEach(({ id, xpath, startOffset, endOffset, color }) => {
-    if (!groupedHighlights[xpath]) {
-      groupedHighlights[xpath] = []
-    }
-    groupedHighlights[xpath].push({
-      id,
-      startOffset,
-      endOffset,
-      color: color || colors[0],
-    })
-  })
+  highlights.forEach(
+    ({ id, xpath, selectedText, startOffset, endOffset, color }) => {
+      // console.log(`Processing highlight with ID: ${id}`)
+      // console.log(`XPath: ${xpath}`)
+      // console.log(`Selected Text: "${selectedText}"`)
+      // console.log(`Start Offset: ${startOffset}, End Offset: ${endOffset}`)
 
-  Object.entries(groupedHighlights).forEach(([xpath, highlightList]) => {
-    const element = document.evaluate(
-      xpath,
-      document,
-      null,
-      XPathResult.FIRST_ORDERED_NODE_TYPE,
-      null,
-    ).singleNodeValue
+      // Find the target element using XPath
+      const element = document.evaluate(
+        xpath,
+        document,
+        null,
+        XPathResult.FIRST_ORDERED_NODE_TYPE,
+        null,
+      ).singleNodeValue
 
-    if (!element) return
-
-    const originalText = window.getOriginalTextFromXPath(xpath)
-    if (!originalText) return
-
-    highlightList.sort((a, b) => a.startOffset - b.startOffset)
-
-    let currentIndex = 0
-    const fragment = document.createDocumentFragment()
-
-    highlightList.forEach(({ id, startOffset, endOffset, color }) => {
-      if (startOffset > currentIndex) {
-        const beforeText = originalText.slice(currentIndex, startOffset)
-        fragment.appendChild(document.createTextNode(beforeText))
+      if (!element) {
+        // console.warn(`Element not found for XPath: ${xpath}`)
+        return
       }
 
-      const highlightedText = originalText.slice(startOffset, endOffset)
-      const span = document.createElement('span')
-      span.textContent = highlightedText
-      Object.assign(span.style, styles)
-      span.style.backgroundColor = color
+      // console.log('Element found:', element)
 
-      span.addEventListener('click', () => window.removeHighlight(span, id))
-      fragment.appendChild(span)
+      const innerHtml = element.innerHTML
+      const innerText = element.textContent
 
-      currentIndex = endOffset
-    })
+      // console.log(`Inner Text: "${innerText}"`)
+      // console.log(`Inner HTML: "${innerHtml}"`)
 
-    if (currentIndex < originalText.length) {
-      const afterText = originalText.slice(currentIndex)
-      fragment.appendChild(document.createTextNode(afterText))
-    }
+      // Determine the nth appearance of selectedText based on startOffset
+      let currentOffset = 0
+      let nth = 0
+      let position = -1
 
-    while (element.firstChild) {
-      element.removeChild(element.firstChild)
-    }
-    element.appendChild(fragment)
-  })
+      while (currentOffset < innerText.length) {
+        position = innerText.indexOf(selectedText, currentOffset)
+        if (position === -1) {
+          console.warn(
+            `"${selectedText}" not found beyond offset: ${currentOffset}`,
+          )
+          break
+        }
+
+        nth++
+        // console.log(
+        //   `Found "${selectedText}" at position ${position} (nth: ${nth})`,
+        // )
+
+        if (position >= startOffset) {
+          // console.log(`Target occurrence found at nth: ${nth}`)
+          break
+        }
+
+        currentOffset = position + selectedText.length
+      }
+
+      // If we couldn't find the correct nth appearance, skip this highlight
+      if (nth === 0 || position === -1) {
+        // console.warn(
+        //   `Failed to determine the nth appearance for: "${selectedText}"`,
+        // )
+        return
+      }
+
+      // Use the provided color or fallback to the first color in the palette
+      const highlightColor = color || colors[0] || '#ffff00' // Default to yellow if no color is provided
+
+      // Replace the nth appearance of selectedText in innerHtml
+      let count = 0
+      // Log the updated HTML
+      // console.log(`Updated Inner HTML: "${newHtml}"`)
+
+      // Set the updated innerHTML
+      element.innerHTML = innerHtml.replace(
+        new RegExp(selectedText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'),
+        (match) => {
+          count++
+          if (count === nth) {
+            // console.log(
+            //   `Replacing nth occurrence of "${match}" with a highlight.`,
+            // )
+            const styleString = Object.entries(styles)
+              .map(([key, value]) => `${key}: ${value};`)
+              .join(' ')
+            return `<span id="${id}" style="background-color: ${highlightColor}; ${styleString}">${match}</span>`
+          }
+          return match
+        },
+      )
+
+      // Add the click event to remove highlight
+      setTimeout(() => {
+        const span = document.getElementById(id)
+        if (span) {
+          span.addEventListener('click', () => {
+            window.removeHighlight(span, id)
+          })
+        }
+      }, 0)
+
+      // console.log(`Successfully updated highlight for ID: ${id}`)
+    },
+  )
+
+  // console.log('Finished rebuilding highlights', highlights.length)
 }
 
 window.highlightText = (selectedText, styles, color) => {
   const selection = window.getSelection()
-  if (selection.rangeCount === 0) return
+  if (selection.rangeCount === 0) {
+    // console.warn('No selection range found.')
+    return
+  }
 
   const range = selection.getRangeAt(0)
-  const textNode =
-    range.startContainer.nodeType === Node.TEXT_NODE
-      ? range.startContainer
-      : range.startContainer.firstChild
+  const startContainer = range.startContainer
 
-  if (!textNode) return
+  const textNode =
+    startContainer.nodeType === Node.TEXT_NODE
+      ? startContainer
+      : startContainer.firstChild
+
+  if (!textNode) {
+    // console.warn('No text node found in the selection.')
+    return
+  }
 
   const xpath = window.getXPath(
     textNode.nodeType === Node.TEXT_NODE ? textNode.parentNode : textNode,
   )
+  // console.log('Calculated XPath:', xpath)
 
-  const originalText = window.getOriginalTextFromXPath(xpath)
-  if (!originalText) return
+  // Fetch the cleaned text content (strip existing spans)
+  const element = document.evaluate(
+    xpath,
+    document,
+    null,
+    XPathResult.FIRST_ORDERED_NODE_TYPE,
+    null,
+  ).singleNodeValue
 
-  const startOffset = originalText.indexOf(selectedText)
-  if (startOffset === -1) return
+  if (!element) {
+    // console.warn('Element not found for the given XPath.')
+    return
+  }
+
+  const clonedElement = element.cloneNode(true)
+  const spans = clonedElement.querySelectorAll("span[id^='highlight-']")
+  spans.forEach((span) => {
+    span.outerHTML = span.innerHTML // Replace span tags with their content
+  })
+
+  const cleanText = clonedElement.textContent
+  // console.log('Cleaned Text Content:', cleanText)
+
+  // Calculate offsets in the cleaned text
+  const selectedIndex = cleanText.indexOf(selectedText)
+  if (selectedIndex === -1) {
+    // console.warn(`Selected text "${selectedText}" not found in the element.`)
+    return
+  }
+
+  const rangeStartOffset = range.startOffset
+  const rangeEndOffset = range.endOffset
+
+  // Match the correct occurrence based on the range's start offset
+  let startOffset = -1
+  let currentIndex = 0
+  let occurrenceIndex = 0
+
+  while (currentIndex < cleanText.length) {
+    const position = cleanText.indexOf(selectedText, currentIndex)
+    if (position === -1) break
+
+    occurrenceIndex++
+    const nodeText = textNode.nodeValue || textNode.textContent
+    const nodeStartOffset = cleanText.indexOf(nodeText)
+
+    const globalStartOffset = nodeStartOffset + rangeStartOffset
+    if (position === globalStartOffset) {
+      startOffset = position
+      // console.log(
+      //   `Matched occurrence ${occurrenceIndex} at position ${position}`,
+      // )
+      break
+    }
+
+    currentIndex = position + selectedText.length
+  }
+
+  if (startOffset === -1) {
+    // console.warn('Failed to match the selected text with the current range.')
+    return
+  }
+
   const endOffset = startOffset + selectedText.length
 
+  // console.log('Calculated Start Offset:', startOffset)
+  // console.log('Calculated End Offset:', endOffset)
+
+  // Check for collisions and overlaps
   if (
-    window.isHighlightOverlapping({
-      xpath,
-      startOffset,
-      endOffset,
-    })
-  )
+    window.isHighlightOverlapping({ xpath, startOffset, endOffset }) ||
+    window.isTagColliding(xpath, startOffset, endOffset)
+  ) {
+    // window.showNotification(
+    //   'Highlighting failed: overlap or collision detected.',
+    // )
     return
+  }
 
   const id = window.generateHighlightId()
-
   const positionData = {
     id,
     selectedText,
@@ -222,19 +391,27 @@ window.highlightText = (selectedText, styles, color) => {
   }
 
   const existingHighlights = window.saveHighlightData(positionData)
+  // console.log('Position Data:', positionData)
+
   window.rebuildHighlights(existingHighlights, styles)
 }
 
 window.restoreHighlights = (styles, colors) => {
+  // console.log('restoreHighlights')
   const baseUrl = `${location.origin}${location.pathname}`
   const storedData = JSON.parse(localStorage.getItem('highlights') || '{}')
   const highlights = storedData[baseUrl] || []
-  window.rebuildHighlights(highlights, styles, colors)
+
+  if (highlights.length) {
+    window.rebuildHighlights(highlights, styles, colors)
+    window.showNotification(getHighlightMessage(highlights.length))
+  }
 }
 
 window.initializeHighlightWithPalette = (styles, colors, currentColor) => {
   let selectedData = null
 
+  // Create the floating palette element
   const palette = document.createElement('div')
   palette.className = 'floating-palette'
   Object.assign(palette.style, {
@@ -246,8 +423,10 @@ window.initializeHighlightWithPalette = (styles, colors, currentColor) => {
     boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
     borderRadius: '8px',
     gap: '4px',
+    flexDirection: 'row',
   })
 
+  // Add color options to the palette
   colors.forEach((color) => {
     const colorOption = document.createElement('div')
     Object.assign(colorOption.style, {
@@ -256,12 +435,16 @@ window.initializeHighlightWithPalette = (styles, colors, currentColor) => {
       backgroundColor: color,
       borderRadius: '50%',
       cursor: 'pointer',
-      border: color === currentColor ? '1px solid black' : 'none',
+      border: color === currentColor ? '2px solid black' : '1px solid #ccc',
     })
 
+    // Add click event for each color
     colorOption.addEventListener('click', () => {
+      // console.log('Palette color selected:', color)
       if (selectedData) {
         const { selectedText, xpath, startOffset, endOffset } = selectedData
+
+        // console.log('Selected Data:', selectedData)
 
         if (
           window.isHighlightOverlapping({
@@ -269,8 +452,19 @@ window.initializeHighlightWithPalette = (styles, colors, currentColor) => {
             startOffset,
             endOffset,
           })
-        )
+        ) {
+          // window.showNotification(
+          //   'Highlighting failed: overlapping with another highlight.',
+          // )
           return
+        }
+
+        if (window.isTagColliding(xpath, startOffset, endOffset)) {
+          // window.showNotification(
+          //   'Highlighting failed: colliding with another tag.',
+          // )
+          return
+        }
 
         const highlightData = {
           id: window.generateHighlightId(),
@@ -281,8 +475,19 @@ window.initializeHighlightWithPalette = (styles, colors, currentColor) => {
           color,
         }
 
+        // console.log('Highlight Data to Save:', highlightData)
+
         const existingHighlights = window.saveHighlightData(highlightData)
         window.rebuildHighlights(existingHighlights, styles)
+
+        chrome.runtime
+          .sendMessage({
+            type: 'update-highlight-color',
+            color,
+          })
+          .then()
+
+        // console.log('Highlight applied with color:', color)
       }
       palette.style.display = 'none'
     })
@@ -292,6 +497,7 @@ window.initializeHighlightWithPalette = (styles, colors, currentColor) => {
 
   document.body.appendChild(palette)
 
+  // Event listener for mouseup (text selection)
   document.addEventListener('mouseup', (event) => {
     const selection = window.getSelection()
 
@@ -300,20 +506,76 @@ window.initializeHighlightWithPalette = (styles, colors, currentColor) => {
     if (selection.rangeCount > 0 && selection.toString().trim().length > 0) {
       const currentRange = selection.getRangeAt(0)
 
+      // console.log('Selection Range:', currentRange)
+
       const container =
         currentRange.startContainer.nodeType === Node.TEXT_NODE
           ? currentRange.startContainer.parentNode
           : currentRange.startContainer
 
       const xpath = window.getXPath(container)
-      const originalText = window.getOriginalTextFromXPath(xpath)
-      if (!originalText) return
+      // console.log('Calculated XPath:', xpath)
+
+      const element = document.evaluate(
+        xpath,
+        document,
+        null,
+        XPathResult.FIRST_ORDERED_NODE_TYPE,
+        null,
+      ).singleNodeValue
+
+      if (!element) {
+        // console.warn('Element not found for XPath:', xpath)
+        return
+      }
+
+      // console.log('Element Found:', element)
+
+      // Recalculate clean text after normalization
+      element.normalize()
+      const cleanText = element.textContent
+      // console.log('Cleaned Text Content:', cleanText)
 
       const selectedText = selection.toString().trim()
-      const startOffset = originalText.indexOf(selectedText)
+      // console.log('Selected Text:', selectedText)
+
+      let occurrenceIndex = 0
+      let currentIndex = 0
+      let startOffset = -1
+
+      // console.log('Calculating Start Offset...')
+      while (currentIndex < cleanText.length) {
+        const position = cleanText.indexOf(selectedText, currentIndex)
+        if (position === -1) break
+
+        occurrenceIndex++
+        const globalStart = position
+        const rangeStart = currentRange.startOffset
+
+        // console.log(
+        //   `Occurrence ${occurrenceIndex} at Position: ${position}, Range Start: ${rangeStart}`,
+        // )
+
+        if (globalStart === rangeStart || occurrenceIndex === 1) {
+          startOffset = position
+          // console.log(
+          //   `Matched Occurrence ${occurrenceIndex} at Position: ${position}`,
+          // )
+          break
+        }
+
+        currentIndex = position + selectedText.length
+      }
+
+      if (startOffset === -1) {
+        // console.warn(`Unable to match the selected text "${selectedText}".`)
+        return
+      }
+
       const endOffset = startOffset + selectedText.length
 
-      if (startOffset === -1) return
+      // console.log('Calculated Start Offset:', startOffset)
+      // console.log('Calculated End Offset:', endOffset)
 
       if (
         window.isHighlightOverlapping({
@@ -321,12 +583,24 @@ window.initializeHighlightWithPalette = (styles, colors, currentColor) => {
           startOffset,
           endOffset,
         })
-      )
+      ) {
+        // window.showNotification(
+        //   'Highlighting failed: overlapping with another highlight.',
+        // )
         return
+      }
+
+      if (window.isTagColliding(xpath, startOffset, endOffset)) {
+        // window.showNotification(
+        //   'Highlighting failed: colliding with another tag.',
+        // )
+        return
+      }
 
       selectedData = { selectedText, xpath, startOffset, endOffset }
 
       const rect = currentRange.getBoundingClientRect()
+      // console.log('Selection Rectangle:', rect)
       palette.style.top = `${window.scrollY + rect.top - 40}px`
       palette.style.left = `${window.scrollX + rect.left}px`
       palette.style.display = 'flex'
@@ -336,9 +610,126 @@ window.initializeHighlightWithPalette = (styles, colors, currentColor) => {
     }
   })
 
+  // Event listener for mousedown to hide the palette
   document.addEventListener('mousedown', (event) => {
     if (!palette.contains(event.target)) {
       palette.style.display = 'none'
     }
   })
+}
+
+// Function to show notification
+window.showNotification = (message) => {
+  // Check if a notification container already exists, create one if not
+  let notificationContainer = document.getElementById('notification-container')
+  if (!notificationContainer) {
+    notificationContainer = document.createElement('div')
+    notificationContainer.id = 'notification-container'
+    Object.assign(notificationContainer.style, {
+      position: 'fixed',
+      top: '24px',
+      right: '24px',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '4px',
+      zIndex: 9999,
+    })
+    document.body.appendChild(notificationContainer)
+  }
+
+  // Create a new notification element
+  const notification = document.createElement('div')
+  notification.className = 'notification'
+  Object.assign(notification.style, {
+    backgroundColor: '#ffffff',
+    border: '1px solid #d1d5db',
+    borderRadius: '8px',
+    padding: '16px 24px',
+    boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
+    color: '#1f2937',
+    fontSize: '14px',
+    width: '300px',
+    display: 'flex',
+    flexDirection: 'column', // Updated for title alignment
+    alignItems: 'flex-start',
+    animation: 'fadeIn 0.3s ease-out',
+  })
+
+  // Add title (app name)
+  const title = document.createElement('div')
+  title.textContent = 'BapBi'
+  Object.assign(title.style, {
+    fontSize: '18px',
+    fontWeight: 'bold',
+    marginBottom: '4px',
+    color: '#1f2937',
+  })
+  notification.appendChild(title)
+
+  // Add message text
+  const messageText = document.createElement('span')
+  messageText.textContent = message
+  messageText.style.lineHeight = '1.4'
+  notification.appendChild(messageText)
+
+  // Add close button
+  const closeButton = document.createElement('button')
+  closeButton.textContent = '×'
+  Object.assign(closeButton.style, {
+    background: 'none',
+    border: 'none',
+    fontSize: '20px',
+    fontWeight: 'bold',
+    position: 'absolute',
+    top: '8px',
+    right: '16px',
+    cursor: 'pointer',
+    color: '#4b5563',
+  })
+  closeButton.addEventListener('click', () => {
+    notification.remove()
+  })
+  notification.appendChild(closeButton)
+
+  // Append notification to container
+  notificationContainer.appendChild(notification)
+
+  // Auto-remove notification after 4 seconds
+  setTimeout(() => {
+    notification.remove()
+  }, 4000)
+}
+
+function getHighlightMessage(totalHighlights) {
+  const singleHighlightMessages = [
+    'Found 1 saved highlight on this page.',
+    'Here’s your saved highlight!',
+    'A single highlight is waiting for you!',
+    '1 highlight loaded. Ready to revisit?',
+    'Your highlight is back—just as you left it!',
+  ]
+
+  const multipleHighlightMessages = [
+    'Found {n} highlights on this page. Welcome back!',
+    '{n} highlights are ready for you!',
+    'Your saved {n} highlights are here!',
+    '{n} highlights loaded. Let’s pick up where you left off!',
+    '{n} highlights are back—explore and enjoy!',
+  ]
+
+  if (totalHighlights === 0) {
+    return ''
+  }
+
+  if (totalHighlights === 1) {
+    return singleHighlightMessages[
+      Math.floor(Math.random() * singleHighlightMessages.length)
+    ]
+  } else {
+    const message =
+      multipleHighlightMessages[
+        Math.floor(Math.random() * multipleHighlightMessages.length)
+      ]
+    return message.replace('{n}', totalHighlights)
+  }
 }
