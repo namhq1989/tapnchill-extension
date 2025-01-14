@@ -125,6 +125,12 @@ window.isTagColliding = (xpath, startOffset, endOffset) => {
 window.generateHighlightId = () =>
   `highlight-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
 
+window.getUrlHighlights = () => {
+  const baseUrl = `${location.origin}${location.pathname}`
+  const storedData = JSON.parse(localStorage.getItem('highlights') || '{}')
+  return storedData[baseUrl] || []
+}
+
 window.saveHighlightData = (positionData) => {
   const baseUrl = `${location.origin}${location.pathname}`
   const storedData = JSON.parse(localStorage.getItem('highlights') || '{}')
@@ -133,6 +139,7 @@ window.saveHighlightData = (positionData) => {
   storedData[baseUrl].push(positionData)
 
   localStorage.setItem('highlights', JSON.stringify(storedData))
+  window.updateHighlightManager(storedData[baseUrl])
   return storedData[baseUrl]
 }
 
@@ -152,6 +159,8 @@ window.removeHighlight = (span, id) => {
   const highlights = storedData[baseUrl] || []
   storedData[baseUrl] = highlights.filter((highlight) => highlight.id !== id)
   localStorage.setItem('highlights', JSON.stringify(storedData))
+
+  window.updateHighlightManager(storedData[baseUrl])
 }
 
 // window.removeHighlight = (span, id) => {
@@ -397,15 +406,10 @@ window.highlightText = (selectedText, styles, color) => {
 }
 
 window.restoreHighlights = (styles, colors) => {
-  // console.log('restoreHighlights')
-  const baseUrl = `${location.origin}${location.pathname}`
-  const storedData = JSON.parse(localStorage.getItem('highlights') || '{}')
-  const highlights = storedData[baseUrl] || []
-
+  const highlights = window.getUrlHighlights()
   if (highlights.length) {
     window.rebuildHighlights(highlights, styles, colors)
-    window.showNotification(getHighlightMessage(highlights.length))
-    window.createHighlightManager(highlights)
+    window.createHighlightManager(highlights, colors)
   }
 }
 
@@ -619,23 +623,24 @@ window.initializeHighlightWithPalette = (styles, colors, currentColor) => {
   })
 }
 
-window.createHighlightManager = (highlights) => {
-  // Remove any existing manager if URL changes
+window.createHighlightManager = (highlights, colors) => {
   const existingContainer = document.getElementById(
     'highlight-manager-container',
   )
-  if (existingContainer) existingContainer.remove()
+  if (existingContainer) {
+    window.updateHighlightManager(highlights, colors)
+    return
+  }
 
-  // Calculate the total number of highlights
   const totalHighlights = highlights.length
 
-  // Create the container for the floating button and the expanded view
+  // Create the container for the floating manager
   const container = document.createElement('div')
   container.id = 'highlight-manager-container'
   Object.assign(container.style, {
     position: 'fixed',
-    bottom: '16px',
-    right: '16px',
+    bottom: '24px',
+    right: '24px',
     zIndex: 10000,
   })
 
@@ -657,93 +662,288 @@ window.createHighlightManager = (highlights) => {
     boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
   })
 
-  // Add the icon to the button
   const icon = document.createElement('img')
-  icon.src = chrome.runtime.getURL('icons/icon128.png') // Use the icon from the extension
+  icon.src = chrome.runtime.getURL('icons/icon128.png')
   Object.assign(icon.style, {
     width: '16px',
     height: '16px',
   })
   button.appendChild(icon)
 
-  // Add the text to the button
   const buttonText = document.createElement('span')
   buttonText.textContent = `${totalHighlights} highlights`
   button.appendChild(buttonText)
 
-  // Create the collapsible view
   const collapsible = document.createElement('div')
   collapsible.id = 'highlight-manager-list'
   Object.assign(collapsible.style, {
-    display: 'none', // Hidden initially
-    maxHeight: '300px',
+    display: 'none',
+    height: '500px',
     overflowY: 'auto',
     padding: '16px',
     backgroundColor: '#f9fafb',
     borderRadius: '8px',
     border: '1px solid #e5e7eb',
     boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-    width: '300px',
+    width: '400px',
     position: 'absolute',
-    bottom: '64px',
-    right: '0',
+    bottom: '54px',
+    right: '0px',
     flexDirection: 'column',
     gap: '8px',
   })
 
-  // Add the header to the collapsible view
+  // Header with icon, text, and custom dropdown
   const header = document.createElement('div')
   Object.assign(header.style, {
     display: 'flex',
     alignItems: 'center',
+    justifyContent: 'space-between',
     gap: '8px',
     marginBottom: '8px',
   })
 
-  const headerIcon = icon.cloneNode() // Reuse the button's icon
+  const headerLeft = document.createElement('div')
+  Object.assign(headerLeft.style, {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+  })
+
+  const headerIcon = icon.cloneNode()
   const headerText = document.createElement('span')
   headerText.textContent = `${totalHighlights} highlights`
   Object.assign(headerText.style, {
-    fontWeight: 'bold',
-    fontSize: '16px',
+    fontSize: '14px',
     color: '#000',
   })
 
-  header.appendChild(headerIcon)
-  header.appendChild(headerText)
-  collapsible.appendChild(header)
+  headerLeft.appendChild(headerIcon)
+  headerLeft.appendChild(headerText)
 
-  // Populate the list with highlights
-  highlights.forEach(({ selectedText }, index) => {
-    const highlightItem = document.createElement('div')
-    Object.assign(highlightItem.style, {
-      padding: '8px 0',
-      fontSize: '14px',
-      color: '#000',
-      cursor: 'pointer', // Add cursor pointer for interactivity
-    })
-
-    highlightItem.textContent = `${index + 1}. ${selectedText}`
-    collapsible.appendChild(highlightItem)
+  // Custom dropdown menu
+  const dropdownContainer = document.createElement('div')
+  dropdownContainer.id = 'custom-dropdown-container'
+  Object.assign(dropdownContainer.style, {
+    position: 'relative',
   })
 
-  // Toggle the view between compact and expanded
+  const dropdownTrigger = document.createElement('button')
+  dropdownTrigger.id = 'custom-dropdown-trigger'
+  dropdownTrigger.textContent = 'All Colors'
+  Object.assign(dropdownTrigger.style, {
+    padding: '4px 8px',
+    border: '1px solid #d1d5db',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontSize: '14px',
+    backgroundColor: 'white',
+    color: '#000',
+    outline: 'none',
+  })
+
+  const dropdownMenu = document.createElement('div')
+  dropdownMenu.id = 'custom-dropdown-menu'
+  Object.assign(dropdownMenu.style, {
+    display: 'none', // Hidden initially
+    position: 'absolute',
+    top: '40px',
+    right: '0',
+    backgroundColor: 'white',
+    border: '1px solid #e5e7eb',
+    borderRadius: '8px',
+    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+    padding: '8px',
+    zIndex: 10001,
+    width: '150px',
+    maxHeight: '200px',
+    overflowY: 'auto',
+    flexDirection: 'column',
+    gap: '8px',
+  })
+
+  // Add options to the custom dropdown menu
+  const allColorsOption = document.createElement('div')
+  allColorsOption.textContent = 'All Colors'
+  Object.assign(allColorsOption.style, {
+    padding: '4px 8px',
+    cursor: 'pointer',
+    fontSize: '14px',
+    color: '#000',
+    borderRadius: '4px',
+  })
+
+  allColorsOption.addEventListener('click', () => {
+    dropdownTrigger.textContent = 'All Colors'
+    const items = highlightItemsContainer.querySelectorAll('div')
+    items.forEach((item) => (item.style.display = 'block'))
+    dropdownMenu.style.display = 'none'
+  })
+
+  dropdownMenu.appendChild(allColorsOption)
+
+  colors.forEach((color) => {
+    const colorOption = document.createElement('div')
+    Object.assign(colorOption.style, {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+      padding: '4px 8px',
+      cursor: 'pointer',
+      fontSize: '14px',
+      // backgroundColor: '#f9fafb',
+      borderRadius: '4px',
+    })
+
+    const colorPreview = document.createElement('span')
+    Object.assign(colorPreview.style, {
+      display: 'inline-block',
+      width: '16px',
+      height: '16px',
+      backgroundColor: color,
+      borderRadius: '4px',
+    })
+
+    const colorText = document.createElement('span')
+    colorText.textContent = color
+    colorText.style.color = '#000'
+
+    colorOption.appendChild(colorPreview)
+    colorOption.appendChild(colorText)
+
+    colorOption.addEventListener('click', () => {
+      dropdownTrigger.textContent = color
+      const items = highlightItemsContainer.querySelectorAll('div')
+      items.forEach((item) => {
+        item.style.display = item.dataset.color === color ? 'block' : 'none'
+      })
+      dropdownMenu.style.display = 'none'
+    })
+
+    dropdownMenu.appendChild(colorOption)
+  })
+
+  dropdownContainer.appendChild(dropdownTrigger)
+  dropdownContainer.appendChild(dropdownMenu)
+  header.appendChild(headerLeft)
+  header.appendChild(dropdownContainer)
+  collapsible.appendChild(header)
+
+  const highlightItemsContainer = document.createElement('div')
+  highlightItemsContainer.id = 'highlight-items-container'
+  Object.assign(highlightItemsContainer.style, {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: '8px',
+  })
+
+  highlights.forEach(({ xpath, color, selectedText }) => {
+    const highlightItem = document.createElement('div')
+    Object.assign(highlightItem.style, {
+      fontSize: '14px',
+      color: '#000',
+      cursor: 'pointer',
+      backgroundColor: color,
+      borderRadius: '4px',
+      padding: '4px 8px',
+      display: 'inline',
+      wordBreak: 'break-word',
+    })
+
+    highlightItem.textContent = selectedText
+    highlightItem.dataset.color = color
+
+    highlightItem.addEventListener('click', () => {
+      const element = document.evaluate(
+        xpath,
+        document,
+        null,
+        XPathResult.FIRST_ORDERED_NODE_TYPE,
+        null,
+      ).singleNodeValue
+
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        element.style.transition = 'background-color 0.5s ease'
+        const originalColor = element.style.backgroundColor
+        element.style.backgroundColor = '#ffeb3b'
+        setTimeout(() => {
+          element.style.backgroundColor = originalColor
+        }, 2000)
+      } else {
+        console.warn('Highlight element not found:', xpath)
+      }
+    })
+
+    highlightItemsContainer.appendChild(highlightItem)
+  })
+
+  collapsible.appendChild(highlightItemsContainer)
+
+  // Dropdown toggle
+  dropdownTrigger.addEventListener('click', () => {
+    dropdownMenu.style.display =
+      dropdownMenu.style.display === 'none' ? 'block' : 'none'
+  })
+
+  // Toggle collapsible view
   let isExpanded = false
   button.addEventListener('click', () => {
-    if (!isExpanded) {
-      collapsible.style.display = 'flex'
-    } else {
-      collapsible.style.display = 'none'
-    }
+    collapsible.style.display = isExpanded ? 'none' : 'flex'
     isExpanded = !isExpanded
   })
 
-  // Append the button and collapsible to the container
   container.appendChild(button)
   container.appendChild(collapsible)
-
-  // Append the container to the document body
   document.body.appendChild(container)
+}
+
+window.updateHighlightManager = (highlights, colors) => {
+  const totalHighlights = highlights.length
+
+  // Update button and header text
+  const buttonText = document.querySelector('#highlight-manager-button span')
+  if (buttonText) {
+    buttonText.textContent = `${totalHighlights} highlights`
+  }
+
+  const headerText = document.querySelector(
+    '#highlight-manager-list div:first-child span',
+  )
+  if (headerText) {
+    headerText.textContent = `${totalHighlights} highlights`
+  }
+
+  // Update highlight items
+  const highlightItemsContainer = document.querySelector(
+    '#highlight-items-container',
+  )
+  if (highlightItemsContainer) {
+    highlightItemsContainer.innerHTML = '' // Clear current items
+
+    highlights.forEach(({ xpath, color, selectedText }) => {
+      const highlightItem = document.createElement('div')
+      Object.assign(highlightItem.style, {
+        fontSize: '14px',
+        color: '#000',
+        cursor: 'pointer',
+        backgroundColor: color,
+        borderRadius: '4px',
+        padding: '4px 8px',
+        display: 'inline',
+        wordBreak: 'break-word',
+      })
+
+      highlightItem.textContent = selectedText
+      highlightItem.dataset.color = color // Store color for filtering
+      highlightItemsContainer.appendChild(highlightItem)
+    })
+  }
+
+  // Reset dropdown to "All Colors"
+  const dropdown = document.getElementById('highlight-color-filter')
+  if (dropdown) dropdown.value = 'all'
 }
 
 // Function to show notification
