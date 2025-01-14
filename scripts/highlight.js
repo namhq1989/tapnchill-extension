@@ -405,6 +405,7 @@ window.restoreHighlights = (styles, colors) => {
   if (highlights.length) {
     window.rebuildHighlights(highlights, styles, colors)
     window.showNotification(getHighlightMessage(highlights.length))
+    window.createHighlightManager(highlights)
   }
 }
 
@@ -616,6 +617,133 @@ window.initializeHighlightWithPalette = (styles, colors, currentColor) => {
       palette.style.display = 'none'
     }
   })
+}
+
+window.createHighlightManager = (highlights) => {
+  // Remove any existing manager if URL changes
+  const existingContainer = document.getElementById(
+    'highlight-manager-container',
+  )
+  if (existingContainer) existingContainer.remove()
+
+  // Calculate the total number of highlights
+  const totalHighlights = highlights.length
+
+  // Create the container for the floating button and the expanded view
+  const container = document.createElement('div')
+  container.id = 'highlight-manager-container'
+  Object.assign(container.style, {
+    position: 'fixed',
+    bottom: '16px',
+    right: '16px',
+    zIndex: 10000,
+  })
+
+  // Create the button (Icon + Total Highlights)
+  const button = document.createElement('button')
+  button.id = 'highlight-manager-button'
+  Object.assign(button.style, {
+    backgroundColor: 'white',
+    border: '1px solid #e5e7eb',
+    borderRadius: '8px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    color: '#000',
+    fontSize: '14px',
+    padding: '8px 12px',
+    cursor: 'pointer',
+    outline: 'none',
+    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+  })
+
+  // Add the icon to the button
+  const icon = document.createElement('img')
+  icon.src = chrome.runtime.getURL('icons/icon128.png') // Use the icon from the extension
+  Object.assign(icon.style, {
+    width: '16px',
+    height: '16px',
+  })
+  button.appendChild(icon)
+
+  // Add the text to the button
+  const buttonText = document.createElement('span')
+  buttonText.textContent = `${totalHighlights} highlights`
+  button.appendChild(buttonText)
+
+  // Create the collapsible view
+  const collapsible = document.createElement('div')
+  collapsible.id = 'highlight-manager-list'
+  Object.assign(collapsible.style, {
+    display: 'none', // Hidden initially
+    maxHeight: '300px',
+    overflowY: 'auto',
+    padding: '16px',
+    backgroundColor: '#f9fafb',
+    borderRadius: '8px',
+    border: '1px solid #e5e7eb',
+    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+    width: '300px',
+    position: 'absolute',
+    bottom: '64px',
+    right: '0',
+    flexDirection: 'column',
+    gap: '8px',
+  })
+
+  // Add the header to the collapsible view
+  const header = document.createElement('div')
+  Object.assign(header.style, {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    marginBottom: '8px',
+  })
+
+  const headerIcon = icon.cloneNode() // Reuse the button's icon
+  const headerText = document.createElement('span')
+  headerText.textContent = `${totalHighlights} highlights`
+  Object.assign(headerText.style, {
+    fontWeight: 'bold',
+    fontSize: '16px',
+    color: '#000',
+  })
+
+  header.appendChild(headerIcon)
+  header.appendChild(headerText)
+  collapsible.appendChild(header)
+
+  // Populate the list with highlights
+  highlights.forEach(({ selectedText }, index) => {
+    const highlightItem = document.createElement('div')
+    Object.assign(highlightItem.style, {
+      padding: '8px 0',
+      fontSize: '14px',
+      color: '#000',
+      cursor: 'pointer', // Add cursor pointer for interactivity
+    })
+
+    highlightItem.textContent = `${index + 1}. ${selectedText}`
+    collapsible.appendChild(highlightItem)
+  })
+
+  // Toggle the view between compact and expanded
+  let isExpanded = false
+  button.addEventListener('click', () => {
+    if (!isExpanded) {
+      collapsible.style.display = 'flex'
+    } else {
+      collapsible.style.display = 'none'
+    }
+    isExpanded = !isExpanded
+  })
+
+  // Append the button and collapsible to the container
+  container.appendChild(button)
+  container.appendChild(collapsible)
+
+  // Append the container to the document body
+  document.body.appendChild(container)
 }
 
 // Function to show notification
