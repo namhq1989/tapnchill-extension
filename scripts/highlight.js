@@ -140,6 +140,13 @@ window.saveHighlightData = (positionData) => {
 
   localStorage.setItem('highlights', JSON.stringify(storedData))
   window.updateHighlightManager(storedData[baseUrl])
+
+  chrome.storage.local
+    .set({
+      highlights: JSON.stringify(storedData),
+    })
+    .then()
+
   return storedData[baseUrl]
 }
 
@@ -161,19 +168,13 @@ window.removeHighlight = (span, id) => {
   localStorage.setItem('highlights', JSON.stringify(storedData))
 
   window.updateHighlightManager(storedData[baseUrl])
-}
 
-// window.removeHighlight = (span, id) => {
-//   const parentNode = span.parentNode
-//   const plainText = document.createTextNode(span.textContent)
-//   parentNode.replaceChild(plainText, span)
-//
-//   const baseUrl = `${location.origin}${location.pathname}`
-//   const storedData = JSON.parse(localStorage.getItem('highlights') || '{}')
-//   const highlights = storedData[baseUrl] || []
-//   storedData[baseUrl] = highlights.filter((highlight) => highlight.id !== id)
-//   localStorage.setItem('highlights', JSON.stringify(storedData))
-// }
+  chrome.storage.local
+    .set({
+      highlights: JSON.stringify(storedData),
+    })
+    .then()
+}
 
 window.rebuildHighlights = (highlights, styles, colors) => {
   // console.log('Starting to rebuild highlights...')
