@@ -2,6 +2,7 @@ import BackButton from '@/modules/common/back-button.tsx'
 import HeaderTitle from '@/modules/common/header-title.tsx'
 import { useEffect, useState } from 'react'
 import LoadingIndicator from '@/modules/common/loading-indicator.tsx'
+import { ChevronRight } from 'lucide-react'
 
 const HighlightView = () => {
   const [isFetching, setIsFetching] = useState(true)
@@ -9,7 +10,8 @@ const HighlightView = () => {
 
   useEffect(() => {
     chrome.storage.local.get(['highlights'], (result) => {
-      setHighlights(JSON.parse(result.highlights) || [])
+      const h = result.highlights
+      setHighlights(h ? JSON.parse(h) : [])
       setIsFetching(false)
       console.log('highlights', highlights)
     })
@@ -21,14 +23,14 @@ const HighlightView = () => {
         <BackButton />
         <HeaderTitle title='Highlights' />
       </div>
-      <div className='flex flex-col w-full gap-4'>
+      <div className='flex flex-col w-full gap-4 p-4'>
         {isFetching ? (
-          <div className='flex w-full h-full justify-center items-center'>
+          <div className='flex flex-col mt-20 gap-4 w-full h-full justify-center items-center'>
             <img src='/icons/icon128.png' alt='logo' width={48} height={48} />
             <LoadingIndicator />
           </div>
         ) : (
-          <div className='flex w-full gap-4 justify-center items-center'>
+          <div className='flex flex-col w-full gap-4 justify-center items-center'>
             {highlights.length === 0 && (
               <div className='flex flex-col gap-2 items-center py-4 my-8'>
                 <img
@@ -52,32 +54,25 @@ const HighlightView = () => {
                 ],
                 index,
               ) => {
-                const domain = new URL(url).hostname
+                const u = new URL(url)
+                const { hostname, pathname } = u
                 return (
                   <div
                     key={index}
-                    className='flex flex-col p-4 container-selected pb-8 rounded-xl'
+                    className='flex items-center justify-between p-4 container-selected rounded-xl w-full gap-2'
                   >
-                    <div className='flex items-center gap-2'>
-                      <span className='text-base font-bold'>{domain}</span>
-                      <div
-                        className='relative group cursor-pointer'
-                        title={url}
-                      >
-                        <span
-                          className='text-gray-500'
-                          onClick={() => window.open(url, '_blank')}
-                        >
-                          ℹ️
-                        </span>
-                        <div className='absolute bottom-full mb-2 hidden group-hover:block bg-black text-white text-xs rounded-md px-2 py-1 z-10'>
-                          {url}
-                        </div>
-                      </div>
+                    <div className='flex flex-col justify-center items-start gap-2'>
+                      <p className='text-sm font-bold'>{hostname + pathname}</p>
+                      <span className='text-sm text-muted-foreground'>
+                        {items.length} highlight{items.length > 1 ? 's' : ''}
+                      </span>
                     </div>
-                    <span className='text-xs'>
-                      {items.length} highlight{items.length > 1 ? 's' : ''}
-                    </span>
+                    <ChevronRight
+                      className='cursor-pointer'
+                      onClick={() => {
+                        window.open(url, '_blank')
+                      }}
+                    />
                   </div>
                 )
               },
