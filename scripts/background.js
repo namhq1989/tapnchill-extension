@@ -396,6 +396,10 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
       sendResponse({ data: metrics })
     })
     return true
+  } else if (request.type === 'get-all-highlight-colors') {
+    sendResponse({
+      colors: HIGHLIGHT_COLORS,
+    })
   } else if (request.type === 'update-highlight-color') {
     lastHighlightColor = request.color
     chrome.storage.local

@@ -5,7 +5,7 @@ import {
 } from '@/components/ui/carousel.tsx'
 import { Link } from 'react-chrome-extension-router'
 import FocusUIView from '@/modules/focus/view.tsx'
-import HighlightView from '@/modules/highlight/ view.tsx'
+import HighlightView from '@/modules/highlight/view.tsx'
 
 const openSidePanel = (menu: string) => {
   chrome.storage.local

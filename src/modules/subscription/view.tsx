@@ -243,6 +243,19 @@ const SubscriptionView = () => {
               </p>
             </div>
           </div>
+          <div className='flex px-0 py-4 border-b-2 border-b-muted'>
+            <div className='flex w-[40%] items-start'>
+              <p className='text-xs'>Highlight</p>
+            </div>
+            <div className='flex w-[30%] items-start'>
+              <p className='text-xs'>Highlight up to 5 urls</p>
+            </div>
+            <div className='flex w-[30%] items-start'>
+              <p className='text-xs'>
+                Highlight up to <span className='text-primary'>100</span> urls
+              </p>
+            </div>
+          </div>
           <div className='flex px-0 py-4'>
             <div className='flex w-[40%] items-start'>
               <p className='text-xs'>Other features</p>

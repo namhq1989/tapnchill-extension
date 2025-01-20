@@ -132,48 +132,85 @@ window.getUrlHighlights = () => {
 }
 
 window.saveHighlightData = (positionData) => {
-  const baseUrl = `${location.origin}${location.pathname}`
-  const storedData = JSON.parse(localStorage.getItem('highlights') || '{}')
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.get((result) => {
+      try {
+        const storedHighlights = result.highlights || {}
+        const planLimitation =
+          result.resourcesLimitation.highlight[result.userPlan] || 5
 
-  storedData[baseUrl] = storedData[baseUrl] || []
-  storedData[baseUrl].push(positionData)
+        if (Object.keys(storedHighlights).length >= planLimitation) {
+          window.showNotification(
+            `You have reached the limit of Free plan (${planLimitation} urls)`,
+          )
+          return resolve([])
+        }
 
-  localStorage.setItem('highlights', JSON.stringify(storedData))
-  window.updateHighlightManager(storedData[baseUrl])
+        const baseUrl = `${location.origin}${location.pathname}`
+        const storedData = JSON.parse(
+          localStorage.getItem('highlights') || '{}',
+        )
 
-  chrome.storage.local
-    .set({
-      highlights: JSON.stringify(storedData),
+        storedData[baseUrl] = storedData[baseUrl] || []
+        storedData[baseUrl].push(positionData)
+
+        localStorage.setItem('highlights', JSON.stringify(storedData))
+        window.updateHighlightManager(storedData[baseUrl])
+
+        storedHighlights[baseUrl] = JSON.stringify(storedData[baseUrl])
+        chrome.storage.local
+          .set({ highlights: storedHighlights })
+          .then(() => resolve(storedData[baseUrl]))
+          .catch(reject)
+
+        if (storedData[baseUrl].length === 1) {
+          chrome.runtime.sendMessage(
+            {
+              type: 'get-all-highlight-colors',
+            },
+            ({ colors }) => {
+              window.createHighlightManager(storedData[baseUrl], colors)
+            },
+          )
+        }
+      } catch (error) {
+        reject(error)
+      }
     })
-    .then()
-
-  return storedData[baseUrl]
+  })
 }
 
 window.removeHighlight = (span, id) => {
-  const parentNode = span.parentNode
+  chrome.storage.local.get('highlights', (result) => {
+    const parentNode = span.parentNode
 
-  // Replace the span with its text content
-  const plainText = document.createTextNode(span.textContent)
-  parentNode.replaceChild(plainText, span)
+    // Replace the span with its text content
+    const plainText = document.createTextNode(span.textContent)
+    parentNode.replaceChild(plainText, span)
 
-  // Normalize the parent node to merge adjacent text nodes
-  parentNode.normalize()
+    // Normalize the parent node to merge adjacent text nodes
+    parentNode.normalize()
 
-  // Update the highlights in localStorage
-  const baseUrl = `${location.origin}${location.pathname}`
-  const storedData = JSON.parse(localStorage.getItem('highlights') || '{}')
-  const highlights = storedData[baseUrl] || []
-  storedData[baseUrl] = highlights.filter((highlight) => highlight.id !== id)
-  localStorage.setItem('highlights', JSON.stringify(storedData))
+    // Update the highlights in localStorage
+    const baseUrl = `${location.origin}${location.pathname}`
+    const storedData = JSON.parse(localStorage.getItem('highlights') || '{}')
+    const highlights = storedData[baseUrl] || []
+    storedData[baseUrl] = highlights.filter((highlight) => highlight.id !== id)
+    localStorage.setItem('highlights', JSON.stringify(storedData))
+    window.updateHighlightManager(storedData[baseUrl])
 
-  window.updateHighlightManager(storedData[baseUrl])
-
-  chrome.storage.local
-    .set({
-      highlights: JSON.stringify(storedData),
-    })
-    .then()
+    const storedHighlights = result.highlights || {}
+    if (storedData[baseUrl].length) {
+      storedHighlights[baseUrl] = JSON.stringify(storedData[baseUrl])
+    } else {
+      delete storedHighlights[baseUrl]
+    }
+    chrome.storage.local
+      .set({
+        highlights: storedHighlights,
+      })
+      .then()
+  })
 }
 
 window.rebuildHighlights = (highlights, styles, colors) => {
@@ -400,10 +437,10 @@ window.highlightText = (selectedText, styles, color) => {
     color,
   }
 
-  const existingHighlights = window.saveHighlightData(positionData)
-  // console.log('Position Data:', positionData)
-
-  window.rebuildHighlights(existingHighlights, styles)
+  window.saveHighlightData(positionData).then((existingHighlights) => {
+    if (!existingHighlights) return
+    window.rebuildHighlights(existingHighlights, styles)
+  })
 }
 
 window.restoreHighlights = (styles, colors) => {
@@ -483,8 +520,10 @@ window.initializeHighlightWithPalette = (styles, colors, currentColor) => {
 
         // console.log('Highlight Data to Save:', highlightData)
 
-        const existingHighlights = window.saveHighlightData(highlightData)
-        window.rebuildHighlights(existingHighlights, styles)
+        window.saveHighlightData(highlightData).then((existingHighlights) => {
+          if (!existingHighlights) return
+          window.rebuildHighlights(existingHighlights, styles)
+        })
 
         chrome.runtime
           .sendMessage({
@@ -672,7 +711,7 @@ window.createHighlightManager = (highlights, colors) => {
   button.appendChild(icon)
 
   const buttonText = document.createElement('span')
-  buttonText.textContent = `${totalHighlights} highlights`
+  buttonText.textContent = `${totalHighlights} highlight${totalHighlights > 1 ? 's' : ''}`
   button.appendChild(buttonText)
 
   const collapsible = document.createElement('div')
@@ -704,24 +743,6 @@ window.createHighlightManager = (highlights, colors) => {
     marginBottom: '8px',
   })
 
-  const headerLeft = document.createElement('div')
-  Object.assign(headerLeft.style, {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-  })
-
-  const headerIcon = icon.cloneNode()
-  const headerText = document.createElement('span')
-  headerText.textContent = `${totalHighlights} highlights`
-  Object.assign(headerText.style, {
-    fontSize: '14px',
-    color: '#000',
-  })
-
-  headerLeft.appendChild(headerIcon)
-  headerLeft.appendChild(headerText)
-
   // Custom dropdown menu
   const dropdownContainer = document.createElement('div')
   dropdownContainer.id = 'custom-dropdown-container'
@@ -749,7 +770,7 @@ window.createHighlightManager = (highlights, colors) => {
     display: 'none', // Hidden initially
     position: 'absolute',
     top: '40px',
-    right: '0',
+    left: '0',
     backgroundColor: 'white',
     border: '1px solid #e5e7eb',
     borderRadius: '8px',
@@ -826,8 +847,38 @@ window.createHighlightManager = (highlights, colors) => {
 
   dropdownContainer.appendChild(dropdownTrigger)
   dropdownContainer.appendChild(dropdownMenu)
-  header.appendChild(headerLeft)
+
+  const deleteButton = document.createElement('div')
+  deleteButton.textContent = 'Delete all'
+  Object.assign(deleteButton.style, {
+    padding: '4px 8px',
+    border: '1px solid #d1d5db',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontSize: '14px',
+    backgroundColor: '#dc2626',
+    color: '#fff',
+    outline: 'none',
+  })
+
+  deleteButton.addEventListener('click', () => {
+    const confirmed = window.confirm(
+      'Are you sure you want to delete all highlights?',
+    )
+    if (confirmed) {
+      const currentHighlights = window.getUrlHighlights()
+      for (const highlight of currentHighlights) {
+        const span = document.getElementById(highlight.id)
+        window.removeHighlight(span, highlight.id)
+      }
+
+      console.log('deleted')
+    }
+  })
+
   header.appendChild(dropdownContainer)
+  header.appendChild(deleteButton)
+
   collapsible.appendChild(header)
 
   const highlightItemsContainer = document.createElement('div')
@@ -906,14 +957,14 @@ window.updateHighlightManager = (highlights, colors) => {
   // Update button and header text
   const buttonText = document.querySelector('#highlight-manager-button span')
   if (buttonText) {
-    buttonText.textContent = `${totalHighlights} highlights`
+    buttonText.textContent = `${totalHighlights} highlight${totalHighlights > 1 ? 's' : ''}`
   }
 
   const headerText = document.querySelector(
     '#highlight-manager-list div:first-child span',
   )
   if (headerText) {
-    headerText.textContent = `${totalHighlights} highlights`
+    headerText.textContent = `${totalHighlights} highlight${totalHighlights > 1 ? 's' : ''}`
   }
 
   // Update highlight items
@@ -1026,7 +1077,7 @@ window.showNotification = (message) => {
   // Auto-remove notification after 4 seconds
   setTimeout(() => {
     notification.remove()
-  }, 4000)
+  }, 5000)
 }
 
 function getHighlightMessage(totalHighlights) {
