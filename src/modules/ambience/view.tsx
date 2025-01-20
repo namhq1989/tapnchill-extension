@@ -25,7 +25,7 @@ const AmbienceView = () => {
         <BackButton />
         <HeaderTitle title='Ambiences' />
       </div>
-      <div className='flex flex-col gap-4 scrollbar-hide'>
+      <div className='flex flex-col gap-4'>
         <div className='grid grid-cols-3 gap-4 p-4'>
           {ambiences.map((a) => {
             return (

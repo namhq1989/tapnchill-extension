@@ -16,7 +16,10 @@
     "sidePanel",
     "alarms",
     "notifications",
-    "tabs"
+    "tabs",
+    "contextMenus",
+    "scripting",
+    "activeTab"
   ],
   "host_permissions": ["<all_urls>"],
   "web_accessible_resources": [

@@ -396,10 +396,160 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
       sendResponse({ data: metrics })
     })
     return true
+  } else if (request.type === 'get-all-highlight-colors') {
+    sendResponse({
+      colors: HIGHLIGHT_COLORS,
+    })
+  } else if (request.type === 'update-highlight-color') {
+    lastHighlightColor = request.color
+    chrome.storage.local
+      .set({
+        lastHighlightColor: request.color,
+      })
+      .then()
   } else {
     sendResponse({
       success: false,
       message: 'Unknown action type',
     })
+  }
+})
+
+//
+// HIGHLIGHT
+//
+
+const HIGHLIGHT_STYLES = {
+  color: '#000',
+  'border-radius': '4px',
+  padding: '2px 4px',
+  display: 'inline',
+  'word-break': 'break-word',
+}
+
+const HIGHLIGHT_COLORS = [
+  '#a1a1aa',
+  '#f87171',
+  '#eab308',
+  '#4d7c0f',
+  '#60a5fa',
+  '#a78bfa',
+  '#e879f9',
+]
+
+const highlightInjectedTabs = new Set()
+let lastHighlightColor = HIGHLIGHT_COLORS[0]
+
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (changeInfo.status === 'loading') {
+    highlightInjectedTabs.delete(tabId)
+    console.log(`Tab ${tabId} refreshed. Removed from injected tabs.`)
+  } else if (changeInfo.status === 'complete') {
+    chrome.storage.local.get('lastHighlightColor', (result) => {
+      lastHighlightColor = result.lastHighlightColor || HIGHLIGHT_COLORS[0]
+    })
+
+    chrome.scripting
+      .executeScript({
+        target: { tabId },
+        files: ['highlight.js'], // Inject the logic
+      })
+      .then(() => {
+        console.log(`Injected highlight.js into tab ${tabId}`)
+        return chrome.scripting.executeScript({
+          target: { tabId },
+          func: (styles, colors) => {
+            window.restoreHighlights(styles, colors)
+          },
+          args: [HIGHLIGHT_STYLES, HIGHLIGHT_COLORS],
+        })
+      })
+      .then(() => {
+        console.log('Highlights restored successfully.')
+      })
+      .catch((err) => console.error('Error restoring highlights:', err))
+  }
+})
+
+chrome.tabs.onRemoved.addListener((tabId) => {
+  highlightInjectedTabs.delete(tabId)
+})
+
+chrome.contextMenus.removeAll(() => {
+  // Root menu for BapBi
+  chrome.contextMenus.create({
+    id: 'bapbi-root',
+    title: 'BapBi',
+    contexts: ['all'],
+  })
+
+  // Submenu: Enable Highlight
+  chrome.contextMenus.create({
+    id: 'enable-highlight',
+    parentId: 'bapbi-root',
+    title: 'Enable Highlight',
+    contexts: ['all'],
+  })
+
+  // Submenu: Highlight this text
+  chrome.contextMenus.create({
+    id: 'highlight-text',
+    parentId: 'bapbi-root',
+    title: 'Highlight this text',
+    contexts: ['selection'],
+  })
+})
+
+// Function to inject `highlight.js` and initialize the floating palette
+const injectHighlightScript = (tabId) => {
+  if (highlightInjectedTabs.has(tabId)) {
+    console.log('Highlight.js already injected into this tab.')
+    return Promise.resolve()
+  }
+
+  return chrome.scripting
+    .executeScript({
+      target: { tabId },
+      files: ['highlight.js'], // Inject the file containing the logic
+    })
+    .then(() => {
+      highlightInjectedTabs.add(tabId)
+      console.log(`Highlight.js injected into tab ${tabId}`)
+      return chrome.scripting.executeScript({
+        target: { tabId },
+        func: (styles, colors) => {
+          window.initializeHighlightWithPalette(styles, colors)
+        },
+        args: [HIGHLIGHT_STYLES, HIGHLIGHT_COLORS],
+      })
+    })
+    .catch((err) => console.error('Failed to inject highlight.js:', err))
+}
+
+// Handle menu item clicks
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  if (info.menuItemId === 'enable-highlight') {
+    injectHighlightScript(tab.id).then(() => {
+      console.log('Highlight enabled for the tab.')
+    })
+  } else if (info.menuItemId === 'highlight-text') {
+    const highlightTextFunc = () => {
+      chrome.scripting
+        .executeScript({
+          target: { tabId: tab.id },
+          func: (styles, text, color) => {
+            window.highlightText(text, styles, color)
+          },
+          args: [
+            HIGHLIGHT_STYLES,
+            info.selectionText,
+            lastHighlightColor || HIGHLIGHT_COLORS[0],
+          ], // Default color
+        })
+        .then()
+        .catch((err) => console.error('Failed to highlight text:', err))
+    }
+
+    injectHighlightScript(tab.id).then(highlightTextFunc)
   }
 })

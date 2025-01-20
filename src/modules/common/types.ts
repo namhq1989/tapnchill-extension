@@ -114,6 +114,7 @@ export interface IResourcesLimitation {
   habit: IPlanLimitation
   note: IPlanLimitation
   qrCode: IPlanLimitation
+  highlight: IPlanLimitation
 }
 
 export interface IGetPaymentCustomerPortalURLResponse {

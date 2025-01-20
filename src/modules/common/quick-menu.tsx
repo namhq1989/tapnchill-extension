@@ -5,6 +5,7 @@ import {
 } from '@/components/ui/carousel.tsx'
 import { Link } from 'react-chrome-extension-router'
 import FocusUIView from '@/modules/focus/view.tsx'
+import HighlightView from '@/modules/highlight/view.tsx'
 
 const openSidePanel = (menu: string) => {
   chrome.storage.local
@@ -43,6 +44,19 @@ const QuickMenu = () => {
               className='w-7 h-7 bg-cover'
             />
             <p className='text-xs font-bold'>Focus</p>
+          </Link>
+        </CarouselItem>
+        <CarouselItem className='basis-1/5 flex items-center justify-center'>
+          <Link
+            component={HighlightView}
+            className='flex flex-col gap-2 p-4 items-center justify-center'
+          >
+            <img
+              src='https://i.bapbi.app/highlight.png'
+              alt='focus'
+              className='w-7 h-7 bg-cover'
+            />
+            <p className='text-xs font-bold'>Highlight</p>
           </Link>
         </CarouselItem>
         <CarouselItem className='basis-1/5 flex items-center justify-center'>
