@@ -24,6 +24,7 @@ export interface IAppStore {
   getPaymentCustomerPortalURL: () => Promise<string>
 
   isInitializing: boolean
+  initSentry: () => void
   initApp: () => Promise<void>
   generateAnonymousUserId: (length: number) => string
   createAnonymousSignInChecksum: (anonymousUserId: string) => Promise<string>
