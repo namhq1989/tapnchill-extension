@@ -703,7 +703,7 @@ window.createHighlightManager = (highlights, colors) => {
   })
 
   const icon = document.createElement('img')
-  icon.src = chrome.runtime.getURL('icons/icon128.png')
+  icon.src = 'https://i.bapbi.app/logo.png'
   Object.assign(icon.style, {
     width: '16px',
     height: '16px',
@@ -872,7 +872,7 @@ window.createHighlightManager = (highlights, colors) => {
         window.removeHighlight(span, highlight.id)
       }
 
-      console.log('deleted')
+      // console.log('deleted')
     }
   })
 

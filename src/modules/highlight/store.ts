@@ -27,6 +27,9 @@ const useHighlightStore = create<IHighlightStore>((set) => ({
           }
         },
       )
+
+      console.log('data', data)
+
       set({ highlights: data })
     })
   },
