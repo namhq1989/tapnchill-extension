@@ -479,7 +479,7 @@ chrome.contextMenus.removeAll(() => {
   // Root menu for BapBi
   chrome.contextMenus.create({
     id: 'bapbi-root',
-    title: 'BapBi',
+    title: '[DEV] BapBi',
     contexts: ['all'],
   })
 
