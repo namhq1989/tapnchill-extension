@@ -158,6 +158,14 @@ const useAppStore = create<IAppStore>((set, get) => ({
     }
   },
 
+  setHabitReminder: (needReminder: boolean) => {
+    chrome.storage.local.set({ habitReminder: needReminder }).then()
+  },
+
+  setTaskReminder: (needReminder: boolean) => {
+    chrome.storage.local.set({ taskReminder: needReminder }).then()
+  },
+
   isInitializing: false,
   initSentry: () => {
     Sentry.init({

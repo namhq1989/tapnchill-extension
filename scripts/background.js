@@ -17,6 +17,11 @@ import {
 } from './focus.js'
 import { createOffscreen } from './create-offscreen.js'
 
+const REMINDER_NOTIFICATION_ID = 'bapbi-reminder-notification'
+const REMINDER_ALARM_NAME = 'reminder'
+const REMINDER_ALARM_START_UP_MINUTES = 10
+const REMINDER_ALARM_RECURRING_MINUTES = 180
+
 const LISTENING_TRACKING_INTERVAL = 60000 // 1 minute
 // const LISTENING_TRACKING_INTERVAL = 5000 // 1 minute
 const LISTENING_TRACKING_RETENTION_ITEMS = 30
@@ -42,8 +47,86 @@ chrome.runtime.onStartup.addListener(function () {
     console.log('Focus state reset in local storage')
   })
 
+  chrome.alarms
+    .create(REMINDER_ALARM_NAME, {
+      delayInMinutes: REMINDER_ALARM_START_UP_MINUTES,
+    })
+    .then(() => {
+      console.log('Reminder alarm created')
+    })
+
   cleanupOldDailyMetrics()
 })
+
+chrome.notifications.onClicked.addListener((notificationId) => {
+  if (notificationId === REMINDER_NOTIFICATION_ID) {
+    chrome.action.openPopup().then()
+
+    // Alternatively, open a specific page in a new tab
+    /*
+    chrome.tabs.create({
+        url: chrome.runtime.getURL("index.html"), // Replace with your extension page
+    });
+    */
+  }
+})
+
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name === REMINDER_ALARM_NAME) {
+    chrome.storage.local.get((result) => {
+      const habitReminder = result.habitReminder ?? false
+      const taskReminder = result.taskReminder ?? false
+      if (habitReminder || taskReminder) {
+        const { title, message } = getDynamicReminderContent()
+        chrome.notifications
+          .create(REMINDER_NOTIFICATION_ID, {
+            type: 'basic',
+            iconUrl: '/icons/icon128.png',
+            title: 'BapBi',
+            message: `${title}! ${message}`,
+            priority: 2,
+          })
+          .then(() => {
+            createReminderAlarm(REMINDER_ALARM_RECURRING_MINUTES)
+          })
+      }
+    })
+  }
+})
+
+const createReminderAlarm = (minute) => {
+  chrome.alarms.clear(REMINDER_ALARM_NAME, () => {
+    chrome.alarms
+      .create(REMINDER_ALARM_NAME, {
+        delayInMinutes: minute,
+      })
+      .then()
+  })
+}
+
+const getDynamicReminderContent = () => {
+  const titles = [
+    "Don't forget!",
+    'Time to check in!',
+    'Reminder Alert!',
+    'Stay on track!',
+    'Quick Reminder!',
+  ]
+
+  const messages = [
+    'Take a moment to check your tasks.',
+    "Don't forget to review your habits for today.",
+    'How are your tasks going? Take a quick look!',
+    'Check your habits and make progress!',
+    'Have you completed your tasks? Take a moment to check.',
+  ]
+
+  // Pick a random title and message
+  const randomTitle = titles[Math.floor(Math.random() * titles.length)]
+  const randomMessage = messages[Math.floor(Math.random() * messages.length)]
+
+  return { title: randomTitle, message: randomMessage }
+}
 
 let trackListeningTimeJobIntervalId
 
@@ -443,7 +526,7 @@ let lastHighlightColor = HIGHLIGHT_COLORS[0]
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === 'loading') {
     highlightInjectedTabs.delete(tabId)
-    console.log(`Tab ${tabId} refreshed. Removed from injected tabs.`)
+    // console.log(`Tab ${tabId} refreshed. Removed from injected tabs.`)
   } else if (changeInfo.status === 'complete') {
     chrome.storage.local.get('lastHighlightColor', (result) => {
       lastHighlightColor = result.lastHighlightColor || HIGHLIGHT_COLORS[0]
@@ -455,7 +538,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
         files: ['highlight.js'], // Inject the logic
       })
       .then(() => {
-        console.log(`Injected highlight.js into tab ${tabId}`)
+        // console.log(`Injected highlight.js into tab ${tabId}`)
         return chrome.scripting.executeScript({
           target: { tabId },
           func: (styles, colors) => {
@@ -465,7 +548,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
         })
       })
       .then(() => {
-        console.log('Highlights restored successfully.')
+        // console.log('Highlights restored successfully.')
       })
       .catch((err) => console.error('Error restoring highlights:', err))
   }

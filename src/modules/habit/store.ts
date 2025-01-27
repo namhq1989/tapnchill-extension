@@ -21,6 +21,7 @@ import useHttpStore from '@/modules/http/store.ts'
 import { mapHabits, mapStats } from '@/modules/habit/util.ts'
 import useNotificationStore from '@/modules/notification/store.ts'
 import { getRFC3339WithTimezone } from '@/lib/date.ts'
+import useAppStore from '@/modules/common/store.ts'
 
 const useHabitsStore = create<IHabitsStore>((set, get) => ({
   icons: listHabitIcons,
@@ -67,7 +68,13 @@ const useHabitsStore = create<IHabitsStore>((set, get) => ({
       )
       set({ isFetchingStats: false })
 
-      set({ stats: mapStats(response.stats), statsHasFetched: true })
+      const stats = mapStats(response.stats)
+      set({ stats, statsHasFetched: true })
+
+      const todayStat = stats[0]
+      const isAllCompleted =
+        todayStat.completedIds.length === todayStat.scheduledIds.length
+      useAppStore.getState().setHabitReminder(!isAllCompleted)
     } catch (err) {
       console.log('err', err)
     }
