@@ -23,6 +23,9 @@ export interface IAppStore {
   isGettingPaymentCustomerPortalURL: boolean
   getPaymentCustomerPortalURL: () => Promise<string>
 
+  setHabitReminder: (needReminder: boolean) => void
+  setTaskReminder: (needReminder: boolean) => void
+
   isInitializing: boolean
   initSentry: () => void
   initApp: () => Promise<void>

@@ -851,7 +851,7 @@ function cleanupOldDailyMetrics() {
 
     // Save the filtered metrics back
     chrome.storage.local.set({ focusDailyMetrics: filteredMetrics }, () => {
-      console.log('Cleaned up old daily metrics:', filteredMetrics)
+      // console.log('Cleaned up old daily metrics:', filteredMetrics)
     })
   })
 }

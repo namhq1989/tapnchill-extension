@@ -8,6 +8,7 @@ import {
 import useHttpStore from '@/modules/http/store.ts'
 import { mapTasks } from '@/modules/task/util.ts'
 import useGoalsStore from '@/modules/goal/store.ts'
+import useAppStore from '@/modules/common/store.ts'
 
 const useTodoTasksStore = create<ITodoTasksStore>((set, get) => ({
   hasFetched: false,
@@ -28,13 +29,16 @@ const useTodoTasksStore = create<ITodoTasksStore>((set, get) => ({
       set({ isFetching: false })
 
       const { goals } = useGoalsStore.getState()
+      const tasks =
+        response.tasks && response.tasks.length
+          ? mapTasks(response.tasks, goals)
+          : []
       set({
-        tasks:
-          response.tasks && response.tasks.length
-            ? mapTasks(response.tasks, goals)
-            : [],
+        tasks,
         hasFetched: true,
       })
+
+      useAppStore.getState().setTaskReminder(tasks.length > 0)
     } catch (err) {
       console.log('err', err)
     }
