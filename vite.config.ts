@@ -1,4 +1,3 @@
-import { sentryVitePlugin } from "@sentry/vite-plugin";
 import path from 'path'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
@@ -6,10 +5,7 @@ import { crx } from '@crxjs/vite-plugin'
 import manifest from './manifest.json'
 
 export default defineConfig({
-  plugins: [react(), crx({ manifest }), sentryVitePlugin({
-    org: "nam-hq",
-    project: "bapbi-extension"
-  })],
+  plugins: [react(), crx({ manifest })],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -31,7 +27,7 @@ export default defineConfig({
       },
     },
 
-    sourcemap: true
+    sourcemap: true,
   },
   optimizeDeps: {
     include: ['howler'],
