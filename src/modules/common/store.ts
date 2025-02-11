@@ -1,4 +1,3 @@
-import * as Sentry from '@sentry/react'
 import { create } from 'zustand'
 import {
   IAnonymousSignInApiRequest,
@@ -167,16 +166,8 @@ const useAppStore = create<IAppStore>((set, get) => ({
   },
 
   isInitializing: false,
-  initSentry: () => {
-    Sentry.init({
-      dsn: import.meta.env.VITE_SENTRY_DSN,
-      integrations: [],
-    })
-  },
   initApp: async () => {
     set({ isInitializing: true })
-
-    get().initSentry()
 
     return new Promise((resolve) => {
       chrome.storage.local.get(async (result) => {
